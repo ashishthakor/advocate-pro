@@ -1,7 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@/types'
+import { User } from '@/types';
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   user: User | null
@@ -74,11 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
         setUser(data.user)
+        toast.success(`Welcome back, ${data.user.name}!`)
         return { success: true, role: data.user.role }; // Return the user's role
       }
+      toast.error('Login failed. Please check your credentials.');
       return { success: false };
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Login failed:', error);
+      toast.error('An error occurred during login.'); 
       return { success: false };
     }
   }
@@ -95,23 +99,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       const data = await response.json()
+      console.log(data)
 
       if (data.success) {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
-        setUser(data.user)
-        return true
+        setUser(data.user);
+        toast.success(`Account created successfully! Welcome, ${data.user.name}.`);
+        return true;
       }
+      toast.error(data.message || 'Registration failed. Please try again.');
       return false
     } catch (error) {
-      console.error('Registration failed:', error)
+      console.error('Registration failed:', error);
+      toast.error('An error occurred during registration.');
       return false
     }
   }
 
   const logout = () => {
     localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    localStorage.removeItem('user');
+    toast('Logged out successfully!');
     setUser(null)
   }
 
