@@ -5,8 +5,10 @@ import { User } from '@/types'
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
+  // The 'role' parameter is added to differentiate between advocate and user logins.
+  login: (email: string, password: string, role: 'advocate' | 'user') => Promise<boolean>
+  // Similarly, 'role' is added for registration.
+  register: (name: string, email: string, password: string, role: 'advocate' | 'user') => Promise<boolean>
   logout: () => void
   loading: boolean
 }
@@ -24,12 +26,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('token')
-      if (!token) {
+      const storedUser = localStorage.getItem('user')
+
+      if (!token || !storedUser) {
         setLoading(false)
         return
       }
 
-      const response = await fetch('/api/auth/me', {
+      // Determine the role from the stored user data to call the correct API endpoint
+      const parsedUser: User = JSON.parse(storedUser);
+      const rolePath = parsedUser.role === 'advocate' ? 'advocate' : 'user';
+
+      const response = await fetch(`/api/${rolePath}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -37,21 +45,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        setUser(data.data)
+        setUser(data.user)
       } else {
-        localStorage.removeItem('token')
+        logout() // Use logout to clear everything
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      localStorage.removeItem('token')
+      logout()
     } finally {
       setLoading(false)
     }
   }
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, role: 'advocate' | 'user'): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/login', {
+      // Use role to select the correct API endpoint
+      const response = await fetch(`/api/${role}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -63,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.success) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
         setUser(data.user)
         return true
       }
@@ -73,9 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'advocate' | 'user'): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/register', {
+      // Use role to select the correct API endpoint
+      const response = await fetch(`/api/${role}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -87,6 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.success) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
         setUser(data.user)
         return true
       }
@@ -99,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setUser(null)
   }
 

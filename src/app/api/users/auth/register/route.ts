@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
+    // Create user with 'user' role
     const [result] = await pool.execute(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, 'user']
+      [name, email, hashedPassword, 'user'] // Changed 'advocate' to 'user'
     );
 
     const insertResult = result as any;
@@ -54,12 +54,12 @@ export async function POST(request: NextRequest) {
       [userId]
     );
 
-    // Generate token
+    // Generate token with 'user' role
     const token = generateToken({
       id: userId,
       email,
       name,
-      role: 'user'
+      role: 'user' // Changed 'admin' to 'user'
     });
 
     return NextResponse.json<AuthResponse>({
@@ -69,14 +69,14 @@ export async function POST(request: NextRequest) {
         id: userId,
         email,
         name,
-        role: 'user',
+        role: 'user', // Changed 'admin' to 'user'
         createdAt: new Date()
       },
       token
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('User registration error:', error); // Updated error message
     return NextResponse.json<AuthResponse>({
       success: false,
       message: 'Internal server error'

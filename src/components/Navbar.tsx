@@ -61,10 +61,10 @@ export function Navbar() {
               ) : (
                 <div className="flex items-center space-x-3">
                   <ThemeToggle />
-                  <Link href="/login" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  <Link href="/advocate/login" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
                     Login
                   </Link>
-                  <Link href="/register" className="btn-primary">
+                  <Link href="/advocate/register" className="btn-primary">
                     Join as Advocate
                   </Link>
                 </div>

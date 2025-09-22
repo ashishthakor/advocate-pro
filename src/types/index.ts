@@ -2,7 +2,7 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'advocate';
   createdAt: Date;
 }
 
@@ -15,6 +15,7 @@ export interface RegisterRequest {
   name: string;
   email: string;
   password: string;
+  role: 'user' | 'advocate';
 }
 
 export interface AuthResponse {
