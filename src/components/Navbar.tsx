@@ -24,7 +24,7 @@ export function Navbar() {
               </Link>
             </div>
 
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-4">
               <Link href="/" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Home
               </Link>
@@ -39,32 +39,32 @@ export function Navbar() {
               </Link>
               {user ? (
                 <>
-                  <Link href="/clients" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  <Link href="/clients" className="text-foreground/80 hover:text-primary px-2 py-2 rounded-md text-sm font-medium transition-colors">
                     Clients
                   </Link>
-                  <Link href="/cases" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  <Link href="/cases" className="text-foreground/80 hover:text-primary px-2 py-2 rounded-md text-sm font-medium transition-colors">
                     Cases
                   </Link>
-                  <Link href="/dashboard" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  <Link href="/dashboard" className="text-foreground/80 hover:text-primary px-2 py-2 rounded-md text-sm font-medium transition-colors">
                     Dashboard
                   </Link>
                   <div className="flex items-center space-x-3">
                     <ThemeToggle />
                     <button
                       onClick={logout}
-                      className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                      className="text-foreground/80 hover:text-primary px-2 py-2 rounded-md text-sm font-medium transition-colors"
                     >
                       Logout
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-4">
                   <ThemeToggle />
-                  <Link href="/advocate/login" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                    Login
+                  <Link href="/users/register" className="text-foreground/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 hover:bg-zinc-600">
+                    Join as Client
                   </Link>
-                  <Link href="/advocate/register" className="btn-primary">
+                  <Link href="/advocate/register" className="text-foreground/80 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-gray-500 hover:bg-slate-300">
                     Join as Advocate
                   </Link>
                 </div>
@@ -119,10 +119,10 @@ export function Navbar() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login" className="text-foreground/80 hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors">
-                      Login
+                    <Link href="/users/register" className="text-foreground/80 hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors">
+                      Join As Client
                     </Link>
-                    <Link href="/register" className="btn-primary block text-center">
+                    <Link href="/advocate/register" className="btn-primary block text-center">
                       Join as Advocate
                     </Link>
                   </>

@@ -50,9 +50,9 @@ export default function UserRegisterPage() {
 
     try {
       // Role hardcoded as 'user'
-      const success = await register(formData.name, formData.email, formData.password)
+      const success = await register(formData.name, formData.email, formData.password, 'user')
       if (success) {
-        router.push('/user-dashboard') // redirect to user dashboard
+        router.push('/users/dashboard') // redirect to user dashboard
       } else {
         setError('Registration failed. Please try again.')
       }
@@ -236,7 +236,7 @@ export default function UserRegisterPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{' '}
-                <Link href="/user-login" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                <Link href="/users/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
                   Sign in here
                 </Link>
               </p>

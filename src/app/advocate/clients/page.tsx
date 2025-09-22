@@ -25,7 +25,7 @@ export default function ClientsPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      window.location.href = '/login'
+      window.location.href = '/advocate/login'
       return
     }
     if (user) {

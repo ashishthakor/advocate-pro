@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         message: 'All fields are required'
       }, { status: 400 });
     }
-
+    
     if (password.length < 6) {
       return NextResponse.json<AuthResponse>({
         success: false,

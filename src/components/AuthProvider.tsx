@@ -6,7 +6,7 @@ import { User } from '@/types'
 interface AuthContextType {
   user: User | null
   // The 'role' parameter is added to differentiate between advocate and user logins.
-  login: (email: string, password: string, role: 'advocate' | 'user') => Promise<boolean>
+  login: (email: string, password: string, role: 'advocate' | 'user') => Promise<{ success: boolean, role?: string }>
   // Similarly, 'role' is added for registration.
   register: (name: string, email: string, password: string, role: 'advocate' | 'user') => Promise<boolean>
   logout: () => void
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string, role: 'advocate' | 'user'): Promise<boolean> => {
+  const login = async (email: string, password: string, role: 'advocate' | 'user'): Promise<{ success: boolean, role?: string }> => {
     try {
       // Use role to select the correct API endpoint
       const response = await fetch(`/api/${role}/auth/login`, {
@@ -74,12 +74,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
         setUser(data.user)
-        return true
+        return { success: true, role: data.user.role }; // Return the user's role
       }
-      return false
+      return { success: false };
     } catch (error) {
       console.error('Login failed:', error)
-      return false
+      return { success: false };
     }
   }
 

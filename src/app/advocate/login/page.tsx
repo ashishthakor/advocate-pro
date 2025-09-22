@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,11 +20,17 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const success = await login(email, password)
-      if (success) {
-        router.push('/dashboard')
-      } else {
-        setError('Invalid email or password')
+      const result = await login(email, password, "advocate");
+      if(result.success){
+        if(result.role === 'advocate'){
+          router.push('/advocate/dashboard');
+        }else{
+          // Handle incorrect role login attempt if needed
+          setError('Invalid credentials or role mismatch.');
+          logout();
+        }
+      }else {
+        setError('Login failed. Please check your credentials.');
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

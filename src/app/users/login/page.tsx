@@ -11,7 +11,7 @@ export default function UserLoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,14 +20,19 @@ export default function UserLoginPage() {
     setLoading(true)
 
     try {
-      // Login as user (role checked in backend)
-      const success = await login(email, password)
-      if (success) {
-        router.push('/user-dashboard')
-      } else {
-        setError('Invalid email or password')
+      const result = await login(email, password, "advocate");
+      if(result.success){
+        if(result.role === 'user'){
+          router.push('/users/dashboard');
+        }else{
+          // Handle incorrect role login attempt if needed
+          setError('Invalid credentials or role mismatch.');
+          logout();
+        }
+      }else {
+        setError('Login failed. Please check your credentials.');
       }
-    } catch (err) {
+    } catch (error) {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -161,7 +166,7 @@ export default function UserLoginPage() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link href="/user-register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
+                <Link href="/users/register" className="font-semibold text-blue-600 hover:text-blue-500 transition-colors">
                   Create one now
                 </Link>
               </p>

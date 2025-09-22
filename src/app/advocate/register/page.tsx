@@ -49,9 +49,9 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const success = await register(formData.name, formData.email, formData.password)
+      const success = await register(formData.name, formData.email, formData.password, "advocate")
       if (success) {
-        router.push('/dashboard')
+        router.push('/advocate/dashboard')
       } else {
         setError('Registration failed. Please try again.')
       }
