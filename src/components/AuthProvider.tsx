@@ -1,12 +1,15 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@/types'
+import { User } from '@/types';
+import toast from 'react-hot-toast';
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<boolean>
-  register: (name: string, email: string, password: string) => Promise<boolean>
+  // The 'role' parameter is added to differentiate between advocate and user logins.
+  login: (email: string, password: string, role: 'advocate' | 'user') => Promise<{ success: boolean, role?: string }>
+  // Similarly, 'role' is added for registration.
+  register: (name: string, email: string, password: string, role: 'advocate' | 'user') => Promise<boolean>
   logout: () => void
   loading: boolean
 }
@@ -24,12 +27,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem('token')
-      if (!token) {
+      const storedUser = localStorage.getItem('user')
+
+      if (!token || !storedUser) {
         setLoading(false)
         return
       }
 
-      const response = await fetch('/api/auth/me', {
+      // Determine the role from the stored user data to call the correct API endpoint
+      const parsedUser: User = JSON.parse(storedUser);
+      const rolePath = parsedUser.role === 'advocate' ? 'advocate' : 'user';
+
+      const response = await fetch(`/api/${rolePath}/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -37,21 +46,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         const data = await response.json()
-        setUser(data.data)
+        setUser(data.user)
       } else {
-        localStorage.removeItem('token')
+        logout() // Use logout to clear everything
       }
     } catch (error) {
       console.error('Auth check failed:', error)
-      localStorage.removeItem('token')
+      logout()
     } finally {
       setLoading(false)
     }
   }
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, role: 'advocate' | 'user'): Promise<{ success: boolean, role?: string }> => {
     try {
-      const response = await fetch('/api/auth/login', {
+      // Use role to select the correct API endpoint
+      const response = await fetch(`/api/${role}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -63,19 +73,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.success) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
         setUser(data.user)
-        return true
+        toast.success(`Welcome back, ${data.user.name}!`)
+        return { success: true, role: data.user.role }; // Return the user's role
       }
-      return false
+      toast.error('Login failed. Please check your credentials.');
+      return { success: false };
     } catch (error) {
-      console.error('Login failed:', error)
-      return false
+      console.error('Login failed:', error);
+      toast.error('An error occurred during login.'); 
+      return { success: false };
     }
   }
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'advocate' | 'user'): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/register', {
+      // Use role to select the correct API endpoint
+      const response = await fetch(`/api/${role}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -84,21 +99,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       const data = await response.json()
+      console.log(data)
 
       if (data.success) {
         localStorage.setItem('token', data.token)
-        setUser(data.user)
-        return true
+        localStorage.setItem('user', JSON.stringify(data.user)); // Store the user object
+        setUser(data.user);
+        toast.success(`Account created successfully! Welcome, ${data.user.name}.`);
+        return true;
       }
+      toast.error(data.message || 'Registration failed. Please try again.');
       return false
     } catch (error) {
-      console.error('Registration failed:', error)
+      console.error('Registration failed:', error);
+      toast.error('An error occurred during registration.');
       return false
     }
   }
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user');
+    toast('Logged out successfully!');
     setUser(null)
   }
 
