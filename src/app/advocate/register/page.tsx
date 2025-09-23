@@ -4,6 +4,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import lightTheme from 'assets/theme'
+import darkTheme from 'assets/theme-dark'
+import { Card, CardContent, TextField, Button, FormControlLabel, Checkbox, Typography, InputAdornment, IconButton } from '@mui/material'
+import { useTheme as useAppTheme } from '@/components/ThemeContext'
+
+// Removed non-existent theme component imports; using styled JSX instead
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,12 +27,10 @@ export default function RegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const { register } = useAuth()
   const router = useRouter()
+  const { theme } = useAppTheme()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,12 +56,9 @@ export default function RegisterPage() {
 
     try {
       const success = await register(formData.name, formData.email, formData.password, "advocate")
-      if (success) {
-        router.push('/advocate/dashboard')
-      } else {
-        setError('Registration failed. Please try again.')
-      }
-    } catch (error) {
+      if (success) router.push('/advocate/dashboard')
+      else setError('Registration failed. Please try again.')
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -75,237 +78,71 @@ export default function RegisterPage() {
   const strength = passwordStrength(formData.password)
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mb-6">
-            <span className="text-primary-foreground font-bold text-2xl">TC</span>
+    <MuiThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+      <CssBaseline />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-10">
+        <div className="max-w-7xl w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+          {/* Left: Marketing/Intro */}
+          <div className="relative overflow-hidden rounded-3xl p-8 lg:p-10 bg-gradient-to-br from-indigo-600 to-blue-600 dark:from-indigo-700 dark:to-blue-700 text-white shadow-xl h-full">
+            <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+            <div className="relative">
+              <div className="h-20 w-20 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center mb-6 shadow-lg">
+                <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h2 className="text-4xl lg:text-5xl font-bold leading-tight">Join as an Advocate</h2>
+              <p className="mt-3 text-blue-50/90 text-lg lg:text-xl">Showcase your expertise, onboard clients securely, and manage cases efficiently.</p>
+              <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                  <span>Verified profiles</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                  <span>Secure onboarding</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                  <span>Case management</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                  </span>
+                  <span>Trusted payments</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Join TechCompete
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            Start your journey in tech competitions
-          </p>
+
+          {/* Right: Form Card using MUI to apply assets/theme overrides */}
+          <Card className="rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 h-full">
+            <CardContent className="p-6 sm:p-8 lg:p-10 h-full">
+              <form onSubmit={handleSubmit}>
+                <TextField id="name" name="name" label="Full Name" fullWidth required margin="normal" value={formData.name} onChange={handleInputChange} />
+                <TextField id="email" name="email" type="email" label="Email Address" autoComplete="email" fullWidth required margin="normal" value={formData.email} onChange={handleInputChange} />
+                <TextField id="password" name="password" type={showPassword ? 'text' : 'password'} label="Password" fullWidth required margin="normal" value={formData.password} onChange={handleInputChange} InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton edge="end" onClick={() => setShowPassword(!showPassword)}>{showPassword ? (<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/></svg>) : (<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>)}</IconButton></InputAdornment>) }} />
+                {formData.password && (<div className="mt-2"><div className="flex space-x-1">{[1,2,3,4,5].map((level)=>(<div key={level} className={`h-1 flex-1 rounded ${level <= strength ? (strength <= 2 ? 'bg-red-500' : strength <= 3 ? 'bg-yellow-500' : 'bg-green-500') : 'bg-gray-200 dark:bg-slate-700'}`} />))}</div><p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{strength <= 2 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'} password</p></div>)}
+                <TextField id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} label="Confirm Password" fullWidth required margin="normal" value={formData.confirmPassword} onChange={handleInputChange} InputProps={{ endAdornment: (<InputAdornment position="end"><IconButton edge="end" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? (<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/></svg>) : (<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>)}</IconButton></InputAdornment>) }} />
+                <div className="mt-2"><FormControlLabel control={<Checkbox checked={agreedToTerms} onChange={(e)=>setAgreedToTerms(e.target.checked)} />} label={<span className="text-sm text-slate-700 dark:text-slate-300">I agree to the <Link href="/terms" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium">Terms of Service</Link> and <Link href="/privacy" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium">Privacy Policy</Link></span>} /></div>
+                {error && (<Typography variant="body2" color="error" className="mt-1">{error}</Typography>)}
+                <Button type="submit" variant="contained" color="primary" fullWidth size="large" disabled={loading || !agreedToTerms} className="mt-4">{loading ? 'Creating account...' : 'Create Account'}</Button>
+                <p className="text-center text-sm text-slate-600 dark:text-slate-300 mt-4">Already have an account?{' '}<Link href="/advocate/login" className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300">Sign in here</Link></p>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Registration Form */}
-        <div className="card glass-effect">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    required
-                    className="input-field pl-10"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="input-field pl-10"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    className="input-field pl-10 pr-10"
-                    placeholder="Create a strong password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {formData.password && (
-                  <div className="mt-2">
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 flex-1 rounded ${
-                            level <= strength
-                              ? strength <= 2
-                                ? 'bg-destructive'
-                                : strength <= 3
-                                ? 'bg-yellow-500'
-                                : 'bg-green-500'
-                              : 'bg-muted'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {strength <= 2 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'} password
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    className="input-field pl-10 pr-10"
-                    placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                  </div>
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="text-xs text-destructive mt-1">Passwords do not match</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-muted-foreground">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-primary hover:text-primary/80">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-primary hover:text-primary/80">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading || !agreedToTerms}
-                className="btn-primary w-full h-12 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent"></div>
-                    <span>Creating account...</span>
-                  </div>
-                ) : (
-                  'Create Account'
-                )}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                  Sign in here
-                </Link>
-              </p>
-            </div>
-          </form>
         </div>
       </div>
-    </div>
+    </MuiThemeProvider>
   )
 }

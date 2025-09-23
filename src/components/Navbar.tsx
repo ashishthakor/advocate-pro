@@ -10,31 +10,31 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0 flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">⚖️</span>
+                <div className="w-9 h-9 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow ring-1 ring-black/5">
+                  <span className="text-white font-bold text-lg">⚖️</span>
                 </div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
                   AdvocatePro
                 </span>
               </Link>
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              <Link href="/" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link href="/" className="text-foreground/80 hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Home
               </Link>
-              <Link href="/services" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link href="/services" className="text-foreground/80 hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Services
               </Link>
-              <Link href="/about" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link href="/about" className="text-foreground/80 hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 About
               </Link>
-              <Link href="/contact" className="text-foreground/80 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">
+              <Link href="/contact" className="text-foreground/80 hover:text-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors">
                 Contact
               </Link>
               {user ? (
@@ -61,10 +61,10 @@ export function Navbar() {
               ) : (
                 <div className="flex items-center space-x-4">
                   <ThemeToggle />
-                  <Link href="/users/register" className="text-foreground/80 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 hover:bg-zinc-600">
+                  <Link href="/users/register" className="inline-flex items-center rounded-md text-sm font-medium px-4 py-2 text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 shadow-sm transition-colors">
                     Join as Client
                   </Link>
-                  <Link href="/advocate/register" className="text-foreground/80 hover:text-red-600 px-3 py-2 rounded-md text-sm font-medium transition-colors bg-gray-500 hover:bg-slate-300">
+                  <Link href="/advocate/register" className="inline-flex items-center rounded-md text-sm font-medium px-4 py-2 text-foreground bg-muted hover:bg-muted/80 border border-border transition-colors">
                     Join as Advocate
                   </Link>
                 </div>
@@ -75,7 +75,7 @@ export function Navbar() {
             <ThemeToggle />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-foreground/80 hover:text-primary focus:outline-none focus:text-primary p-2"
+              className={`relative text-foreground/80 hover:text-foreground focus:outline-none p-2 rounded-md ring-1 ring-transparent hover:ring-border transition ${isMenuOpen ? 'bg-muted' : ''}`}
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />

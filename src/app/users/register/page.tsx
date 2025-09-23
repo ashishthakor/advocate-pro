@@ -4,6 +4,22 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import lightTheme from 'assets/theme'
+import darkTheme from 'assets/theme-dark'
+import {
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  FormControlLabel,
+  Checkbox,
+  Typography,
+  InputAdornment,
+  IconButton,
+} from '@mui/material'
+import { useTheme as useAppTheme } from '@/components/ThemeContext'
 
 export default function UserRegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,12 +35,10 @@ export default function UserRegisterPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const { register } = useAuth()
   const router = useRouter()
+  const { theme } = useAppTheme()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
+    setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,13 +64,15 @@ export default function UserRegisterPage() {
 
     try {
       // Role hardcoded as 'user'
-      const success = await register(formData.name, formData.email, formData.password, 'user')
-      if (success) {
-        router.push('/users/dashboard') // redirect to user dashboard
-      } else {
-        setError('Registration failed. Please try again.')
-      }
-    } catch (error) {
+      const success = await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        'user'
+      )
+      if (success) router.push('/users/dashboard')
+      else setError('Registration failed. Please try again.')
+    } catch {
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -76,174 +92,203 @@ export default function UserRegisterPage() {
   const strength = passwordStrength(formData.password)
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center mb-6">
-            <span className="text-primary-foreground font-bold text-2xl">TC</span>
-          </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            Join as a Client
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            Create your account to access your dashboard
-          </p>
-        </div>
+    <MuiThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
+      <CssBaseline />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-950 dark:to-black flex items-center justify-center py-12 px-4 sm:px-6 lg:px-10">
+        <div className="max-w-7xl w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+            
+            {/* Left: Intro/Marketing */}
+            <div className="relative overflow-hidden rounded-3xl p-8 lg:p-10 bg-gradient-to-br from-indigo-600 to-blue-600 dark:from-indigo-700 dark:to-blue-700 text-white shadow-xl h-full">
+              <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
+              <div className="absolute -bottom-12 -left-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+              <div className="relative">
+                <div className="h-20 w-20 rounded-3xl bg-white/20 backdrop-blur flex items-center justify-center mb-6 shadow-lg">
+                  <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7a4 4 0 100 8 4 4 0 000-8zm12 0a4 4 0 100 8 4 4 0 000-8zM3 17h12m6 0h-6" />
+                  </svg>
+                </div>
+                <h2 className="text-4xl lg:text-5xl font-bold leading-tight">Join as a Client</h2>
+                <p className="mt-3 text-blue-50/90 text-lg lg:text-xl">
+                  Find trusted advocates, manage your cases, and access legal services with ease.
+                </p>
+                <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L9 14.414 5.293 10.707a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                    </span>
+                    <span>Verified advocates</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L9 14.414 5.293 10.707a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                    </span>
+                    <span>Secure communication</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L9 14.414 5.293 10.707a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                    </span>
+                    <span>Case tracking</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414L9 14.414 5.293 10.707a1 1 0 011.414-1.414L9 11.586l6.293-6.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                    </span>
+                    <span>Trusted payments</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {/* Registration Form */}
-        <div className="card glass-effect">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <input
+            {/* Right: Registration Form */}
+            <Card className="rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 h-full">
+              <CardContent className="p-6 sm:p-8 lg:p-10 h-full">
+                <form onSubmit={handleSubmit}>
+                  <TextField
                     id="name"
                     name="name"
-                    type="text"
+                    label="Full Name"
+                    fullWidth
                     required
-                    className="input-field pl-10"
-                    placeholder="Enter your full name"
+                    margin="normal"
                     value={formData.name}
                     onChange={handleInputChange}
                   />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <input
+                  <TextField
                     id="email"
                     name="email"
                     type="email"
+                    label="Email Address"
                     autoComplete="email"
+                    fullWidth
                     required
-                    className="input-field pl-10"
-                    placeholder="Enter your email"
+                    margin="normal"
                     value={formData.email}
                     onChange={handleInputChange}
                   />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
+                  <TextField
                     id="password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
+                    label="Password"
+                    fullWidth
                     required
-                    className="input-field pl-10 pr-10"
-                    placeholder="Create a strong password"
+                    margin="normal"
                     value={formData.password}
                     onChange={handleInputChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton edge="end" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ? '🙈' : '👁️'}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-                {formData.password && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {strength <= 2 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'} password
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <input
+                  {formData.password && (
+                    <div className="mt-2">
+                      <div className="flex space-x-1">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded ${
+                              level <= strength
+                                ? strength <= 2
+                                  ? 'bg-red-500'
+                                  : strength <= 3
+                                  ? 'bg-yellow-500'
+                                  : 'bg-green-500'
+                                : 'bg-gray-200 dark:bg-slate-700'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {strength <= 2 ? 'Weak' : strength <= 3 ? 'Medium' : 'Strong'} password
+                      </p>
+                    </div>
+                  )}
+                  <TextField
                     id="confirmPassword"
                     name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
+                    label="Confirm Password"
+                    fullWidth
                     required
-                    className="input-field pl-10 pr-10"
-                    placeholder="Confirm your password"
+                    margin="normal"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton edge="end" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ? '🙈' : '👁️'}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  <div className="mt-2">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={agreedToTerms}
+                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                        />
+                      }
+                      label={
+                        <span className="text-sm text-slate-700 dark:text-slate-300">
+                          I agree to the{' '}
+                          <Link
+                            href="/terms"
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium"
+                          >
+                            Terms of Service
+                          </Link>{' '}
+                          and{' '}
+                          <Link
+                            href="/privacy"
+                            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium"
+                          >
+                            Privacy Policy
+                          </Link>
+                        </span>
+                      }
+                    />
+                  </div>
+                  {error && (
+                    <Typography variant="body2" color="error" className="mt-1">
+                      {error}
+                    </Typography>
+                  )}
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                    disabled={loading || !agreedToTerms}
+                    className="mt-4"
                   >
-                    {showConfirmPassword ? 'Hide' : 'Show'}
-                  </button>
-                </div>
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="text-xs text-destructive mt-1">Passwords do not match</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-muted-foreground">
-                  I agree to the{' '}
-                  <Link href="/terms" className="text-primary hover:text-primary/80">
-                    Terms of Service
-                  </Link>{' '}
-                  and{' '}
-                  <Link href="/privacy" className="text-primary hover:text-primary/80">
-                    Privacy Policy
-                  </Link>
-                </label>
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading || !agreedToTerms}
-                className="btn-primary w-full h-12 text-base disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Creating account...' : 'Create Account'}
-              </button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/users/login" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                  Sign in here
-                </Link>
-              </p>
-            </div>
-          </form>
+                    {loading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                  <p className="text-center text-sm text-slate-600 dark:text-slate-300 mt-4">
+                    Already have an account?{' '}
+                    <Link
+                      href="/users/login"
+                      className="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
+                    >
+                      Sign in here
+                    </Link>
+                  </p>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </MuiThemeProvider>
   )
 }
