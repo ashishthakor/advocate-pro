@@ -13,7 +13,13 @@
     "migrate:rollback": "node src/scripts/migrate.js rollback"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.1",
+    "@mui/styled-engine": "5.12.3",
     "bcryptjs": "^2.4.3",
+    "chroma-js": "^3.1.2",
     "dotenv": "^17.2.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.4",
@@ -21,7 +27,8 @@
     "next-auth": "^4.24.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.9.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -29,6 +36,7 @@
     "@types/node": "22.18.6",
     "@types/react": "18.3.24",
     "@types/react-dom": "^18.3.1",
+    "ajv": "^8.17.1",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.5.3",
