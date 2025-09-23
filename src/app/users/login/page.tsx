@@ -20,7 +20,7 @@ export default function UserLoginPage() {
     setLoading(true)
 
     try {
-      const result = await login(email, password, "advocate");
+      const result = await login(email, password, "user");
       if(result.success){
         if(result.role === 'user'){
           router.push('/users/dashboard');
