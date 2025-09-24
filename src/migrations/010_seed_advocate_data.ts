@@ -40,6 +40,6 @@ export const seedAdvocateData: Migration = {
     await connection.execute('DELETE FROM appointments');
     await connection.execute('DELETE FROM cases');
     await connection.execute('DELETE FROM clients');
-    await connection.execute('UPDATE users SET role = "admin" WHERE email = "admin@techcompete.com"');
+    await connection.execute('UPDATE users SET role = "advocate" WHERE email = "advocate@techcompete.com"');
   }
 };
