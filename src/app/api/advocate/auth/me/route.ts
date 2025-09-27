@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/database';
+import {pool} from '@/lib/database';
 import { verifyToken, getTokenFromRequest } from '@/lib/auth';
 import { ApiResponse, User } from '@/types';
 

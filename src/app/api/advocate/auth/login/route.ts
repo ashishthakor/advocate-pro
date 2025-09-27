@@ -2,7 +2,7 @@
 // It now queries the 'users' table and checks for the 'advocate' role
 
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/database';
+import {pool} from '@/lib/database';
 import { verifyPassword, generateToken } from '@/lib/auth';
 import { LoginRequest, AuthResponse } from '@/types';
 

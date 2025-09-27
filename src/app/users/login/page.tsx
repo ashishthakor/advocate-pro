@@ -1,9 +1,10 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useAuth } from '@/components/AuthProvider'
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useAuth } from "@/components/AuthProvider";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import lightTheme from "assets/theme";
@@ -23,43 +24,44 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // ✅ replace with your banner image
 import bgImage from "assets/images/bg-sign-in-cover.jpeg";
+import GoogleLoginButton from "@/components/GoogleLoginButton";
 
 export default function UserLoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const { login, logout } = useAuth()
-  const router = useRouter()
+  const { login, logout } = useAuth();
+  const router = useRouter();
 
   // you can dynamically detect dark/light mode if needed
-  const themeMode = "light"
+  const themeMode = "light";
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const result = await login(email, password, 'user')
+      const result = await login(email, password, "user");
       if (result.success) {
-        if (result.role === 'user') {
-          router.push('/users/dashboard')
+        if (result.role === "user") {
+          router.push("/users/dashboard");
         } else {
-          setError('Invalid credentials or role mismatch.')
-          logout()
+          setError("Invalid credentials or role mismatch.");
+          logout();
         }
       } else {
-        setError('Login failed. Please check your credentials.')
+        setError("Login failed. Please check your credentials.");
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError("An error occurred. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <MuiThemeProvider theme={themeMode === "dark" ? darkTheme : lightTheme}>
@@ -105,9 +107,7 @@ export default function UserLoginPage() {
           >
             {/* Header inside card */}
             <div className="bg-blue-600 text-white rounded-lg text-center py-8 relative top-[-60px] flex flex-col gap-2">
-              <span className="font-serif text-2xl">
-                Sign-in for Users
-              </span>
+              <span className="font-serif text-2xl">Sign-in for Users</span>
               <span className="font-mono text-sm text-zinc-300">
                 Enter your email and password to Sign In
               </span>
@@ -172,11 +172,15 @@ export default function UserLoginPage() {
               </Button>
             </form>
 
-            <Box textAlign="center" sx={{ mt: 2 }}>
+            <Box textAlign="center">
               <Typography variant="body2" color="text.secondary">
                 Don’t have an account?{" "}
                 <Link href="/users/register">Sign Up</Link>
               </Typography>
+            </Box>
+
+            <Box textAlign="center" sx={{ mt: 2 }}>
+              <GoogleLoginButton callbackUrl="/users/dashboard" role="user"/>
             </Box>
           </Paper>
         </Container>
@@ -203,7 +207,8 @@ export default function UserLoginPage() {
             px={2}
           >
             <Typography variant="body2" color="text.secondary">
-              &copy; {new Date().getFullYear()} AdvocatePro. All rights reserved.
+              &copy; {new Date().getFullYear()} AdvocatePro. All rights
+              reserved.
             </Typography>
 
             <Typography
@@ -218,5 +223,5 @@ export default function UserLoginPage() {
         </Box>
       </Box>
     </MuiThemeProvider>
-  )
+  );
 }

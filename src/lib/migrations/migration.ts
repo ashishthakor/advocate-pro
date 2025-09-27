@@ -1,4 +1,4 @@
-import pool from '../database';
+import {pool} from '@/lib/database';
 
 export interface Migration {
   id: string;

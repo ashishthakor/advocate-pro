@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/database';
+import {pool} from '@/lib/database';
 import { verifyPassword, generateToken } from '@/lib/auth';
 import { LoginRequest, AuthResponse } from '@/types';
 
