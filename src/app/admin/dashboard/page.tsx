@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/components/AuthProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import {useProtectedPage} from "@/hook/useProtectedPage";
 
 interface Advocate {
   id: number;
@@ -28,7 +29,7 @@ interface Advocate {
 }
 
 export default function AdminDashboard() {
-  const { user, loading: authLoading } = useAuth(); // get auth loading
+  const { user, loading: authLoading } = useProtectedPage("admin"); // get auth loading
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<number | null>(null);

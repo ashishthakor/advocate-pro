@@ -48,7 +48,7 @@ export default function AdvocateLoginPage() {
       if (result.success && result.user) {
         // Redirect based on role
         if (result.user.role === 'advocate') {
-          router.push('/advocates/dashboard')
+          router.push('/advocate/dashboard')
         } else if (result.user.role === 'admin') {
           router.push('/admin/dashboard')
         } else {
