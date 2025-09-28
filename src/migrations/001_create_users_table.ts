@@ -13,7 +13,8 @@ export const createUsersTable: Migration = {
         role ENUM('user', 'advocate', 'admin') DEFAULT 'user',
         is_approved TINYINT(1) DEFAULT 0, -- 0 = pending, 1 = approved
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY unique_provider (provider, provider_id) -- prevents duplicate Google users
       )
     `);
   },
