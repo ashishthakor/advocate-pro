@@ -17,22 +17,24 @@ import {
 } from "@mui/material";
 import { useAuth } from "@/components/AuthProvider";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface Advocate {
   id: number;
   name: string;
   email: string;
-  isApproved: boolean; // match backend
+  isApproved: boolean;
   createdAt: string;
 }
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // get auth loading
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [actionLoading, setActionLoading] = useState<number | null>(null); // id of advocate being approved/declined
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const router = useRouter();
 
-  // Fetch all advocates
+  // Fetch advocates
   const fetchAdvocates = async () => {
     setLoading(true);
     try {
@@ -57,11 +59,18 @@ export default function AdminDashboard() {
     }
   };
 
+  // Page protection + fetch advocates
   useEffect(() => {
-    if (!loading && user?.role === 'admin') {
-      fetchAdvocates()
+    if (!authLoading) {
+      if (!user) {
+        router.replace("/users/login"); // use replace instead of push
+      } else if (user.role === "admin") {
+        fetchAdvocates();
+      } else {
+        router.replace("/"); // redirect non-admin users
+      }
     }
-  }, [loading, user]);
+  }, [user, authLoading, router]);
 
   // Approve or decline advocate
   const handleAction = async (id: number, action: "approve" | "decline") => {
@@ -80,7 +89,7 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data.success) {
         toast.success(`Advocate ${action}d successfully!`);
-        fetchAdvocates(); // refresh list
+        fetchAdvocates();
       } else {
         toast.error(data.message || `Failed to ${action} advocate.`);
       }
@@ -92,8 +101,17 @@ export default function AdminDashboard() {
     }
   };
 
-  if (loading) return <p>Loading user...</p>
-  if (!user) return <Typography>Access Denied</Typography>;
+  // Show loading until auth check finishes
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center mt-[10%]">
+        <CircularProgress />
+        <span className="ml-2">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin") return null; // double check
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -106,11 +124,7 @@ export default function AdminDashboard() {
           Registered Advocates
         </Typography>
 
-        {loading ? (
-          <Box display="flex" justifyContent="center" py={5}>
-            <CircularProgress />
-          </Box>
-        ) : advocates.length === 0 ? (
+        {advocates.length === 0 ? (
           <Typography>No advocates found.</Typography>
         ) : (
           <Table>
@@ -147,10 +161,7 @@ export default function AdminDashboard() {
                               disabled={actionLoading === advocate.id}
                             >
                               {actionLoading === advocate.id ? (
-                                <CircularProgress
-                                  size={18}
-                                  color="inherit"
-                                />
+                                <CircularProgress size={18} color="inherit" />
                               ) : (
                                 "Approve"
                               )}
@@ -170,10 +181,7 @@ export default function AdminDashboard() {
                               disabled={actionLoading === advocate.id}
                             >
                               {actionLoading === advocate.id ? (
-                                <CircularProgress
-                                  size={18}
-                                  color="inherit"
-                                />
+                                <CircularProgress size={18} color="inherit" />
                               ) : (
                                 "Decline"
                               )}
