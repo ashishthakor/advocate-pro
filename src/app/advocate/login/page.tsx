@@ -44,17 +44,23 @@ export default function AdvocateLoginPage() {
 
     try {
       const result = await login(email, password, 'advocate')
-      if (result.success) {
-        if (result.role === 'advocate') {
-          router.push('/advocate/dashboard')
+
+      if (result.success && result.user) {
+        // Redirect based on role
+        if (result.user.role === 'advocate') {
+          router.push('/advocates/dashboard')
+        } else if (result.user.role === 'admin') {
+          router.push('/admin/dashboard')
         } else {
-          setError('Invalid credentials or role mismatch.')
+          setError('Unauthorized role')
           logout()
         }
       } else {
-        setError('Login failed. Please check your credentials.')
+        // Handle unapproved advocate message
+        setError(result.message || 'Invalid credentials')
       }
-    } catch (error) {
+    } catch (err) {
+      console.error(err)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)

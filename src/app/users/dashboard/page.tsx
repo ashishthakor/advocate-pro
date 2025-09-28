@@ -21,21 +21,6 @@ export default function DashboardPage() {
     return <Loading />;
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            Access Denied
-          </h1>
-          <p className="text-muted-foreground">
-            Please log in to access your dashboard.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <main className="p-8">
       <h1 className="text-2xl font-bold mb-6">User Dashboard</h1>

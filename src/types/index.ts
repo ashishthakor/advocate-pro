@@ -2,7 +2,8 @@ export interface User {
   id: number;
   email: string;
   name: string;
-  role: 'user' | 'advocate';
+  role: 'user' | 'advocate' | 'admin';
+  isApproved: boolean;
   createdAt: Date;
 }
 

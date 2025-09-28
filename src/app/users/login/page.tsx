@@ -1,6 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -45,18 +44,26 @@ export default function UserLoginPage() {
     setLoading(true);
 
     try {
-      const result = await login(email, password, "user");
-      if (result.success) {
-        if (result.role === "user") {
-          router.push("/users/dashboard");
-        } else {
-          setError("Invalid credentials or role mismatch.");
+      const result = await login(email, password, "user"); // or "advocate" for advocate page
+
+      if (result.success && result.user) {
+        // ✅ Safe check
+        const role = result.user.role;
+
+        if (role === "user") router.push("/users/dashboard");
+        else if (role === "advocate") router.push("/advocates/dashboard");
+        else if (role === "admin") router.push("/admin/dashboard");
+        else {
+          setError("Invalid role for this login page.");
           logout();
         }
       } else {
-        setError("Login failed. Please check your credentials.");
+        setError(
+          result.message || "Login failed. Please check your credentials."
+        );
       }
     } catch (error) {
+      console.error(error);
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -177,10 +184,6 @@ export default function UserLoginPage() {
                 Don’t have an account?{" "}
                 <Link href="/users/register">Sign Up</Link>
               </Typography>
-            </Box>
-
-            <Box textAlign="center" sx={{ mt: 2 }}>
-              <GoogleLoginButton callbackUrl="/users/dashboard" role="user"/>
             </Box>
           </Paper>
         </Container>
