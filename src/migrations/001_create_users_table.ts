@@ -10,9 +10,8 @@ export const createUsersTable: Migration = {
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role ENUM('user', 'advocate') DEFAULT 'user',
-        provider VARCHAR(50) DEFAULT 'credentials', -- e.g. 'google'
-        provider_id VARCHAR(255), -- Google user id,
+        role ENUM('user', 'advocate', 'admin') DEFAULT 'user',
+        is_approved TINYINT(1) DEFAULT 0, -- 0 = pending, 1 = approved
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         UNIQUE KEY unique_provider (provider, provider_id) -- prevents duplicate Google users
