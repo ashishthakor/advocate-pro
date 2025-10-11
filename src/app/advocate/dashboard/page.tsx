@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 interface Stats {
   clients: number;
   cases: number;
-  appointments: number;
   revenue: number;
 }
 
@@ -19,7 +18,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats>({
     clients: 0,
     cases: 0,
-    appointments: 0,
     revenue: 0,
   });
 
@@ -29,7 +27,7 @@ export default function Dashboard() {
 
     const fetchStats = async () => {
       try {
-        // Example: implement /api/advocate/stats to return { clients, cases, appointments, revenue }
+        // Example: implement /api/advocate/stats to return { clients, cases, revenue }
         const res = await fetch("/api/advocate/stats", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -40,7 +38,6 @@ export default function Dashboard() {
         setStats({
           clients: data.clients ?? 0,
           cases: data.cases ?? 0,
-          appointments: data.appointments ?? 0,
           revenue: data.revenue ?? 0,
         });
       } catch (err) {
@@ -66,7 +63,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
@@ -100,25 +97,6 @@ export default function Dashboard() {
           <div className="card">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold mb-2">
-                  Today's Appointments
-                </h3>
-                <p className="text-3xl font-bold text-primary">
-                  {stats.appointments}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Scheduled meetings
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                {/* Icon */}
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center justify-between">
-              <div>
                 <h3 className="text-lg font-semibold mb-2">Monthly Revenue</h3>
                 <p className="text-3xl font-bold text-primary">
                   ${stats.revenue}
@@ -133,7 +111,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Actions (links) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <Link
             href="/clients"
             className="card hover:shadow-lg transition-shadow duration-300 group"
@@ -163,23 +141,6 @@ export default function Dashboard() {
                 <h3 className="font-semibold text-foreground">New Case</h3>
                 <p className="text-sm text-muted-foreground">
                   Create case file
-                </p>
-              </div>
-            </div>
-          </Link>
-
-          <Link
-            href="/appointments"
-            className="card hover:shadow-lg transition-shadow duration-300 group"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                {/* Icon */}
-              </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Schedule</h3>
-                <p className="text-sm text-muted-foreground">
-                  Book appointment
                 </p>
               </div>
             </div>

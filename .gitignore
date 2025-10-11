@@ -21,3 +21,21 @@
 
 # env files (can opt-in for committing if needed)
 .env*
+
+
+# THEME
+/THEME
+
+# Sample
+/Textile-solution-backend
+
+# Others
+/DATABASE_SETUP.md
+/DEPLOYMENT_GUIDE.md
+/PROJECT_ETA.md
+/PROJECT_PLAN.md
+/PROJECT_STRUCTURE.md
+/PROJECT_SUMMARY.md
+/QUICK_SETUP.md
+setup.js
+/SINGLE_DEVELOPER_GUIDE.md

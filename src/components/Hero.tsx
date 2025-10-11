@@ -28,7 +28,7 @@ export function Hero() {
             AdvocatePro
           </h1>
           <p className="text-lg md:text-2xl mb-10 max-w-4xl mx-auto text-slate-600 dark:text-slate-300">
-            Manage clients, cases, documents, and appointments from one place. Powerful tools, beautiful UI, and fast workflows.
+            Manage clients, cases, and documents from one place. Powerful tools, beautiful UI, and fast workflows.
           </p>
 
           {/* CTAs */}
