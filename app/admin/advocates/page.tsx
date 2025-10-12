@@ -21,7 +21,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Alert,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -76,7 +75,6 @@ interface PaginationInfo {
 export default function AdvocatesPage() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -103,7 +101,6 @@ export default function AdvocatesPage() {
   const fetchAdvocates = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -121,11 +118,9 @@ export default function AdvocatesPage() {
       if (response.success) {
         setAdvocates(response.data);
         setPagination(response.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch advocates');
       }
     } catch (err) {
-      setError('Failed to fetch advocates');
+      console.error('Fetch advocates error:', err);
     } finally {
       setLoading(false);
     }
@@ -175,11 +170,9 @@ export default function AdvocatesPage() {
         setSelectedAdvocate(null);
         setApprovalNotes('');
         fetchAdvocates(pagination.currentPage); // Refresh current page
-      } else {
-        setError(response.message || 'Failed to update advocate status');
       }
     } catch (err) {
-      setError('Failed to update advocate status');
+      console.error('Update advocate status error:', err);
     } finally {
       setApprovalLoading(false);
     }
@@ -207,11 +200,8 @@ export default function AdvocatesPage() {
         setConfirmationDialog(false);
         setConfirmationAction({ type: 'approve', advocate: null });
         fetchAdvocates(pagination.currentPage);
-      } else {
-        setError(response.message || 'Failed to update advocate status');
       }
     } catch (err) {
-      setError('Failed to update advocate status');
       console.error('Confirmation action error:', err);
     } finally {
       setApprovalLoading(false);
@@ -259,12 +249,6 @@ export default function AdvocatesPage() {
           Refresh
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

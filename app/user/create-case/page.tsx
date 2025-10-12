@@ -10,7 +10,6 @@ import {
   TextField,
   MenuItem,
   Button,
-  Alert,
   CircularProgress,
   Divider,
   Chip,
@@ -109,7 +108,6 @@ export default function CreateCasePage() {
     sought_other_text: '',
   });
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [successOpen, setSuccessOpen] = useState(false);
 
@@ -163,7 +161,6 @@ export default function CreateCasePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setSubmitting(true);
     try {
       const attachments = await uploadAttachments();
@@ -185,9 +182,8 @@ export default function CreateCasePage() {
           return;
         }
       }
-      setError((res as any).message || 'Failed to create case');
     } catch (err: any) {
-      setError(err?.message || 'Failed to create case');
+      console.error('Create case error:', err);
     } finally {
       setSubmitting(false);
     }
@@ -200,11 +196,6 @@ export default function CreateCasePage() {
         <Typography variant="h5">{t('createCase.title')}</Typography>
         <Chip label={t('createCase.disputeResolutionApplication')} color="primary" variant="outlined" sx={{ ml: 1 }} />
       </Stack>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
       <Box component="form" onSubmit={handleSubmit}>
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -488,7 +479,6 @@ export default function CreateCasePage() {
                       return ok;
                     });
                     setFiles(valid);
-                    if (nextError) setError(nextError);
                   }}
                 />
                 <Typography variant="caption" color="text.secondary">

@@ -16,7 +16,6 @@ import {
   Chip,
   Button,
   Avatar,
-  Alert,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -83,7 +82,6 @@ export default function AssignmentsPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -113,7 +111,6 @@ export default function AssignmentsPage() {
   const fetchCases = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -130,11 +127,9 @@ export default function AssignmentsPage() {
       if (response.success) {
         setCases(response.data.cases);
         setPagination(response.data.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('Failed to fetch cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -199,11 +194,9 @@ export default function AssignmentsPage() {
         setSelectedCase(null);
         setSelectedAdvocateId('');
         fetchCases(pagination.currentPage); // Refresh current page
-      } else {
-        setError(response.message || 'Failed to assign advocate');
       }
     } catch (err) {
-      setError('Failed to assign advocate');
+      console.error('Assign advocate error:', err);
     } finally {
       setAssignmentLoading(false);
     }
@@ -266,12 +259,6 @@ export default function AssignmentsPage() {
           Refresh
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

@@ -8,7 +8,6 @@ import {
   TextField,
   Button,
   Typography,
-  Alert,
   CircularProgress,
   Link,
   Container,
@@ -46,7 +45,6 @@ export default function UserRegisterPage() {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
@@ -61,10 +59,8 @@ export default function UserRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
       setLoading(false);
       return;
     }
@@ -88,11 +84,9 @@ export default function UserRegisterPage() {
         setTimeout(() => {
           router.push('/auth/user-login');
         }, 2000);
-      } else {
-        setError(data.message || 'Registration failed');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }
@@ -121,9 +115,6 @@ export default function UserRegisterPage() {
               textAlign: 'center',
             }}
           >
-            <Alert severity="success" sx={{ mb: 3 }}>
-              Registration successful! Redirecting to login...
-            </Alert>
             <CircularProgress />
           </Paper>
         </Container>
@@ -187,11 +178,6 @@ export default function UserRegisterPage() {
 
           <CardContent sx={{ p: 4 }}>
             <form onSubmit={handleSubmit}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
-                </Alert>
-              )}
 
               <Grid container spacing={2}>
                 <Grid item xs={12}>

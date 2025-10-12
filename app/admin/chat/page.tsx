@@ -18,7 +18,6 @@ import {
   ListItemButton,
   InputAdornment,
   CircularProgress,
-  Alert,
   Paper,
   Divider,
   Stack,
@@ -77,7 +76,6 @@ export default function AdminChatPage() {
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [advocateFilter, setAdvocateFilter] = useState('all');
@@ -86,7 +84,6 @@ export default function AdminChatPage() {
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedAdvocate, setSelectedAdvocate] = useState('');
   const [assigning, setAssigning] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
   const { user } = useAuth();
   const { t } = useLanguage();
@@ -106,11 +103,9 @@ export default function AdminChatPage() {
 
       if (data.success) {
         setCases(data.data.cases || data.data);
-      } else {
-        setError(data.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('An error occurred while fetching cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -225,17 +220,9 @@ export default function AdminChatPage() {
         setAssignDialogOpen(false);
         setSelectedAdvocate('');
         setSelectedCase(null);
-        setSuccessMessage(`Case "${selectedCase.title}" assigned successfully!`);
-        setError('');
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccessMessage(''), 3000);
-      } else {
-        setError(data.message || 'Failed to assign case');
       }
     } catch (err) {
       console.error('Assign case error:', err);
-      setError('Failed to assign case');
     } finally {
       setAssigning(false);
     }
@@ -255,18 +242,6 @@ export default function AdminChatPage() {
         <WhatsAppIcon color="primary" sx={{ fontSize: 32 }} />
         <Typography variant="h4">{t('chat.adminTitle')}</Typography>
       </Stack>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
-
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccessMessage('')}>
-          {successMessage}
-        </Alert>
-      )}
 
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>

@@ -16,7 +16,6 @@ import {
   Chip,
   Button,
   Avatar,
-  Alert,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -104,7 +103,6 @@ export default function CasesPage() {
   const router = useRouter();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -135,7 +133,6 @@ export default function CasesPage() {
   const fetchCases = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -154,11 +151,9 @@ export default function CasesPage() {
       if (response.success) {
         setCases(response.data.cases);
         setPagination(response.data.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('Failed to fetch cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -259,12 +254,6 @@ export default function CasesPage() {
           Refresh
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

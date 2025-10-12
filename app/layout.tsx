@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '../components/ThemeProvider';
 import { LanguageProvider } from '../components/LanguageProvider';
 import { AuthProvider } from '../components/AuthProvider';
+import { NotificationProvider } from '../components/NotificationProvider';
 import ReduxProvider from '@/components/ReduxProvider';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 
@@ -29,7 +30,9 @@ export default function RootLayout({
                 <LanguageProvider>
                   <ReduxProvider>
                     <AuthProvider>
-                      {children}
+                      <NotificationProvider>
+                        {children}
+                      </NotificationProvider>
                     </AuthProvider>
                   </ReduxProvider>
                 </LanguageProvider>

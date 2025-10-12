@@ -10,7 +10,6 @@ import {
   Button,
   Avatar,
   Grid,
-  Alert,
   CircularProgress,
   Divider,
   IconButton,
@@ -47,8 +46,6 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -87,11 +84,9 @@ export default function UserProfilePage() {
           phone: profileData.phone || '',
           address: profileData.address || '',
         });
-      } else {
-        setError(response.message || 'Failed to fetch profile');
       }
     } catch (err) {
-      setError('Failed to fetch profile');
+      console.error('Fetch profile error:', err);
     } finally {
       setLoading(false);
     }
@@ -114,8 +109,6 @@ export default function UserProfilePage() {
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
-      setError('');
-      setSuccess('');
 
       const response = await apiFetch('/api/users/profile', {
         method: 'PUT',
@@ -123,18 +116,15 @@ export default function UserProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Profile updated successfully');
         setIsEditing(false);
         await fetchProfile();
         // Update auth context
         if (updateUser) {
           updateUser({ ...user, ...formData });
         }
-      } else {
-        setError(response.message || 'Failed to update profile');
       }
     } catch (err) {
-      setError('Failed to update profile');
+      console.error('Update profile error:', err);
     } finally {
       setSaving(false);
     }
@@ -143,16 +133,12 @@ export default function UserProfilePage() {
   const handleChangePassword = async () => {
     try {
       setSaving(true);
-      setError('');
-      setSuccess('');
 
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setError('New passwords do not match');
         return;
       }
 
       if (passwordData.newPassword.length < 6) {
-        setError('Password must be at least 6 characters long');
         return;
       }
 
@@ -165,17 +151,14 @@ export default function UserProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Password changed successfully');
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         });
-      } else {
-        setError(response.message || 'Failed to change password');
       }
     } catch (err) {
-      setError('Failed to change password');
+      console.error('Change password error:', err);
     } finally {
       setSaving(false);
     }
@@ -191,8 +174,6 @@ export default function UserProfilePage() {
         address: profile.address || '',
       });
     }
-    setError('');
-    setSuccess('');
   };
 
   if (loading) {
@@ -208,18 +189,6 @@ export default function UserProfilePage() {
       {/* <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
         My Profile
       </Typography> */}
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
-        </Alert>
-      )}
 
       <Grid container spacing={3}>
         {/* Profile Information */}

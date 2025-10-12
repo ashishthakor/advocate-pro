@@ -8,7 +8,6 @@ import {
   TextField,
   Button,
   Typography,
-  Alert,
   CircularProgress,
   Link,
   Container,
@@ -38,7 +37,6 @@ export default function UserLoginPage() {
     password: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const router = useRouter();
   const { login } = useAuth();
 
@@ -53,7 +51,6 @@ export default function UserLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -72,11 +69,9 @@ export default function UserLoginPage() {
       if (data.success) {
         login(data.user, data.token);
         router.push('/user/dashboard');
-      } else {
-        setError(data.message || 'Login failed');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -138,11 +133,6 @@ export default function UserLoginPage() {
 
           <CardContent sx={{ p: 4 }}>
             <form onSubmit={handleSubmit}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
-                </Alert>
-              )}
 
               <TextField
                 fullWidth

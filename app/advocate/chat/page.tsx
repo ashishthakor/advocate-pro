@@ -18,7 +18,6 @@ import {
   ListItemButton,
   InputAdornment,
   CircularProgress,
-  Alert,
   Paper,
   Divider,
   Stack,
@@ -56,7 +55,6 @@ export default function AdvocateChatPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [filteredCases, setFilteredCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const router = useRouter();
@@ -87,11 +85,9 @@ export default function AdvocateChatPage() {
           case_.advocate_id === user?.id
         );
         setCases(assignedCases);
-      } else {
-        setError(data.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('An error occurred while fetching cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -160,12 +156,6 @@ export default function AdvocateChatPage() {
         <WhatsAppIcon color="primary" sx={{ fontSize: 32 }} />
         <Typography variant="h4">{t('chat.advocateTitle')}</Typography>
       </Stack>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
 
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>

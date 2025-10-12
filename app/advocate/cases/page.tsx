@@ -18,7 +18,6 @@ import {
   ListItemButton,
   InputAdornment,
   CircularProgress,
-  Alert,
   Paper,
   Divider,
   Stack,
@@ -81,7 +80,6 @@ interface PaginationInfo {
 export default function AdvocateCasesPage() {
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -110,7 +108,6 @@ export default function AdvocateCasesPage() {
   const fetchCases = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -129,11 +126,9 @@ export default function AdvocateCasesPage() {
       if (response.success) {
         setCases(response.data.cases);
         setPagination(response.data.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('Failed to fetch cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -224,12 +219,6 @@ export default function AdvocateCasesPage() {
           {t('cases.refresh')}
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
-          {error}
-        </Alert>
-      )}
 
       {/* Filters */}
       <Card sx={{ mb: 3 }}>

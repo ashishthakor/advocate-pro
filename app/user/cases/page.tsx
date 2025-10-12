@@ -10,7 +10,6 @@ import {
   TextField,
   MenuItem,
   Button,
-  Alert,
   CircularProgress,
   Table,
   TableHead,
@@ -65,7 +64,6 @@ export default function UserCasesPage() {
   const { t } = useLanguage();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -93,7 +91,6 @@ export default function UserCasesPage() {
   const fetchCases = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -112,11 +109,9 @@ export default function UserCasesPage() {
       if (response.success) {
         setCases(response.data.cases);
         setPagination(response.data.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch cases');
       }
     } catch (err) {
-      setError('Failed to fetch cases');
+      console.error('Fetch cases error:', err);
     } finally {
       setLoading(false);
     }
@@ -208,10 +203,6 @@ export default function UserCasesPage() {
           {t('cases.refresh')}
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
-      )}
 
       {/* Filters */}
       <Card sx={{ mb: 3 }}>

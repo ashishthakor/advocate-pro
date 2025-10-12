@@ -16,7 +16,6 @@ import {
   Chip,
   Button,
   Avatar,
-  Alert,
   CircularProgress,
   IconButton,
   Tooltip,
@@ -73,7 +72,6 @@ interface PaginationInfo {
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo>({
@@ -96,7 +94,6 @@ export default function UsersPage() {
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
-      setError('');
       
       const params = new URLSearchParams({
         page: page.toString(),
@@ -114,11 +111,9 @@ export default function UsersPage() {
       if (response.success) {
         setUsers(response.data);
         setPagination(response.pagination);
-      } else {
-        setError(response.message || 'Failed to fetch users');
       }
     } catch (err) {
-      setError('Failed to fetch users');
+      console.error('Fetch users error:', err);
     } finally {
       setLoading(false);
     }
@@ -225,12 +220,6 @@ export default function UsersPage() {
           Refresh
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
