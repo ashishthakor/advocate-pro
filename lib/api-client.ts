@@ -5,6 +5,13 @@ import Cookies from 'js-cookie';
 type ApiInput = RequestInfo | URL;
 type ApiInit = RequestInit & { json?: unknown };
 
+// Global notification handler - will be set by NotificationProvider
+let globalNotificationHandler: ((message: string, severity: 'success' | 'error' | 'warning' | 'info') => void) | null = null;
+
+export const setGlobalNotificationHandler = (handler: (message: string, severity: 'success' | 'error' | 'warning' | 'info') => void) => {
+  globalNotificationHandler = handler;
+};
+
 function buildHeaders(init?: ApiInit): HeadersInit {
   const headers = new Headers(init?.headers || {});
 
@@ -52,6 +59,11 @@ export async function apiFetch<T = any>(input: ApiInput, init?: ApiInit): Promis
       } catch {}
     }
     
+    // Show error notification
+    if (globalNotificationHandler) {
+      globalNotificationHandler('Session expired. Please login again.', 'error');
+    }
+    
     // Redirect to login page
     if (typeof window !== 'undefined') {
       window.location.href = '/';
@@ -67,7 +79,39 @@ export async function apiFetch<T = any>(input: ApiInput, init?: ApiInit): Promis
 
   if (!res.ok) {
     const message = isJson && data && (data.message || data.error) ? (data.message || data.error) : res.statusText;
+    
+    // Show error notification for failed requests
+    if (globalNotificationHandler) {
+      globalNotificationHandler(message || 'Request failed', 'error');
+    }
+    
     throw new Error(message || 'Request failed');
+  }
+
+  // Show success notification for POST, PUT, DELETE requests
+  const method = (init?.method || 'GET').toUpperCase();
+  if (['POST', 'PUT', 'DELETE'].includes(method) && globalNotificationHandler) {
+    let successMessage = '';
+    
+    // Try to get specific message from backend response
+    if (isJson && data && data.message) {
+      successMessage = data.message;
+    } else {
+      // Fallback to generic messages
+      switch (method) {
+        case 'POST':
+          successMessage = 'Created successfully';
+          break;
+        case 'PUT':
+          successMessage = 'Updated successfully';
+          break;
+        case 'DELETE':
+          successMessage = 'Deleted successfully';
+          break;
+      }
+    }
+    
+    globalNotificationHandler(successMessage, 'success');
   }
 
   return data as T;

@@ -52,6 +52,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { apiFetch } from '@/lib/api-client';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
+import CaseDetailsModal from '@/components/CaseDetailsModal';
 
 interface Case {
   id: number;
@@ -90,6 +91,9 @@ export default function AdvocateCasesPage() {
     hasNextPage: false,
     hasPrevPage: false,
   });
+  
+  const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+  const [caseDetailsModalOpen, setCaseDetailsModalOpen] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -206,6 +210,19 @@ export default function AdvocateCasesPage() {
 
   const handleCaseClick = (caseId: number) => {
     router.push(`/advocate/chat/${caseId}`);
+  };
+
+  const handleViewDetails = (caseId: number) => {
+    const case_ = cases.find(c => c.id === caseId);
+    if (case_) {
+      setSelectedCase(case_);
+      setCaseDetailsModalOpen(true);
+    }
+  };
+
+  const handleCloseCaseDetails = () => {
+    setCaseDetailsModalOpen(false);
+    setSelectedCase(null);
   };
 
   return (
@@ -404,7 +421,10 @@ export default function AdvocateCasesPage() {
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="View Details">
-                            <IconButton size="small">
+                            <IconButton 
+                              size="small"
+                              onClick={() => handleViewDetails(c.id)}
+                            >
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
@@ -451,6 +471,15 @@ export default function AdvocateCasesPage() {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Case Details Modal */}
+      {selectedCase && (
+        <CaseDetailsModal
+          open={caseDetailsModalOpen}
+          onClose={handleCloseCaseDetails}
+          caseDetails={selectedCase as any}
+        />
+      )}
     </Box>
   );
 }
