@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "components/AuthProvider";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import lightTheme from "assets/theme";
@@ -44,11 +44,24 @@ export default function UserLoginPage() {
     setLoading(true);
 
     try {
-      const result = await login(email, password, "user"); // or "advocate" for advocate page
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: 'user',
+        }),
+      });
 
-      if (result.success && result.user) {
+      const data = await response.json();
+
+      if (data.success) {
+        login(data.user, data.token);
         // ✅ Safe check
-        const role = result.user.role;
+        const role = data.user.role;
 
         if (role === "user") router.push("/users/dashboard");
         else if (role === "advocate") router.push("/advocates/dashboard");
@@ -59,7 +72,7 @@ export default function UserLoginPage() {
         }
       } else {
         setError(
-          result.message || "Login failed. Please check your credentials."
+          data.message || "Login failed. Please check your credentials."
         );
       }
     } catch (error) {
@@ -69,9 +82,8 @@ export default function UserLoginPage() {
       setLoading(false);
     }
   };
-
   return (
-    <MuiThemeProvider theme={themeMode === "dark" ? darkTheme : lightTheme}>
+    <MuiThemeProvider theme={themeMode === "light" ? lightTheme : darkTheme}>
       <CssBaseline />
 
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>

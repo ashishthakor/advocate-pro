@@ -18,16 +18,16 @@ import {
 import { useTheme } from '@mui/material/styles';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { useTheme as useAppTheme } from '@/components/ThemeProvider';
-import { useLanguage } from '@/components/LanguageProvider';
-import LanguageSelector from '@/components/LanguageSelector';
+import { useTheme as useAppTheme } from 'components/ThemeProvider';
+import { useLanguage } from 'components/LanguageProvider';
+import LanguageSelector from 'components/LanguageSelector';
 import {
   Person as PersonIcon,
   Lock as LockIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from 'components/AuthProvider';
 
 export default function AdvocateLoginPage() {
   const theme = useTheme();

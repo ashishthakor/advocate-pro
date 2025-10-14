@@ -1,6 +1,6 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { apiFetch } from '@/lib/api-client';
-import { assignCase, assignCaseFailure, assignCaseSuccess } from '@/store/slices/assignmentsSlice';
+import { apiFetch } from 'lib/api-client';
+import { assignCase, assignCaseFailure, assignCaseSuccess } from '../slices/assignmentsSlice';
 
 function* handleAssignCase(action: ReturnType<typeof assignCase>) {
   try {

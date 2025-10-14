@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
+const { User } = require("models/init-models");
 import { hashPassword, generateToken } from "@/lib/auth";
 import { RegisterRequest, AuthResponse } from "@/types";
 
@@ -29,13 +29,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
-    const [existingUsers] = await pool.execute(
-      "SELECT id FROM users WHERE email = ?",
-      [email]
-    );
+    // Check if user already exists using Sequelize ORM
+    const existingUser = await User.findOne({
+      where: { email: email }
+    });
 
-    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+    if (existingUser) {
       return NextResponse.json<AuthResponse>(
         {
           success: false,
@@ -48,17 +47,19 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create advocate with is_approved = 0
-    const [result] = await pool.execute(
-      "INSERT INTO users (name, email, password, role, is_approved) VALUES (?, ?, ?, ?, ?)",
-      [name, email, hashedPassword, "advocate", 0]
-    );
+    // Create advocate with is_approved = 0 using Sequelize ORM
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "advocate",
+      is_approved: 0
+    });
 
-    const insertResult = result as any;
-    const userId = insertResult.insertId;
-
-    // Create user profile
-    await pool.execute("INSERT INTO profiles (user_id) VALUES (?)", [userId]);
+    // Create user profile using Sequelize ORM
+    // await Profile.create({
+    //   user_id: user.id
+    // });
 
     // **Do NOT generate token yet** — advocate cannot login until approved
     return NextResponse.json<AuthResponse>(

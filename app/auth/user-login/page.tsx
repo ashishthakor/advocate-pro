@@ -18,16 +18,16 @@ import {
 import { useTheme } from '@mui/material/styles';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { useTheme as useAppTheme } from '@/components/ThemeProvider';
-import { useLanguage } from '@/components/LanguageProvider';
-import LanguageSelector from '@/components/LanguageSelector';
+import { useTheme as useAppTheme } from 'components/ThemeProvider';
+import { useLanguage } from 'components/LanguageProvider';
+import LanguageSelector from 'components/LanguageSelector';
 import {
   Person as PersonIcon,
   Lock as LockIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from 'components/AuthProvider';
 
 export default function UserLoginPage() {
   const theme = useTheme();
@@ -193,7 +193,7 @@ export default function UserLoginPage() {
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Don't have an account?
+                  Don&apos;t have an account?
                 </Typography>
               </Divider>
 

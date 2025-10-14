@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
+import { Op } from "sequelize";
 import { ApiResponse } from "@/types";
+const { User } = require("models/init-models");
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,47 +12,24 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const offset = (page - 1) * limit;
 
-    let query = `
-      SELECT c.*, u.name as advocate_name 
-      FROM clients c 
-      LEFT JOIN users u ON c.advocate_id = u.id 
-      WHERE 1=1
-    `;
-    let params: any[] = [];
-
+    // Build where conditions for users with role "user"
+    const whereConditions: any = { role: "user" };
+    
     if (search) {
-      query +=
-        " AND (c.first_name LIKE ? OR c.last_name LIKE ? OR c.email LIKE ?)";
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      whereConditions[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } }
+      ];
     }
 
-    if (status !== "all") {
-      query += " AND c.status = ?";
-      params.push(status);
-    }
-
-    query += " ORDER BY c.created_at DESC LIMIT ? OFFSET ?";
-    params.push(limit, offset);
-
-    const [clients] = await pool.execute(query, params);
-
-    // Get total count
-    let countQuery = "SELECT COUNT(*) as total FROM clients c WHERE 1=1";
-    let countParams: any[] = [];
-
-    if (search) {
-      countQuery +=
-        " AND (c.first_name LIKE ? OR c.last_name LIKE ? OR c.email LIKE ?)";
-      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`);
-    }
-
-    if (status !== "all") {
-      countQuery += " AND c.status = ?";
-      countParams.push(status);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = (countResult as any)[0].total;
+    // Get users (clients) with pagination using Sequelize ORM
+    const { count, rows: clients } = await User.findAndCountAll({
+      where: whereConditions,
+      attributes: ['id', 'name', 'email', 'phone', 'address', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit: limit,
+      offset: offset
+    });
 
     return NextResponse.json<ApiResponse>({
       success: true,
@@ -61,8 +39,8 @@ export async function GET(request: NextRequest) {
         pagination: {
           page,
           limit,
-          total,
-          totalPages: Math.ceil(total / limit),
+          total: count,
+          totalPages: Math.ceil(count / limit),
         },
       },
     });
@@ -82,36 +60,27 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      first_name,
-      last_name,
+      name,
       email,
       phone,
       address,
-      occupation,
-      status = "active",
+      password = "default123" // Default password for clients
     } = body;
 
-    // For now, use advocate_id = 1 (admin user)
-    const advocate_id = 1;
-
-    const [result] = await pool.execute(
-      "INSERT INTO clients (advocate_id, first_name, last_name, email, phone, address, occupation, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        advocate_id,
-        first_name,
-        last_name,
-        email,
-        phone,
-        address,
-        occupation,
-        status,
-      ]
-    );
+    // Create client as a user with role "user" using Sequelize ORM
+    const client = await User.create({
+      name,
+      email,
+      password, // In real app, this should be hashed
+      role: "user",
+      phone,
+      address
+    });
 
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Client created successfully",
-      data: { id: (result as any).insertId },
+      data: { id: client.id },
     });
   } catch (error: any) {
     console.error("Create client error:", error);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from '@/lib/database';
-import { verifyTokenFromRequest, hasRole } from '@/lib/auth';
-import { QueryTypes } from 'sequelize';
+const { Case, User } = require('models/init-models');
+import { verifyTokenFromRequest } from 'lib/auth';
+import { Op } from 'sequelize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,74 +42,71 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let whereClause = '';
-    let replacements: any[] = [];
-
-    // Build where clause based on user role
+    // Build where conditions for Sequelize based on user role
+    const whereConditions: any = {};
+    
     if (authResult.user.role === 'user') {
-      whereClause = 'WHERE c.user_id = ?';
-      replacements.push(authResult.user.userId);
+      whereConditions.user_id = authResult.user.userId;
     } else if (authResult.user.role === 'advocate') {
-      whereClause = 'WHERE c.advocate_id = ?';
-      replacements.push(authResult.user.userId);
+      whereConditions.advocate_id = authResult.user.userId;
     }
-    // Admin can see all cases, so no additional where clause
+    // Admin can see all cases, so no additional where condition
 
     // Add filters
-    const filters = [];
     if (status) {
-      filters.push('c.status = ?');
-      replacements.push(status);
+      whereConditions.status = status;
     }
     if (caseType) {
-      filters.push('c.case_type = ?');
-      replacements.push(caseType);
+      whereConditions.case_type = caseType;
     }
     if (priority) {
-      filters.push('c.priority = ?');
-      replacements.push(priority);
+      whereConditions.priority = priority;
     }
     if (search) {
-      filters.push('(c.title LIKE ? OR c.description LIKE ? OR c.case_number LIKE ? OR u.name LIKE ? OR a.name LIKE ?)');
-      replacements.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+      whereConditions[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } },
+        { case_number: { [Op.like]: `%${search}%` } }
+      ];
     }
 
-    if (filters.length > 0) {
-      whereClause += whereClause ? ' AND ' + filters.join(' AND ') : 'WHERE ' + filters.join(' AND ');
-    }
-
-    // Get cases with user and advocate information
-    const cases = await sequelize.query(`
-      SELECT 
-        c.*,
-        u.name as user_name,
-        u.email as user_email,
-        a.name as advocate_name,
-        a.email as advocate_email
-      FROM cases c
-      LEFT JOIN users u ON c.user_id = u.id
-      LEFT JOIN users a ON c.advocate_id = a.id
-      ${whereClause}
-      ORDER BY c.${sortBy} ${sortOrder.toUpperCase()}
-      LIMIT ? OFFSET ?
-    `, {
-      replacements: [...replacements, limit, offset],
-      type: QueryTypes.SELECT
+    // Get cases with user and advocate information using Sequelize ORM
+    const cases = await Case.findAll({
+      where: whereConditions,
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name', 'email']
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: ['name', 'email']
+        }
+      ],
+      order: [[sortBy, sortOrder.toUpperCase()]],
+      limit: limit,
+      offset: offset
     });
 
     // Get total count
-    const totalResult = await sequelize.query(`
-      SELECT COUNT(*) as total
-      FROM cases c
-      LEFT JOIN users u ON c.user_id = u.id
-      LEFT JOIN users a ON c.advocate_id = a.id
-      ${whereClause}
-    `, {
-      replacements,
-      type: QueryTypes.SELECT
+    const total = await Case.count({ 
+      where: whereConditions,
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: []
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: []
+        }
+      ]
     });
-
-    const total = (totalResult[0] as any).total;
+    
     const totalPages = Math.ceil(total / limit);
 
     return NextResponse.json({
@@ -203,78 +200,62 @@ export async function POST(request: NextRequest) {
     // Generate case number
     const caseNumber = `CASE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
-    // Insert new case
-    await sequelize.query(`
-      INSERT INTO cases (
-        case_number, title, description, case_type, priority, user_id,
-        court_name, judge_name, next_hearing_date, fees, fees_paid,
-        start_date, end_date,
-        requester_name, requester_email, requester_phone, requester_address,
-        respondent_name, respondent_phone, respondent_email, respondent_address,
-        relationship_between_parties, nature_of_dispute, brief_description_of_dispute, occurrence_date,
-        prior_communication, prior_communication_other,
-        sought_monetary_claim, sought_settlement, sought_other,
-        attachments_json,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-    `, {
-      replacements: [
-        caseNumber, 
-        title, 
-        description, 
-        case_type || 'civil', 
-        priority || 'medium', 
-        authResult.user.userId,
-        court_name || null, 
-        judge_name || null, 
-        next_hearing_date || null, 
-        fees || 0.00, 
-        fees_paid || 0.00,
-        start_date || null, 
-        end_date || null,
-        requester_name || null, 
-        requester_email || null, 
-        requester_phone || null, 
-        requester_address || null,
-        respondent_name || null, 
-        respondent_phone || null, 
-        respondent_email || null, 
-        respondent_address || null,
-        relationship_between_parties || null, 
-        nature_of_dispute || null, 
-        brief_description_of_dispute || null, 
-        occurrence_date || null,
-        prior_communication || null, 
-        prior_communication_other || null,
-        !!sought_monetary_claim, 
-        !!sought_settlement, 
-        sought_other || null,
-        attachments_json || null
-      ],
-      type: QueryTypes.INSERT
+    // Create new case using Sequelize ORM
+    const newCase = await Case.create({
+      case_number: caseNumber,
+      title,
+      description,
+      case_type: case_type || 'civil',
+      priority: priority || 'medium',
+      user_id: authResult.user.userId,
+      court_name: court_name || null,
+      judge_name: judge_name || null,
+      next_hearing_date: next_hearing_date || null,
+      fees: fees || 0.00,
+      fees_paid: fees_paid || 0.00,
+      start_date: start_date || null,
+      end_date: end_date || null,
+      requester_name: requester_name || null,
+      requester_email: requester_email || null,
+      requester_phone: requester_phone || null,
+      requester_address: requester_address || null,
+      respondent_name: respondent_name || null,
+      respondent_phone: respondent_phone || null,
+      respondent_email: respondent_email || null,
+      respondent_address: respondent_address || null,
+      relationship_between_parties: relationship_between_parties || null,
+      nature_of_dispute: nature_of_dispute || null,
+      brief_description_of_dispute: brief_description_of_dispute || null,
+      occurrence_date: occurrence_date || null,
+      prior_communication: prior_communication || null,
+      prior_communication_other: prior_communication_other || null,
+      sought_monetary_claim: !!sought_monetary_claim,
+      sought_settlement: !!sought_settlement,
+      sought_other: sought_other || null,
+      attachments_json: attachments_json || null
     });
 
-    // Fetch the created case with joined user/advocate fields to match FE expectations
-    const created = await sequelize.query(`
-      SELECT 
-        c.*,
-        u.name as user_name,
-        u.email as user_email,
-        a.name as advocate_name,
-        a.email as advocate_email
-      FROM cases c
-      LEFT JOIN users u ON c.user_id = u.id
-      LEFT JOIN users a ON c.advocate_id = a.id
-      WHERE c.case_number = ?
-    `, {
-      replacements: [caseNumber],
-      type: QueryTypes.SELECT
+    // Fetch the created case with joined user/advocate fields using Sequelize ORM
+    const createdCase = await Case.findOne({
+      where: { case_number: caseNumber },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name', 'email']
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: ['name', 'email']
+        }
+      ]
     });
 
     return NextResponse.json({
       success: true,
       message: 'Case created successfully',
-      data: created[0]
+      data: createdCase
     });
 
   } catch (error) {

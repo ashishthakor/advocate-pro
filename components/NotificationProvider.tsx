@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Snackbar, Alert, AlertColor } from '@mui/material';
-import { setGlobalNotificationHandler } from '@/lib/api-client';
+import { setGlobalNotificationHandler } from 'lib/api-client';
 
 interface NotificationContextType {
   showNotification: (message: string, severity: AlertColor) => void;

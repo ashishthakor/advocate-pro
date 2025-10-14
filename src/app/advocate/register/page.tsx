@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "components/AuthProvider";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import lightTheme from "assets/theme";
@@ -22,7 +22,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useTheme as useAppTheme } from "@/components/ThemeContext";
+import { useTheme as useAppTheme } from "components/ThemeProvider";
 import bgImage from "assets/images/bg-sign-up-cover.jpeg";
 
 export default function RegisterPage() {
@@ -37,9 +37,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { register } = useAuth();
   const router = useRouter();
-  const { theme } = useAppTheme();
+  const { darkMode } = useAppTheme();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -67,23 +66,33 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const success = await register(
-        formData.name,
-        formData.email,
-        formData.password,
-        "advocate"
-      );
-      if (success) router.push("/advocate/dashboard");
-      else setError("Registration failed. Please try again.");
-    } catch {
-      setError("An error occurred. Please try again.");
+      const response = await fetch('/api/auth/advocate-register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          role: 'advocate',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        router.push('/advocate/login');
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <MuiThemeProvider theme={theme === "dark" ? darkTheme : lightTheme}>
+    <MuiThemeProvider theme={darkMode ? darkTheme : lightTheme}>
       <CssBaseline />
 
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>

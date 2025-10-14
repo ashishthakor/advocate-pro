@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "components/AuthProvider";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {pool} from '@/lib/database';
 import { verifyToken, getTokenFromRequest } from '@/lib/auth';
-import { ApiResponse, User } from '@/types';
+import { ApiResponse, User as UserType } from '@/types';
+const { User } = require('models/init-models');
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,39 +22,28 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Get user from database
-    const [users] = await pool.execute(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
-      [decoded.id]
-    );
+    // Get user from database using Sequelize ORM
+    const user = await User.findByPk(decoded.id, {
+      attributes: ['id', 'name', 'email', 'role', 'created_at']
+    });
 
-    // Type assertion for MySQL2 result
-    const userRows = users as Array<{
-      id: number;
-      name: string;
-      email: string;
-      role: string;
-      created_at: string | Date;
-    }>;
-
-    if (!Array.isArray(userRows) || userRows.length === 0) {
+    if (!user) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: 'User not found'
       }, { status: 404 });
     }
 
-    const user = userRows[0];
-
-    return NextResponse.json<ApiResponse<User>>({
+    return NextResponse.json<ApiResponse<UserType>>({
       success: true,
       message: 'User data retrieved successfully',
       data: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role === "user" || user.role === "advocate" ? user.role : "user",
-        createdAt: typeof user.created_at === 'string' ? new Date(user.created_at) : user.created_at
+        role: user.role,
+        createdAt: new Date(user.created_at),
+        isApproved: user.is_approved
       }
     });
 

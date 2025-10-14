@@ -1,7 +1,6 @@
 "use client";
 
-import { useAuth } from "@/components/AuthProvider";
-import { Loading } from "@/components/Loading";
+import { Loading } from '@/components/Loading';
 import { useProtectedPage } from "@/hook/useProtectedPage";
 import {
   Card,

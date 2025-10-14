@@ -43,11 +43,11 @@ import {
   Support as SupportIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from 'components/AuthProvider';
 import { motion } from 'framer-motion';
-import { useTheme as useAppTheme } from '@/components/ThemeProvider';
-import { useLanguage } from '@/components/LanguageProvider';
-import LanguageSelector from '@/components/LanguageSelector';
+import { useTheme as useAppTheme } from 'components/ThemeProvider';
+import { useLanguage } from 'components/LanguageProvider';
+import LanguageSelector from 'components/LanguageSelector';
 
 export default function LandingPage() {
   const theme = useTheme();

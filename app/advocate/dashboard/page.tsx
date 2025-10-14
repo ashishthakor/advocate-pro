@@ -31,12 +31,12 @@ import {
   WhatsApp as WhatsAppIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { useAuth } from '@/components/AuthProvider';
-import { apiFetch } from '@/lib/api-client';
-import { useLanguage } from '@/components/LanguageProvider';
-import { CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
+import { useAuth } from 'components/AuthProvider';
+import { apiFetch } from 'lib/api-client';
+import { useLanguage } from 'components/LanguageProvider';
+import { CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
 import { useRouter } from 'next/navigation';
-import CaseDetailsModal from '@/components/CaseDetailsModal';
+import CaseDetailsModal from 'components/CaseDetailsModal';
 
 interface Case {
   id: number;
@@ -92,13 +92,13 @@ export default function AdvocateDashboardPage() {
         
         // Calculate statistics
         const totalCases = cases.length;
-        const activeCases = cases.filter(c => 
+        const activeCases = cases.filter((c: any) => 
           ['waiting_for_action', 'neutrals_needs_to_be_assigned', 'consented'].includes(c.status)
         ).length;
-        const completedCases = cases.filter(c => 
+        const completedCases = cases.filter((c: any) => 
           ['settled', 'closed_no_consent', 'close_no_settlement', 'withdrawn'].includes(c.status)
         ).length;
-        const pendingCases = cases.filter(c => 
+        const pendingCases = cases.filter((c: any) => 
           ['hold', 'temporary_non_starter'].includes(c.status)
         ).length;
 
@@ -181,7 +181,7 @@ export default function AdvocateDashboardPage() {
           Welcome back, {user?.name || 'Advocate'}!
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Here's an overview of your assigned cases and recent activity.
+          Here&apos;s an overview of your assigned cases and recent activity.
         </Typography>
       </Box>
 

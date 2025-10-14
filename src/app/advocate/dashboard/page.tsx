@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/components/AuthProvider";
-import { Loading } from "@/components/Loading";
+import { useAuth } from "components/AuthProvider";
+import { Loading } from '@/components/Loading'
 import Link from "next/link";
 import { useProtectedPage } from "@/hook/useProtectedPage";
 import { useEffect, useState } from "react";
@@ -58,7 +58,7 @@ export default function Dashboard() {
             Welcome back, {user?.name}!
           </h1>
           <p className="text-muted-foreground mt-2">
-            Here's an overview of your legal practice.
+            Here&apos;s an overview of your legal practice.
           </p>
         </div>
 

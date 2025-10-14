@@ -32,9 +32,9 @@ import {
   WhatsApp as WhatsAppIcon,
   Assignment as AssignmentIcon,
 } from '@mui/icons-material';
-import { useAuth } from '@/components/AuthProvider';
-import { apiFetch } from '@/lib/api-client';
-import { useLanguage } from '@/components/LanguageProvider';
+import { useAuth } from 'components/AuthProvider';
+import { apiFetch } from 'lib/api-client';
+import { useLanguage } from 'components/LanguageProvider';
 import { useRouter } from 'next/navigation';
 
 interface Client {

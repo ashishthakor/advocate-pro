@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {pool} from '@/lib/database';
+const { User } = require('models/init-models');
 import { verifyToken, getTokenFromRequest } from '@/lib/auth';
-import { ApiResponse, User } from '@/types';
+import { ApiResponse, User as UserType } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,22 +22,20 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Get user from database
-    const [users] = await pool.execute(
-      'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
-      [decoded.id]
-    );
+    // Get user from database using Sequelize ORM
+    const user = await User.findOne({
+      where: { id: decoded.id },
+      attributes: ['id', 'name', 'email', 'role', 'created_at']
+    });
 
-    if (!Array.isArray(users) || users.length === 0) {
+    if (!user) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: 'User not found'
       }, { status: 404 });
     }
 
-    const user = users[0] as any;
-
-    return NextResponse.json<ApiResponse<User>>({
+    return NextResponse.json<ApiResponse<UserType>>({
       success: true,
       message: 'User data retrieved successfully',
       data: {
@@ -45,7 +43,8 @@ export async function GET(request: NextRequest) {
         email: user.email,
         name: user.name,
         role: user.role,
-        createdAt: new Date(user.created_at)
+        createdAt: user.created_at,
+        isApproved: user.is_approved
       }
     });
 

@@ -31,8 +31,8 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { useAuth } from '@/components/AuthProvider';
-import { apiFetch } from '@/lib/api-client';
+import { useAuth } from 'components/AuthProvider';
+import { apiFetch } from 'lib/api-client';
 
 interface AdvocateProfile {
   id: number;
@@ -51,7 +51,7 @@ interface AdvocateProfile {
 }
 
 export default function AdvocateProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<AdvocateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -143,10 +143,7 @@ export default function AdvocateProfilePage() {
         setSuccess('Profile updated successfully');
         setIsEditing(false);
         await fetchProfile();
-        // Update auth context
-        if (updateUser) {
-          updateUser({ ...user, ...formData });
-        }
+        // Profile updated successfully
       } else {
         setError(response.message || 'Failed to update profile');
       }

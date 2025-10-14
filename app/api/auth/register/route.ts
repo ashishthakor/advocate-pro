@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { sequelize } from '@/lib/database';
+const { User } = require('models/init-models');
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,15 +14,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUsers = await sequelize.query(
-      'SELECT id FROM users WHERE email = ?',
-      {
-        replacements: [email],
-        type: sequelize.QueryTypes.SELECT
-      }
-    );
+    const existingUser = await User.findOne({
+      where: { email: email }
+    });
 
-    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User with this email already exists' },
         { status: 409 }
@@ -32,18 +28,18 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Insert new user
-    const [result] = await sequelize.query(
-      `INSERT INTO users (name, email, password, role, phone, address, is_approved, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-      {
-        replacements: [name, email, hashedPassword, role, phone || null, address || null, role === 'admin'],
-        type: sequelize.QueryTypes.INSERT
-      }
-    );
+    // Create new user using Sequelize ORM
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      phone: phone || null,
+      address: address || null,
+      is_approved: role === 'admin' // Admins are auto-approved
+    });
 
-    const insertResult = result as any;
-    const userId = insertResult[0];
+    const userId = newUser.id;
 
     return NextResponse.json({
       success: true,

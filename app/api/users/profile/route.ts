@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { sequelize } from '@/lib/database';
+import { verifyToken } from 'lib/auth';
+import { sequelize } from 'lib/database';
 
 export async function GET(request: NextRequest) {
   try {

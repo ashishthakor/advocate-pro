@@ -33,7 +33,7 @@ import {
   WhatsApp as WhatsAppIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from 'components/AuthProvider';
 import { io, Socket } from 'socket.io-client';
 
 interface ChatMessage {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from '@/lib/database';
-import { verifyTokenFromRequest } from '@/lib/auth';
+const { Case } = require('models/init-models');
+import { verifyTokenFromRequest } from 'lib/auth';
+import { QueryTypes } from 'sequelize';
+import { sequelize } from 'lib/database';
 
 export async function GET(
   request: NextRequest,
@@ -23,7 +25,7 @@ export async function GET(
       SELECT user_id, advocate_id FROM cases WHERE id = ?
     `, {
       replacements: [caseId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     if (cases.length === 0) {
@@ -59,7 +61,7 @@ export async function GET(
       ORDER BY cm.created_at ASC
     `, {
       replacements: [caseId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     return NextResponse.json({
@@ -105,7 +107,7 @@ export async function POST(
       SELECT user_id, advocate_id FROM cases WHERE id = ?
     `, {
       replacements: [caseId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     if (cases.length === 0) {
@@ -144,10 +146,10 @@ export async function POST(
         file_size || null,
         file_type || null
       ],
-      type: sequelize.QueryTypes.INSERT
+        type: QueryTypes.INSERT
     });
 
-    const messageId = result[0];
+    const messageId = (result as any)[0];
 
     // Get the created message with user info
     const messages = await sequelize.query(`
@@ -161,7 +163,7 @@ export async function POST(
       WHERE cm.id = ?
     `, {
       replacements: [messageId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     return NextResponse.json({

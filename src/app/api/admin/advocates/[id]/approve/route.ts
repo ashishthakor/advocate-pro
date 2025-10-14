@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
+const { User } = require("models/init-models");
 import { adminMiddleware } from "@/middleware/admin";
 
 export async function PATCH(
@@ -23,12 +23,17 @@ export async function PATCH(
   }
 
   try {
-    const [result]: any = await pool.execute(
-      'UPDATE users SET is_approved=1 WHERE id=? AND role="advocate"',
-      [advocateId]
+    const [updatedRowsCount] = await User.update(
+      { is_approved: 1 },
+      { 
+        where: { 
+          id: advocateId,
+          role: "advocate" 
+        } 
+      }
     );
 
-    if (result.affectedRows === 0) {
+    if (updatedRowsCount === 0) {
       return NextResponse.json(
         { success: false, message: "Advocate not found or already approved" },
         { status: 404 }

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { s3Uploader, FileValidator } from '@/lib/aws-s3';
-import { verifyToken } from '@/lib/auth';
+import { s3Uploader, FileValidator } from 'lib/aws-s3';
+import { verifyTokenFromRequest } from 'lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     // Verify authentication
-    const authResult = await verifyToken(request);
+    const authResult = await verifyTokenFromRequest(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       mimeType,
       folder,
       caseId: caseId ? parseInt(caseId) : undefined,
-      userId: authResult.user?.id,
+      userId: authResult.user?.userId,
     });
 
     if (!uploadResult.success) {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Verify authentication
-    const authResult = await verifyToken(request);
+    const authResult = await verifyTokenFromRequest(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },

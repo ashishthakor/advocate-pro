@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from 'components/AuthProvider'
 
 interface Competition {
   id: number
@@ -113,7 +113,7 @@ export default function CompetitionDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Competition not found</h2>
-          <p className="text-gray-600">The competition you're looking for doesn't exist.</p>
+          <p className="text-gray-600">The competition you&apos;re looking for doesn&apos;t exist.</p>
         </div>
       </div>
     )

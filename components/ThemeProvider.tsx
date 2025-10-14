@@ -7,6 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 interface ThemeContextType {
   darkMode: boolean;
   toggleDarkMode: () => void;
+  theme: any; // MUI theme object
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -126,6 +127,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const value: ThemeContextType = {
     darkMode,
     toggleDarkMode,
+    theme,
   };
 
   return (

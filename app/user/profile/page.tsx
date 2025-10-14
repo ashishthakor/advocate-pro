@@ -27,8 +27,8 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { useAuth } from '@/components/AuthProvider';
-import { apiFetch } from '@/lib/api-client';
+import { useAuth } from 'components/AuthProvider';
+import { apiFetch } from 'lib/api-client';
 
 interface UserProfile {
   id: number;
@@ -43,7 +43,7 @@ interface UserProfile {
 }
 
 export default function UserProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -126,10 +126,7 @@ export default function UserProfilePage() {
         setSuccess('Profile updated successfully');
         setIsEditing(false);
         await fetchProfile();
-        // Update auth context
-        if (updateUser) {
-          updateUser({ ...user, ...formData });
-        }
+        // Profile updated successfully
       } else {
         setError(response.message || 'Failed to update profile');
       }

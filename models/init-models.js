@@ -1,5 +1,5 @@
 const DataTypes = require("sequelize").DataTypes;
-const sequelize = require("../config/database");
+const { sequelize } = require("../lib/database");
 const User = require("./User")(sequelize, DataTypes);
 const Case = require("./Case")(sequelize, DataTypes);
 const ChatMessage = require("./ChatMessage")(sequelize, DataTypes);

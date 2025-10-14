@@ -46,7 +46,7 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch } from 'lib/api-client'; 
 
 interface Advocate {
   id: number;

@@ -48,11 +48,11 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
-import { useLanguage } from '@/components/LanguageProvider';
-import { apiFetch } from '@/lib/api-client';
-import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
-import CaseDetailsModal from '@/components/CaseDetailsModal';
+import { useAuth } from 'components/AuthProvider';
+import { useLanguage } from 'components/LanguageProvider';
+import { apiFetch } from 'lib/api-client';
+import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
+import CaseDetailsModal from 'components/CaseDetailsModal';
 
 interface Case {
   id: number;

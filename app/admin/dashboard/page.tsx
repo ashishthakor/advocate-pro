@@ -28,8 +28,8 @@ import {
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
 } from '@mui/icons-material';
-import { useAuth } from '@/components/AuthProvider';
-import { apiFetch } from '@/lib/api-client';
+import { useAuth } from 'components/AuthProvider';
+import { apiFetch } from 'lib/api-client';
 
 interface DashboardStats {
   totalCases: number;
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
   return (
     <>
       <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
-        Welcome back, {user?.name || 'Admin'}! Here's what's happening in your system.
+        Welcome back, {user?.name || 'Admin'}! Here&apos;s what&apos;s happening in your system.
       </Typography>
 
       {error && (

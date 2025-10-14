@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/database';
 import { ApiResponse } from '@/types';
+const { Case, User } = require('models/init-models');
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,73 +12,57 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = (page - 1) * limit;
 
-    let query = `
-      SELECT c.*, cl.first_name, cl.last_name, cl.email as client_email,
-             u.name as advocate_name 
-      FROM cases c 
-      LEFT JOIN clients cl ON c.client_id = cl.id 
-      LEFT JOIN users u ON c.advocate_id = u.id 
-      WHERE 1=1
-    `;
-    let params: any[] = [];
-
-    if (search) {
-      query += ' AND (c.title LIKE ? OR c.case_number LIKE ? OR cl.first_name LIKE ? OR cl.last_name LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
-    }
-
+    // Build where conditions
+    const whereConditions: any = {};
+    
     if (status !== 'all') {
-      query += ' AND c.status = ?';
-      params.push(status);
+      whereConditions.status = status;
     }
-
+    
     if (type !== 'all') {
-      query += ' AND c.case_type = ?';
-      params.push(type);
+      whereConditions.case_type = type;
     }
 
-    query += ' ORDER BY c.created_at DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    // Get cases with pagination using Sequelize ORM
+    const { count, rows: cases } = await Case.findAndCountAll({
+      where: whereConditions,
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email']
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: ['id', 'name', 'email']
+        }
+      ],
+      order: [['created_at', 'DESC']],
+      limit: limit,
+      offset: offset
+    });
 
-    const [cases] = await pool.execute(query, params);
-
-    // Get total count
-    let countQuery = `
-      SELECT COUNT(*) as total 
-      FROM cases c 
-      LEFT JOIN clients cl ON c.client_id = cl.id 
-      WHERE 1=1
-    `;
-    let countParams: any[] = [];
-
+    // Filter by search if provided
+    let filteredCases = cases;
     if (search) {
-      countQuery += ' AND (c.title LIKE ? OR c.case_number LIKE ? OR cl.first_name LIKE ? OR cl.last_name LIKE ?)';
-      countParams.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+      filteredCases = cases.filter((caseItem: any) => 
+        caseItem.title.toLowerCase().includes(search.toLowerCase()) ||
+        caseItem.case_number.toLowerCase().includes(search.toLowerCase()) ||
+        (caseItem.user && caseItem.user.name.toLowerCase().includes(search.toLowerCase()))
+      );
     }
-
-    if (status !== 'all') {
-      countQuery += ' AND c.status = ?';
-      countParams.push(status);
-    }
-
-    if (type !== 'all') {
-      countQuery += ' AND c.case_type = ?';
-      countParams.push(type);
-    }
-
-    const [countResult] = await pool.execute(countQuery, countParams);
-    const total = (countResult as any)[0].total;
 
     return NextResponse.json<ApiResponse>({
       success: true,
       message: 'Cases retrieved successfully',
       data: {
-        cases,
+        cases: filteredCases,
         pagination: {
           page,
           limit,
-          total,
-          totalPages: Math.ceil(total / limit)
+          total: search ? filteredCases.length : count,
+          totalPages: Math.ceil((search ? filteredCases.length : count) / limit)
         }
       }
     });
@@ -107,18 +91,24 @@ export async function POST(request: NextRequest) {
       fees = 0
     } = body;
 
-    // For now, use advocate_id = 1 (admin user)
-    const advocate_id = 1;
-
-    const [result] = await pool.execute(
-      'INSERT INTO cases (advocate_id, client_id, case_number, title, description, case_type, status, priority, start_date, fees) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [advocate_id, client_id, case_number, title, description, case_type, status, priority, start_date, fees]
-    );
+    // Create case using Sequelize ORM
+    const newCase = await Case.create({
+      user_id: 1, // Default user for now
+      advocate_id: 1, // Default advocate for now
+      case_number,
+      title,
+      description,
+      case_type,
+      status,
+      priority,
+      start_date: start_date ? new Date(start_date) : null,
+      fees
+    });
 
     return NextResponse.json<ApiResponse>({
       success: true,
       message: 'Case created successfully',
-      data: { id: (result as any).insertId }
+      data: { id: newCase.id }
     });
 
   } catch (error: any) {

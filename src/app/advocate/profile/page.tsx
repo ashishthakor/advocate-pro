@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from 'components/AuthProvider'
 
 interface ProfileData {
   id: number

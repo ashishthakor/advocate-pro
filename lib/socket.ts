@@ -1,7 +1,8 @@
-import { Server as SocketIOServer } from 'socket.io';
+import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
 import { sequelize } from './database';
+import { QueryTypes } from 'sequelize';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -155,17 +156,17 @@ export class SocketManager {
           data.file_size || null,
           data.file_type || null
         ],
-        type: sequelize.QueryTypes.INSERT
+        type: QueryTypes.INSERT
       });
 
-      const messageId = result[0];
+      const messageId = (result as any)[0];
 
       // Get user info for the message
       const userInfo = await sequelize.query(`
         SELECT name, email, role FROM users WHERE id = ?
       `, {
         replacements: [socket.userId],
-        type: sequelize.QueryTypes.SELECT
+        type: QueryTypes.SELECT
       });
 
       const message = {
@@ -179,9 +180,9 @@ export class SocketManager {
         file_size: data.file_size,
         file_type: data.file_type,
         created_at: new Date(),
-        user_name: userInfo[0]?.name,
-        user_email: userInfo[0]?.email,
-        user_role: userInfo[0]?.role
+        user_name: (userInfo[0] as any)?.name,
+        user_email: (userInfo[0] as any)?.email,
+        user_role: (userInfo[0] as any)?.role
       };
 
       // Broadcast to all users in the case room
@@ -213,7 +214,7 @@ export class SocketManager {
         SELECT user_id, advocate_id FROM cases WHERE id = ?
       `, {
         replacements: [caseId],
-        type: sequelize.QueryTypes.SELECT
+        type: QueryTypes.SELECT
       });
 
       if (cases.length === 0) {
@@ -258,7 +259,7 @@ export class SocketManager {
         ORDER BY cm.created_at ASC
       `, {
         replacements: [caseId],
-        type: sequelize.QueryTypes.SELECT
+        type: QueryTypes.SELECT
       });
 
       return messages as ChatMessage[];

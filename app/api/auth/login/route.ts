@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { sequelize } from '@/lib/database';
+const { User } = require('models/init-models');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -16,23 +16,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Query user from database
-    const users = await sequelize.query(
-      'SELECT * FROM users WHERE email = ? AND role = ?',
-      {
-        replacements: [email, role],
-        type: sequelize.QueryTypes.SELECT
+    // Query user from database using Sequelize ORM
+    const user = await User.findOne({
+      where: {
+        email: email,
+        role: role
       }
-    );
+    });
 
-    if (!Array.isArray(users) || users.length === 0) {
+    if (!user) {
       return NextResponse.json(
         { success: false, message: 'Invalid credentials' },
         { status: 401 }
       );
     }
-
-    const user = users[0] as any;
 
     // Check if user is approved (for advocates and users)
     if (user.role !== 'admin' && !user.is_approved) {

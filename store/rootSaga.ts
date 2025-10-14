@@ -1,8 +1,8 @@
 import { all, fork } from 'redux-saga/effects';
-import usersSaga from '@/store/sagas/usersSaga';
-import advocatesSaga from '@/store/sagas/advocatesSaga';
-import casesSaga from '@/store/sagas/casesSaga';
-import assignmentsSaga from '@/store/sagas/assignmentsSaga';
+import usersSaga from './sagas/usersSaga';
+import advocatesSaga from './sagas/advocatesSaga';
+import casesSaga from './sagas/casesSaga';
+import assignmentsSaga from './sagas/assignmentsSaga';
 
 export default function* rootSaga() {
   yield all([

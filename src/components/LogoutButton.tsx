@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from 'components/AuthProvider';
 
 export default function LogoutButton() {
   const { logout } = useAuth();

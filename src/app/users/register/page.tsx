@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "components/AuthProvider";
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import lightTheme from "assets/theme";
@@ -22,7 +22,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useTheme as useAppTheme } from "@/components/ThemeContext";
+import { useTheme as useAppTheme } from "components/ThemeProvider";
 import bgImage from "assets/images/bg-sign-up-cover.jpeg";
 
 export default function UserRegisterPage() {
@@ -37,7 +37,6 @@ export default function UserRegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { register } = useAuth();
   const router = useRouter();
   const { theme } = useAppTheme();
 
@@ -67,17 +66,26 @@ export default function UserRegisterPage() {
     setLoading(true);
 
     try {
-      // Role hardcoded as 'user'
-      const success = await register(
-        formData.name,
-        formData.email,
-        formData.password,
-        "user"
-      );
-      if (success) router.push("/users/dashboard");
-      else setError("Registration failed. Please try again.");
-    } catch {
-      setError("An error occurred. Please try again.");
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          role: 'user',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        router.push('/users/login');
+      } else {
+        setError(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from '@/lib/database';
-import { verifyTokenFromRequest } from '@/lib/auth';
+const { User } = require('models/init-models');
+import { verifyTokenFromRequest } from 'lib/auth';
+import { Op } from 'sequelize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -49,54 +50,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let whereClause = '';
-    let replacements: any[] = [];
-
-    // Build where clause
-    const conditions = [];
+    // Build where conditions for Sequelize
+    const whereConditions: any = {};
+    
     if (role) {
-      conditions.push('role = ?');
-      replacements.push(role);
+      whereConditions.role = role;
     }
     if (is_approved !== null && is_approved !== '') {
-      conditions.push('is_approved = ?');
-      replacements.push(is_approved === 'true');
+      whereConditions.is_approved = is_approved === 'true';
     }
     if (search) {
-      conditions.push('(name LIKE ? OR email LIKE ? OR phone LIKE ?)');
-      replacements.push(`%${search}%`, `%${search}%`, `%${search}%`);
-    }
-
-    if (conditions.length > 0) {
-      whereClause = 'WHERE ' + conditions.join(' AND ');
+      whereConditions[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+        { phone: { [Op.like]: `%${search}%` } }
+      ];
     }
 
     // Get total count for pagination
-    const [countResult] = await sequelize.query(`
-      SELECT COUNT(*) as total
-      FROM users
-      ${whereClause}
-    `, {
-      replacements,
-      type: sequelize.QueryTypes.SELECT
-    });
-
-    const total = (countResult as any).total;
+    const total = await User.count({ where: whereConditions });
     const totalPages = Math.ceil(total / limit);
 
-    // Get users with pagination
-    const users = await sequelize.query(`
-      SELECT 
-        id, name, email, role, is_approved, phone, address,
-        specialization, experience_years, bar_number, license_number,
-        created_at, updated_at
-      FROM users
-      ${whereClause}
-      ORDER BY ${sortBy} ${sortOrder.toUpperCase()}
-      LIMIT ? OFFSET ?
-    `, {
-      replacements: [...replacements, limit, offset],
-      type: sequelize.QueryTypes.SELECT
+    // Get users with pagination using Sequelize ORM
+    const users = await User.findAll({
+      where: whereConditions,
+      order: [[sortBy, sortOrder.toUpperCase()]],
+      limit: limit,
+      offset: offset,
+      attributes: { exclude: ['password'] } // Exclude password from response
     });
 
     return NextResponse.json({

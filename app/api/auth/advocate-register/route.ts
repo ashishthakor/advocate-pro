@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { sequelize } from '@/lib/database';
+const { User } = require('models/init-models');
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,15 +24,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUsers = await sequelize.query(
-      'SELECT id FROM users WHERE email = ?',
-      {
-        replacements: [email],
-        type: sequelize.QueryTypes.SELECT
-      }
-    );
+    const existingUser = await User.findOne({
+      where: { email: email }
+    });
 
-    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+    if (existingUser) {
       return NextResponse.json(
         { success: false, message: 'User with this email already exists' },
         { status: 409 }
@@ -40,15 +36,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if bar number already exists
-    const existingBar = await sequelize.query(
-      'SELECT id FROM users WHERE bar_number = ?',
-      {
-        replacements: [bar_number],
-        type: sequelize.QueryTypes.SELECT
-      }
-    );
+    const existingBar = await User.findOne({
+      where: { bar_number: bar_number }
+    });
 
-    if (Array.isArray(existingBar) && existingBar.length > 0) {
+    if (existingBar) {
       return NextResponse.json(
         { success: false, message: 'Advocate with this bar number already exists' },
         { status: 409 }
@@ -58,33 +50,22 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Insert new advocate
-    const [result] = await sequelize.query(
-      `INSERT INTO users (
-        name, email, password, role, phone, address, 
-        specialization, experience_years, bar_number, license_number, 
-        is_approved, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
-      {
-        replacements: [
-          name, 
-          email, 
-          hashedPassword, 
-          'advocate', 
-          phone || null, 
-          address || null,
-          specialization,
-          experience_years || 0,
-          bar_number,
-          license_number,
-          false // Advocates need admin approval
-        ],
-        type: sequelize.QueryTypes.INSERT
-      }
-    );
+    // Create new advocate using Sequelize ORM
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'advocate',
+      phone: phone || null,
+      address: address || null,
+      specialization,
+      experience_years: experience_years || 0,
+      bar_number,
+      license_number,
+      is_approved: false // Advocates need admin approval
+    });
 
-    const insertResult = result as any;
-    const userId = insertResult[0];
+    const userId = newUser.id;
 
     return NextResponse.json({
       success: true,

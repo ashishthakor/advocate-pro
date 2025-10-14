@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
+const { User } = require("models/init-models");
 import { adminMiddleware } from "@/middleware/admin";
 
 export async function DELETE(
@@ -22,12 +22,14 @@ export async function DELETE(
   }
 
   try {
-    const [result]: any = await pool.execute(
-      'DELETE FROM users WHERE id=? AND role="advocate"',
-      [advocateId]
-    );
+    const deletedRowsCount = await User.destroy({
+      where: {
+        id: advocateId,
+        role: "advocate"
+      }
+    });
 
-    if (result.affectedRows === 0) {
+    if (deletedRowsCount === 0) {
       return NextResponse.json(
         { success: false, message: "Advocate not found" },
         { status: 404 }

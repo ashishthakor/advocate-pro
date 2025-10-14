@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {pool} from '@/lib/database';
 import { hashPassword, generateToken } from '@/lib/auth';
 import { RegisterRequest, AuthResponse } from '@/types';
+const { User } = require('models/init-models');
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,13 +23,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if user already exists
-    const [existingUsers] = await pool.execute(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
+    // Check if user already exists using Sequelize ORM
+    const existingUser = await User.findOne({
+      where: { email: email }
+    });
 
-    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+    if (existingUser) {
       return NextResponse.json<AuthResponse>({
         success: false,
         message: 'User with this email already exists'
@@ -39,38 +38,37 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user with 'user' role
-    const [result] = await pool.execute(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, 'user'] // Changed 'advocate' to 'user'
-    );
+    // Create user with 'user' role using Sequelize ORM
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'user'
+    });
 
-    const insertResult = result as any;
-    const userId = insertResult.insertId;
-
-    // Create user profile
-    await pool.execute(
-      'INSERT INTO profiles (user_id) VALUES (?)',
-      [userId]
-    );
+    // // Create user profile using Sequelize ORM
+    // await Profile.create({
+    //   user_id: user.id
+    // });
 
     // Generate token with 'user' role
     const token = generateToken({
-      id: userId,
+      id: user.id,
       email,
       name,
-      role: 'user' // Changed 'admin' to 'user'
+      role: 'user'
     });
 
     return NextResponse.json<AuthResponse>({
       success: true,
       message: 'User registered successfully',
       user: {
-        id: userId,
+        id: user.id,
         email,
         name,
-        role: 'user', // Changed 'admin' to 'user'
-        createdAt: new Date()
+        role: 'user',
+        createdAt: user.created_at,
+        isApproved: user.is_approved === 1
       },
       token
     }, { status: 201 });

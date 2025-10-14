@@ -72,7 +72,7 @@ export default function ContactPage() {
           <h1 className="text-4xl font-bold text-foreground mb-4">Contact Us</h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Get in touch with our team for any questions, support, or to schedule a consultation. 
-            We're here to help you succeed.
+            We&apos;re here to help you succeed.
           </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function ContactPage() {
             
             {submitStatus === 'success' && (
               <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                Thank you for your message! We'll get back to you within 24 hours.
+                Thank you for your message! We&apos;ll get back to you within 24 hours.
               </div>
             )}
 
@@ -200,8 +200,8 @@ export default function ContactPage() {
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-6">Get in Touch</h2>
               <p className="text-muted-foreground mb-8">
-                We're here to help you with any questions or concerns. Reach out to us through 
-                any of the channels below, and we'll get back to you as soon as possible.
+                We&apos;re here to help you with any questions or concerns. Reach out to us through 
+                any of the channels below, and we&apos;ll get back to you as soon as possible.
               </p>
             </div>
 

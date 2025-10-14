@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from '@/lib/database';
-import { verifyTokenFromRequest } from '@/lib/auth';
+import { sequelize } from 'lib/database';
+import { QueryTypes } from 'sequelize';
+import { verifyTokenFromRequest } from 'lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -28,7 +29,7 @@ export async function GET(
       WHERE id = ?
     `, {
       replacements: [userId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     if (users.length === 0) {
@@ -82,7 +83,7 @@ export async function PUT(
       SELECT * FROM users WHERE id = ?
     `, {
       replacements: [userId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     if (existingUsers.length === 0) {
@@ -122,7 +123,7 @@ export async function PUT(
       WHERE id = ?
     `, {
       replacements,
-      type: sequelize.QueryTypes.UPDATE
+        type: QueryTypes.UPDATE
     });
 
     return NextResponse.json({
@@ -176,7 +177,7 @@ export async function DELETE(
       SELECT * FROM users WHERE id = ?
     `, {
       replacements: [userId],
-      type: sequelize.QueryTypes.SELECT
+      type: QueryTypes.SELECT
     });
 
     if (existingUsers.length === 0) {
@@ -191,7 +192,7 @@ export async function DELETE(
       DELETE FROM users WHERE id = ?
     `, {
       replacements: [userId],
-      type: sequelize.QueryTypes.DELETE
+      type: QueryTypes.DELETE
     });
 
     return NextResponse.json({

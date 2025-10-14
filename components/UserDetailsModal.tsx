@@ -24,7 +24,7 @@ import {
   LocationOn as LocationIcon,
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
-import { useLanguage } from '@/components/LanguageProvider';
+import { useLanguage } from 'components/LanguageProvider';
 
 interface UserDetails {
   id: number;

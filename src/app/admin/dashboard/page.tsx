@@ -15,7 +15,7 @@ import {
   Tooltip,
   CircularProgress,
 } from "@mui/material";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "components/AuthProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import {useProtectedPage} from "@/hook/useProtectedPage";

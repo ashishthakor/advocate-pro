@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
+const { User } = require("models/init-models");
 import { verifyPassword, generateToken } from "@/lib/auth";
 import { LoginRequest, AuthResponse } from "@/types";
 
@@ -15,20 +15,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Include is_approved in the SELECT query
-    const [users] = await pool.execute(
-      "SELECT id, name, email, password, role, is_approved, created_at FROM users WHERE email = ?",
-      [email]
-    );
+    // Find user using Sequelize ORM
+    const user = await User.findOne({
+      where: { email: email },
+      attributes: ['id', 'name', 'email', 'password', 'role', 'is_approved', 'created_at']
+    });
 
-    if (!Array.isArray(users) || users.length === 0) {
+    if (!user) {
       return NextResponse.json<AuthResponse>(
         { success: false, message: "Invalid email or password" },
         { status: 401 }
       );
     }
-
-    const user = users[0] as any;
 
     // Only allow advocates (or admin, if needed)
     if (user.role !== "advocate" && user.role !== "admin") {
@@ -39,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check approval
-    if (user.role === "advocate" && user.is_approved === 0) {
+    if (user.role === "advocate" && !user.is_approved) {
       return NextResponse.json<AuthResponse>(
         {
           success: false,

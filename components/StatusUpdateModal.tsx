@@ -16,8 +16,8 @@ import {
   Chip,
   CircularProgress,
 } from '@mui/material';
-import { apiFetch } from '@/lib/api-client';
-import { CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
+import { apiFetch } from 'lib/api-client';
+import { CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
 
 interface StatusUpdateModalProps {
   open: boolean;

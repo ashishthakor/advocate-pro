@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from 'components/AuthProvider'
 import { ThemeProvider as MuiThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import lightTheme from "assets/theme";
@@ -35,7 +35,7 @@ export default function AdvocateLoginPage() {
   const router = useRouter()
 
   // you can dynamically detect dark/light mode if needed
-  const themeMode = "light"
+  const themeMode = "light" as "light" | "dark"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,13 +43,26 @@ export default function AdvocateLoginPage() {
     setLoading(true)
 
     try {
-      const result = await login(email, password, 'advocate')
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: 'advocate',
+        }),
+      })
 
-      if (result.success && result.user) {
+      const data = await response.json()
+
+      if (data.success) {
+        login(data.user, data.token)
         // Redirect based on role
-        if (result.user.role === 'advocate') {
+        if (data.user.role === 'advocate') {
           router.push('/advocate/dashboard')
-        } else if (result.user.role === 'admin') {
+        } else if (data.user.role === 'admin') {
           router.push('/admin/dashboard')
         } else {
           setError('Unauthorized role')
@@ -57,7 +70,7 @@ export default function AdvocateLoginPage() {
         }
       } else {
         // Handle unapproved advocate message
-        setError(result.message || 'Invalid credentials')
+        setError(data.message || 'Invalid credentials')
       }
     } catch (err) {
       console.error(err)

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { s3Uploader } from '@/lib/aws-s3';
-import { verifyToken } from '@/lib/auth';
+import { s3Uploader } from 'lib/aws-s3';
+import { verifyTokenFromRequest } from 'lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const authResult = await verifyToken(request);
+    const authResult = await verifyTokenFromRequest(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },

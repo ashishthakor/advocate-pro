@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/components/AuthProvider'
-import { Loading } from '@/components/Loading'
+import { useAuth } from 'components/AuthProvider';
+import { Loading } from '@/components/Loading';
 import Link from 'next/link'
 
 interface Client {

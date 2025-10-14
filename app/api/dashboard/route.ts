@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from '../../../lib/database';
-import { verifyTokenFromRequest } from '@/lib/auth';
-import { QueryTypes } from 'sequelize';
+const { Case, User } = require('models/init-models');
+import { verifyTokenFromRequest } from 'lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,97 +15,77 @@ export async function GET(request: NextRequest) {
     const userId = authResult.user.userId;
     const userRole = authResult.user.role;
 
-    // Build where clause based on user role
-    let whereClause = '';
-    let replacements: any[] = [];
-
+    // Build where conditions based on user role
+    const whereConditions: any = {};
+    
     if (userRole === 'user') {
-      whereClause = 'WHERE c.user_id = ?';
-      replacements.push(userId);
+      whereConditions.user_id = userId;
     } else if (userRole === 'advocate') {
-      whereClause = 'WHERE c.advocate_id = ?';
-      replacements.push(userId);
+      whereConditions.advocate_id = userId;
     }
-    // Admin can see all cases, so no additional where clause
+    // Admin can see all cases, so no additional where condition
 
-    // Get case statistics
-    const statsQuery = `
-      SELECT 
-        COUNT(*) as total_cases,
-        CAST(SUM(CASE WHEN c.status = 'waiting_for_action' THEN 1 ELSE 0 END) AS UNSIGNED) as waiting_for_action_cases,
-        CAST(SUM(CASE WHEN c.status = 'neutrals_needs_to_be_assigned' THEN 1 ELSE 0 END) AS UNSIGNED) as neutrals_needs_to_be_assigned_cases,
-        CAST(SUM(CASE WHEN c.status = 'consented' THEN 1 ELSE 0 END) AS UNSIGNED) as consented_cases,
-        CAST(SUM(CASE WHEN c.status = 'closed_no_consent' THEN 1 ELSE 0 END) AS UNSIGNED) as closed_no_consent_cases,
-        CAST(SUM(CASE WHEN c.status = 'close_no_settlement' THEN 1 ELSE 0 END) AS UNSIGNED) as close_no_settlement_cases,
-        CAST(SUM(CASE WHEN c.status = 'temporary_non_starter' THEN 1 ELSE 0 END) AS UNSIGNED) as temporary_non_starter_cases,
-        CAST(SUM(CASE WHEN c.status = 'settled' THEN 1 ELSE 0 END) AS UNSIGNED) as settled_cases,
-        CAST(SUM(CASE WHEN c.status = 'hold' THEN 1 ELSE 0 END) AS UNSIGNED) as hold_cases,
-        CAST(SUM(CASE WHEN c.status = 'withdrawn' THEN 1 ELSE 0 END) AS UNSIGNED) as withdrawn_cases
-      FROM cases c
-      ${whereClause}
-    `;
-
-    const statsResult = await sequelize.query(statsQuery, {
-      replacements,
-      type: QueryTypes.SELECT,
+    // Get case statistics using Sequelize ORM
+    const totalCases = await Case.count({ where: whereConditions });
+    
+    const waitingForActionCases = await Case.count({ 
+      where: { ...whereConditions, status: 'waiting_for_action' } 
+    });
+    const neutralsNeedsToBeAssignedCases = await Case.count({ 
+      where: { ...whereConditions, status: 'neutrals_needs_to_be_assigned' } 
+    });
+    const consentedCases = await Case.count({ 
+      where: { ...whereConditions, status: 'consented' } 
+    });
+    const closedNoConsentCases = await Case.count({ 
+      where: { ...whereConditions, status: 'closed_no_consent' } 
+    });
+    const closeNoSettlementCases = await Case.count({ 
+      where: { ...whereConditions, status: 'close_no_settlement' } 
+    });
+    const temporaryNonStarterCases = await Case.count({ 
+      where: { ...whereConditions, status: 'temporary_non_starter' } 
+    });
+    const settledCases = await Case.count({ 
+      where: { ...whereConditions, status: 'settled' } 
+    });
+    const holdCases = await Case.count({ 
+      where: { ...whereConditions, status: 'hold' } 
+    });
+    const withdrawnCases = await Case.count({ 
+      where: { ...whereConditions, status: 'withdrawn' } 
     });
 
-    const stats = statsResult[0] as any;
+    const stats = {
+      total_cases: totalCases,
+      waiting_for_action_cases: waitingForActionCases,
+      neutrals_needs_to_be_assigned_cases: neutralsNeedsToBeAssignedCases,
+      consented_cases: consentedCases,
+      closed_no_consent_cases: closedNoConsentCases,
+      close_no_settlement_cases: closeNoSettlementCases,
+      temporary_non_starter_cases: temporaryNonStarterCases,
+      settled_cases: settledCases,
+      hold_cases: holdCases,
+      withdrawn_cases: withdrawnCases
+    };
 
-    // Get recent cases with user and advocate information
-    const recentCasesQuery = `
-      SELECT 
-        c.id,
-        c.case_number,
-        c.title,
-        c.description,
-        c.status,
-        c.priority,
-        c.case_type,
-        c.created_at,
-        c.updated_at,
-        c.user_id,
-        c.advocate_id,
-        c.court_name,
-        c.judge_name,
-        c.next_hearing_date,
-        c.fees,
-        c.fees_paid,
-        c.start_date,
-        c.end_date,
-        c.requester_name,
-        c.requester_email,
-        c.requester_phone,
-        c.requester_address,
-        c.respondent_name,
-        c.respondent_email,
-        c.respondent_phone,
-        c.respondent_address,
-        c.relationship_between_parties,
-        c.nature_of_dispute,
-        c.brief_description_of_dispute,
-        c.occurrence_date,
-        c.prior_communication,
-        c.prior_communication_other,
-        c.sought_monetary_claim,
-        c.sought_settlement,
-        c.sought_other,
-        c.attachments_json,
-        u.name as user_name,
-        u.email as user_email,
-        a.name as advocate_name,
-        a.email as advocate_email
-      FROM cases c
-      LEFT JOIN users u ON c.user_id = u.id
-      LEFT JOIN users a ON c.advocate_id = a.id
-      ${whereClause}
-      ORDER BY c.created_at DESC
-      LIMIT 5
-    `;
-
-    const recentCasesResult = await sequelize.query(recentCasesQuery, {
-      replacements,
-      type: QueryTypes.SELECT,
+    // Get recent cases with user and advocate information using Sequelize ORM
+    const recentCases = await Case.findAll({
+      where: whereConditions,
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['name', 'email']
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: ['name', 'email']
+        }
+      ],
+      order: [['created_at', 'DESC']],
+      limit: 5
     });
 
     return NextResponse.json({
@@ -116,7 +95,7 @@ export async function GET(request: NextRequest) {
         activeCases: (Number(stats.waiting_for_action_cases) || 0) + (Number(stats.neutrals_needs_to_be_assigned_cases) || 0) + (Number(stats.consented_cases) || 0),
         closedCases: (Number(stats.closed_no_consent_cases) || 0) + (Number(stats.close_no_settlement_cases) || 0) + (Number(stats.settled_cases) || 0) + (Number(stats.withdrawn_cases) || 0),
         pendingCases: (Number(stats.temporary_non_starter_cases) || 0) + (Number(stats.hold_cases) || 0),
-        recentCases: recentCasesResult,
+        recentCases: recentCases,
         statusBreakdown: {
           waiting_for_action: Number(stats.waiting_for_action_cases) || 0,
           neutrals_needs_to_be_assigned: Number(stats.neutrals_needs_to_be_assigned_cases) || 0,

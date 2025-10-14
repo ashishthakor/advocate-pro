@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { sequelize } from '@/lib/database';
+import { verifyToken } from 'lib/auth';
+import { sequelize } from 'lib/database';
 import bcrypt from 'bcryptjs';
 
 export async function PUT(request: NextRequest) {

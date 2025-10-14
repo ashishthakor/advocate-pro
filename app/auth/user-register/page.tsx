@@ -20,9 +20,9 @@ import { useTheme } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { useTheme as useAppTheme } from '@/components/ThemeProvider';
-import { useLanguage } from '@/components/LanguageProvider';
-import LanguageSelector from '@/components/LanguageSelector';
+import { useTheme as useAppTheme } from 'components/ThemeProvider';
+import { useLanguage } from 'components/LanguageProvider';
+import LanguageSelector from 'components/LanguageSelector';
 import {
   Person as PersonIcon,
   Email as EmailIcon,

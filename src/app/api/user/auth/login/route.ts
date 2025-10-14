@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/database";
 import { verifyPassword, generateToken } from "@/lib/auth";
-import { LoginRequest, AuthResponse, User } from "@/types";
+import { LoginRequest, AuthResponse, User as UserType } from "@/types";
+const { User } = require("models/init-models");
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
-    const [users] = await pool.execute(
-      "SELECT id, name, email, password, role, is_approved, created_at FROM users WHERE email = ?",
-      [email]
-    );
+    // Find user using Sequelize ORM
+    const user = await User.findOne({
+      where: { email: email },
+      attributes: ['id', 'name', 'email', 'password', 'role', 'is_approved', 'created_at']
+    });
 
-    if (!Array.isArray(users) || users.length === 0) {
+    if (!user) {
       return NextResponse.json<AuthResponse>(
         {
           success: false,
@@ -34,8 +34,6 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-
-    const user = users[0] as any;
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.password);
@@ -61,12 +59,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Map DB row → TypeScript User
-    const mappedUser: User = {
+    const mappedUser: UserType = {
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
-      isApproved: user.is_approved === 1, // ✅ camelCase now
+      isApproved: user.is_approved === 1,
       createdAt: new Date(user.created_at),
     };
 
