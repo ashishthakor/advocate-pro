@@ -10,8 +10,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      {/* <CssBaseline /> */}
       <DashboardLayout userType="admin">
         {children}
       </DashboardLayout>
