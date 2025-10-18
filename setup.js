@@ -7,7 +7,7 @@ DATABASE_HOST=localhost
 DATABASE_PORT=3306
 DATABASE_NAME=advo_competition
 DATABASE_USER=root
-DATABASE_PASSWORD=your_password_here
+DATABASE_PASSWORD=Suraj@7860
 
 # NextAuth Configuration
 NEXTAUTH_URL=http://localhost:3000
