@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       where: {
         email: email,
         role: role
-      }
+      },
+      raw: true,
     });
 
     if (!user) {
@@ -61,6 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
+    console.log("🚀 ~ POST ~ userWithoutPassword:", userWithoutPassword)
 
     return NextResponse.json({
       success: true,
