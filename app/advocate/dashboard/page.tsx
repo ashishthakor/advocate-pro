@@ -31,12 +31,12 @@ import {
   WhatsApp as WhatsAppIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { useAuth } from 'components/AuthProvider';
-import { apiFetch } from 'lib/api-client';
-import { useLanguage } from 'components/LanguageProvider';
-import { CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
+import { useAuth } from '@/components/AuthProvider';
+import { apiFetch } from '@/lib/api-client';
+import { useLanguage } from '@/components/LanguageProvider';
+import { CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import CaseDetailsModal from 'components/CaseDetailsModal';
+import CaseDetailsModal from '@/components/CaseDetailsModal';
 
 interface Case {
   id: number;

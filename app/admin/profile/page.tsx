@@ -28,8 +28,8 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { useAuth } from 'components/AuthProvider';
-import { apiFetch } from 'lib/api-client';
+import { useAuth } from '@/components/AuthProvider';
+import { apiFetch } from '@/lib/api-client';
 
 interface AdminProfile {
   id: number;
@@ -44,7 +44,7 @@ interface AdminProfile {
 }
 
 export default function AdminProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -127,7 +127,10 @@ export default function AdminProfilePage() {
         setSuccess('Profile updated successfully');
         setIsEditing(false);
         await fetchProfile();
-        // Profile updated successfully
+        // Update auth context
+        if (updateUser && user) {
+          updateUser({ ...user, ...formData, id: user.id });
+        }
       } else {
         setError(response.message || 'Failed to update profile');
       }

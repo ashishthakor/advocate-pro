@@ -36,10 +36,10 @@ import {
   WhatsApp as WhatsAppIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from 'components/AuthProvider';
-import { useLanguage } from 'components/LanguageProvider';
+import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { io, Socket } from 'socket.io-client';
-import { apiFetch } from 'lib/api-client';
+import { apiFetch } from '@/lib/api-client';
 
 interface ChatMessage {
   id: number;
