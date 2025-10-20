@@ -48,10 +48,10 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from 'components/ThemeProvider';
 import { useLanguage } from 'components/LanguageProvider';
 import LanguageSelector from 'components/LanguageSelector';
+import Hero from '@/components/Hero';
 
 export default function LandingPage() {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
 
@@ -165,190 +165,10 @@ export default function LandingPage() {
       </AppBar>
 
       {/* Hero Section */}
-      <Box
-        sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          bgcolor: 'background.default',
-          color: 'text.primary',
-          py: { xs: 12, md: 16 },
-          backgroundImage: (t) =>
-            t.palette.mode === 'dark'
-              ? 'radial-gradient(1400px 600px at -15% -25%, rgba(103, 80, 164, 0.2), transparent), radial-gradient(1200px 600px at 115% 15%, rgba(25, 118, 210, 0.15), transparent), radial-gradient(800px 400px at 50% 100%, rgba(156, 39, 176, 0.1), transparent)'
-              : 'radial-gradient(1400px 600px at -15% -25%, rgba(103, 80, 164, 0.12), transparent), radial-gradient(1200px 600px at 115% 15%, rgba(25, 118, 210, 0.08), transparent), radial-gradient(800px 400px at 50% 100%, rgba(156, 39, 176, 0.06), transparent)',
-          transition: 'background-color 200ms ease',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <motion.div 
-                initial={{ opacity: 0, y: 32 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                transition={{ duration: 0.8, ease: "easeOut" }} 
-                viewport={{ once: true }}
-              >
-                <Typography
-                  variant={isMobile ? 'h3' : 'h1'}
-                  component="h1"
-                  gutterBottom
-                  sx={{ fontWeight: 800, fontSize: { xs: '2.5rem', md: '3.5rem' }, lineHeight: 1.1 }}
-                >
-                  {t('hero.title')}
-                </Typography>
-                <Typography
-                  variant={isMobile ? 'h6' : 'h5'}
-                  sx={{ mb: 4, opacity: 0.8, fontWeight: 400, maxWidth: '90%' }}
-                >
-                  {t('hero.subtitle')}
-                </Typography>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant="contained"
-                      size="large"
-                      component={Link}
-                      href="/auth/user-register"
-                      startIcon={<PersonAddIcon />}
-                      sx={{ 
-                        py: 1.5, 
-                        px: 4, 
-                        fontSize: '1.1rem',
-                        borderRadius: 2,
-                        boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(25,118,210,0.3)',
-                      }}
-                    >
-                      {t('hero.getStarted')}
-                    </Button>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant="outlined"
-                      size="large"
-                      component={Link}
-                      href="/auth/advocate-register"
-                      startIcon={<ArrowForwardIcon />}
-                      sx={{ 
-                        py: 1.5, 
-                        px: 4, 
-                        fontSize: '1.1rem',
-                        borderRadius: 2,
-                        borderWidth: 2,
-                        '&:hover': { borderWidth: 2 },
-                      }}
-                    >
-                      {t('hero.joinAdvocate')}
-                    </Button>
-                  </motion.div>
-                </Stack>
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  viewport={{ once: true }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                    <Chip label="✓ AI-Powered" color="success" size="small" />
-                    <Chip label="✓ Multi-Language" color="info" size="small" />
-                    <Chip label="✓ Arbitration Focus" color="warning" size="small" />
-                  </Box>
-                </motion.div>
-              </motion.div>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box sx={{ textAlign: 'center', position: 'relative' }}>
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8, rotate: -5 }} 
-                  whileInView={{ opacity: 1, scale: 1, rotate: 0 }} 
-                  transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }} 
-                  viewport={{ once: true }}
-                >
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      display: 'inline-block',
-                      p: 4,
-                      borderRadius: 4,
-                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                      border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-                    }}
-                  >
-                    <GavelIcon sx={{ fontSize: 200, color: 'primary.main', opacity: 0.8 }} />
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.1, 1],
-                        opacity: [1, 0.8, 1]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -10,
-                          right: -10,
-                          width: 60,
-                          height: 60,
-                          borderRadius: '50%',
-                          bgcolor: 'secondary.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <SecurityIcon sx={{ color: 'white', fontSize: 30 }} />
-                      </Box>
-                    </motion.div>
-                  </Box>
-                </motion.div>
-              </Box>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
+      <Hero/>
+      
       {/* Stats Section */}
-      <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? 'background.default' : 'grey.50'), py: 6 }}>
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
-            {stats.map((stat, index) => (
-              <Grid item xs={6} md={3} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Paper
-                    sx={{
-                      p: 3,
-                      textAlign: 'center',
-                      bgcolor: 'background.paper',
-                      border: (theme) => `1px solid ${theme.palette.divider}`,
-                    }}
-                  >
-                    <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                      {stat.number}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {stat.label}
-                    </Typography>
-                  </Paper>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
+      
 
       {/* Features Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
