@@ -48,6 +48,7 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from 'components/ThemeProvider';
 import { useLanguage } from 'components/LanguageProvider';
 import LanguageSelector from 'components/LanguageSelector';
+import "./globals.css";
 
 export default function LandingPage() {
   const theme = useTheme();
