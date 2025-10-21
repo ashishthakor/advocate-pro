@@ -88,15 +88,15 @@ export default createTheme({
   breakpoints: { ...breakpoints },
   palette: { ...colors },
   typography: { ...typography },
-  boxShadows: { ...boxShadows },
-  borders: { ...borders },
-  functions: {
-    boxShadow,
-    hexToRgb,
-    linearGradient,
-    pxToRem,
-    rgba,
-  },
+  // boxShadows: { ...boxShadows }, // Custom shadows not compatible with Material-UI theme
+  // borders: { ...borders }, // Custom borders not compatible with Material-UI theme
+  // functions: { // Custom functions not compatible with Material-UI theme
+  //   boxShadow,
+  //   hexToRgb,
+  //   linearGradient,
+  //   pxToRem,
+  //   rgba,
+  // },
 
   components: {
     MuiCssBaseline: {

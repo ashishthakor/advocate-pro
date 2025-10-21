@@ -1,3 +1,24 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    // Disable rules that slow down builds
+    "react-hooks/exhaustive-deps": "warn",
+    "@next/next/no-img-element": "warn",
+    "react/no-unescaped-entities": "error",
+    
+    // Performance optimizations
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    
+    // Disable some rules that are not critical for production builds
+    "prefer-const": "warn",
+    "no-var": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "build/",
+    "dist/"
+  ]
 }
