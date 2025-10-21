@@ -34,6 +34,7 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
+import Logo from '@/components/Logo';
 
 export default function AboutPage() {
   const theme = useTheme();
@@ -50,32 +51,18 @@ export default function AboutPage() {
 
   const team = [
     {
-      name: 'John Advocate',
-      role: 'Senior Partner',
-      experience: '15+ years',
-      specialization: 'Criminal Defense',
+      name: 'Abhishek Umashankar Pande',
+      role: 'Managing Director',
+      experience: 'Director',
+      specialization: 'Gujarat',
       image: '👨‍💼'
     },
     {
-      name: 'Sarah Legal',
-      role: 'Partner',
-      experience: '12+ years',
-      specialization: 'Family Law',
-      image: '👩‍💼'
-    },
-    {
-      name: 'Michael Counsel',
-      role: 'Senior Associate',
-      experience: '8+ years',
-      specialization: 'Corporate Law',
+      name: 'Prashant Kumar Singh',
+      role: 'Director',
+      experience: 'Director',
+      specialization: 'Gujarat',
       image: '👨‍💼'
-    },
-    {
-      name: 'Emily Justice',
-      role: 'Associate',
-      experience: '5+ years',
-      specialization: 'Property Law',
-      image: '👩‍💼'
     }
   ];
 
@@ -108,13 +95,8 @@ export default function AboutPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
-                <GavelIcon />
-              </Avatar>
+              <Logo width={140} height={35} />
             </motion.div>
-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-              ARBITALK
-            </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Button color="inherit" component={Link} href="/">Home</Button>
@@ -169,6 +151,13 @@ export default function AboutPage() {
               sx={{ fontWeight: 'bold', mb: 6 }}
             >
               About ARBITALK
+            </Typography>
+            <Typography
+              variant="h6"
+              textAlign="center"
+              sx={{ mb: 4, opacity: 0.9, fontWeight: 'medium' }}
+            >
+              A product of Gentlefolk Consulting Private Limited
             </Typography>
             <Typography
               variant={isMobile ? 'h6' : 'h5'}
@@ -350,16 +339,16 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Meet Our Team
+              Our Leadership Team
             </Typography>
             <Typography variant="h6" textAlign="center" sx={{ mb: 8, opacity: 0.8 }}>
-              Experienced legal professionals dedicated to your success
+              Experienced leaders dedicated to revolutionizing legal practice management
             </Typography>
           </motion.div>
           
-          <Grid container spacing={4}>
+          <Grid container spacing={4} justifyContent="center">
             {team.map((member, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid item xs={12} sm={6} md={5} lg={4} key={index}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -381,7 +370,7 @@ export default function AboutPage() {
                         {member.experience}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {member.specialization}
+                        Resident of {member.specialization}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -495,13 +484,13 @@ export default function AboutPage() {
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <GavelIcon sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                  ARBITALK
-                </Typography>
+                <Logo width={120} height={30} />
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Revolutionizing arbitration and legal case management with AI-powered solutions.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+                A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>

@@ -41,6 +41,7 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
+import Logo from '@/components/Logo';
 import Link from 'next/link';
 
 export default function ContactPage() {
@@ -100,9 +101,9 @@ export default function ContactPage() {
     },
     {
       title: 'Address',
-      value: '123 Legal Street, Suite 100',
+      value: 'Plot No. 22, Yogi Nagar Society',
       icon: '📍',
-      description: 'New York, NY 10001'
+      description: 'Near Amroli Bridge, Katargam, Surat - 395004, Gujarat'
     },
     {
       title: 'Emergency',
@@ -123,13 +124,8 @@ export default function ContactPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
-                <GavelIcon />
-              </Avatar>
+              <Logo width={140} height={35} />
             </motion.div>
-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-              ARBITALK
-            </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Button color="inherit" component={Link} href="/">Home</Button>
@@ -224,7 +220,7 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Full Name *"
+                        label="Full Name"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
@@ -236,7 +232,7 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Email Address *"
+                        label="Email Address"
                         name="email"
                         type="email"
                         value={formData.email}
@@ -260,7 +256,7 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Subject *"
+                        label="Subject"
                         name="subject"
                         select
                         value={formData.subject}
@@ -283,7 +279,7 @@ export default function ContactPage() {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Message *"
+                        label="Message"
                         name="message"
                         multiline
                         rows={6}
@@ -432,13 +428,13 @@ export default function ContactPage() {
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <GavelIcon sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                  ARBITALK
-                </Typography>
+                <Logo width={120} height={30} />
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Revolutionizing arbitration and legal case management with AI-powered solutions.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+                A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>

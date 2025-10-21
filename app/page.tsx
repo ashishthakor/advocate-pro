@@ -48,6 +48,7 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from 'components/ThemeProvider';
 import { useLanguage } from 'components/LanguageProvider';
 import LanguageSelector from 'components/LanguageSelector';
+import Logo from 'components/Logo';
 import "./globals.css";
 
 export default function LandingPage() {
@@ -126,13 +127,8 @@ export default function LandingPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
-                <GavelIcon />
-              </Avatar>
+              <Logo width={140} height={35} />
             </motion.div>
-            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-              ARBITALK
-            </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Button color="inherit" component={Link} href="/services">Services</Button>
@@ -459,14 +455,14 @@ export default function LandingPage() {
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <GavelIcon sx={{ mr: 1, color: 'primary.main' }} />
-                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
-                  ARBITALK
-                </Typography>
+                <Logo width={120} height={30} />
               </Box>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Revolutionizing arbitration and legal case management with AI-powered solutions. 
                 Connect clients, advocates, and administrators in one comprehensive platform.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+                A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
