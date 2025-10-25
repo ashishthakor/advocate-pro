@@ -36,14 +36,14 @@ export async function POST(request: NextRequest) {
       role,
       phone: phone || null,
       address: address || null,
-      is_approved: role === 'admin' // Admins are auto-approved
+      is_approved: true // All users are auto-approved by default
     });
 
     const userId = newUser.id;
 
     return NextResponse.json({
       success: true,
-      message: 'User registered successfully. Please wait for admin approval.',
+      message: 'User registered successfully.',
       userId,
     });
 
