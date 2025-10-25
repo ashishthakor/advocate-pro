@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sequelize } from 'lib/database';
+import { sequelize } from '@/lib/database';
 import { QueryTypes } from 'sequelize';
-import { verifyTokenFromRequest } from 'lib/auth';
+import { verifyTokenFromRequest } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,

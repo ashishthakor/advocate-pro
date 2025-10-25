@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case } = require('models/init-models');
-import { verifyTokenFromRequest } from 'lib/auth';
+const { Case } = require('@/models/init-models');
+import { verifyTokenFromRequest } from '@/lib/auth';
 import { QueryTypes } from 'sequelize';
-import { sequelize } from 'lib/database';
+import { sequelize } from '@/lib/database';
 
 export async function GET(
   request: NextRequest,

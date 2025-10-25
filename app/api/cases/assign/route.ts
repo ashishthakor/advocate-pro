@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User } = require('models/init-models');
-import { verifyTokenFromRequest, hasRole } from 'lib/auth';
+const { Case, User } = require('@/models/init-models');
+import { verifyTokenFromRequest, hasRole } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {

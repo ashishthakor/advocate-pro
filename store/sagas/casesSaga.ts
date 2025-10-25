@@ -1,6 +1,6 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { apiFetch } from 'lib/api-client';
-import { fetchCases, fetchCasesFailure, fetchCasesSuccess, CaseItem, Pagination } from '../slices/casesSlice';
+import { apiFetch } from '@/lib/api-client';
+import { fetchCases, fetchCasesFailure, fetchCasesSuccess, CaseItem, Pagination } from '@/store/slices/casesSlice';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 function buildQuery(params?: { page?: number; limit?: number; status?: string; case_type?: string; priority?: string }) {

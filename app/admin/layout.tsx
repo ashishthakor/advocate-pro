@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, CssBaseline } from '@mui/material';
-import DashboardLayout from 'components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 import { usePathname } from 'next/navigation';
 
 export default function AdminLayout({

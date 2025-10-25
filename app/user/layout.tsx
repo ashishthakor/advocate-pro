@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function UserLayout({
   children,

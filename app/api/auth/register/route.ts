@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-const { User } = require('models/init-models');
+const { User } = require('@/models/init-models');
 
 export async function POST(request: NextRequest) {
   try {

@@ -19,7 +19,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Avatar,
   Stack,
   alpha,
 } from '@mui/material';
@@ -36,7 +35,6 @@ import {
   Speed as SpeedIcon,
   Security as SecurityIcon,
   Support as SupportIcon,
-  Language as LanguageIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { motion } from 'framer-motion';

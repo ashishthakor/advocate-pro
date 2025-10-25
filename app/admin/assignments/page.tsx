@@ -42,8 +42,8 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { apiFetch } from 'lib/api-client';
-import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
+import { apiFetch } from '@/lib/api-client';
+import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 
 interface Case {
   id: number;

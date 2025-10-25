@@ -41,11 +41,11 @@ import {
   WhatsApp as WhatsAppIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
-import { apiFetch } from 'lib/api-client';
+import { apiFetch } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
-import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
-import StatusUpdateModal from 'components/StatusUpdateModal';
-import CaseDetailsModal from 'components/CaseDetailsModal';
+import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
+import StatusUpdateModal from '@/components/StatusUpdateModal';
+import CaseDetailsModal from '@/components/CaseDetailsModal';
 
 interface Case {
   id: number;

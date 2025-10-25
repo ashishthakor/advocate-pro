@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User } = require('models/init-models');
-import { verifyTokenFromRequest } from 'lib/auth';
+const { Case, User } = require('@/models/init-models');
+import { verifyTokenFromRequest } from '@/lib/auth';
 import { Op } from 'sequelize';
 
 export async function GET(request: NextRequest) {

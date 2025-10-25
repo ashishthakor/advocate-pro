@@ -20,10 +20,8 @@ import {
   alpha,
 } from '@mui/material';
 import {
-  Gavel as GavelIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
-  Language as LanguageIcon,
   Speed as SpeedIcon,
   Visibility as VisibilityIcon,
   Security as SecurityIcon,

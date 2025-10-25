@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { s3Uploader, FileValidator } from 'lib/aws-s3';
-import { verifyTokenFromRequest } from 'lib/auth';
+import { s3Uploader, FileValidator } from '@/lib/aws-s3';
+import { verifyTokenFromRequest } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {

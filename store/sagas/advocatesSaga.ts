@@ -1,5 +1,5 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { apiFetch } from 'lib/api-client';
+import { apiFetch } from '@/lib/api-client';
 import {
   fetchAdvocates,
   fetchAdvocatesFailure,

@@ -45,9 +45,9 @@ import {
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useAuth } from 'components/AuthProvider';
-import { useLanguage } from 'components/LanguageProvider';
-import { apiFetch } from 'lib/api-client';
+import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
+import { apiFetch } from '@/lib/api-client';
 
 interface Case {
   id: number;

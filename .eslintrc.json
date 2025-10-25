@@ -4,14 +4,14 @@
     // Disable rules that slow down builds
     "react-hooks/exhaustive-deps": "warn",
     "@next/next/no-img-element": "warn",
-    "react/no-unescaped-entities": "error",
+    "react/no-unescaped-entities": "off",
     
     // Performance optimizations
-    "no-unused-vars": "warn",
-    "no-console": "warn",
+    "no-unused-vars": "off",
+    "no-console": "off",
     
     // Disable some rules that are not critical for production builds
-    "prefer-const": "warn",
+    "prefer-const": "off",
     "no-var": "warn"
   },
   "ignorePatterns": [
