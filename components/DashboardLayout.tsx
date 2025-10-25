@@ -26,11 +26,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkIcon from '@mui/icons-material/Work';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FolderIcon from '@mui/icons-material/Folder';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import MessageIcon from '@mui/icons-material/Message';
 import Link from 'next/link';
 import { useAuth } from 'components/AuthProvider';
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
           { text: 'Advocates', icon: <WorkIcon />, path: '/admin/advocates' },
           { text: 'Cases', icon: <FolderIcon />, path: '/admin/cases' },
-          { text: 'Chat', icon: <WhatsAppIcon />, path: '/admin/chat' },
+          { text: 'Updates', icon: <MessageIcon />, path: '/admin/chat' },
           { text: 'Assignments', icon: <AssignmentIcon />, path: '/admin/assignments' },
         ];
       case 'advocate':
@@ -98,7 +98,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: 'Dashboard', icon: <DashboardIcon />, path: '/advocate/dashboard' },
           { text: 'Assigned Cases', icon: <FolderIcon />, path: '/advocate/cases' },
           { text: 'Clients', icon: <PeopleIcon />, path: '/advocate/clients' },
-          { text: 'Chat', icon: <WhatsAppIcon />, path: '/advocate/chat' },
+          { text: 'Updates', icon: <MessageIcon />, path: '/advocate/chat' },
           { text: 'Profile', icon: <PersonIcon />, path: '/advocate/profile' },
         ];
       case 'user':
@@ -106,7 +106,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: 'Dashboard', icon: <DashboardIcon />, path: '/user/dashboard' },
           { text: 'My Cases', icon: <FolderIcon />, path: '/user/cases' },
           { text: 'Create Case', icon: <AddBoxIcon />, path: '/user/create-case' },
-          { text: 'Chat', icon: <WhatsAppIcon />, path: '/user/chat' },
+          { text: 'Updates', icon: <MessageIcon />, path: '/user/chat' },
           { text: 'Profile', icon: <PersonIcon />, path: '/user/profile' },
         ];
       default:

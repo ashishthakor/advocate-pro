@@ -251,11 +251,6 @@ export default function AdminChatPage() {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <WhatsAppIcon color="primary" sx={{ fontSize: 32 }} />
-        <Typography variant="h4">{t('chat.adminTitle')}</Typography>
-      </Stack>
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
           {error}

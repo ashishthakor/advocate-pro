@@ -16,7 +16,10 @@ import {
   Alert,
   Snackbar,
   Stack,
-  Divider,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Avatar,
   alpha,
 } from '@mui/material';
 import {
@@ -28,15 +31,23 @@ import {
   Schedule as ScheduleIcon,
   Send as SendIcon,
   CheckCircle as CheckCircleIcon,
+  Gavel as GavelIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
+  Language as LanguageIcon,
+  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import LanguageSelector from '@/components/LanguageSelector';
+import Logo from '@/components/Logo';
+import Link from 'next/link';
 
 export default function ContactPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { darkMode } = useAppTheme();
+  const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
   
   const [formData, setFormData] = useState({
@@ -45,12 +56,11 @@ export default function ContactPage() {
     phone: '',
     subject: '',
     message: '',
-    userType: 'user',
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -72,77 +82,75 @@ export default function ContactPage() {
         phone: '',
         subject: '',
         message: '',
-        userType: 'user',
       });
     }, 2000);
   };
 
   const contactInfo = [
     {
-      icon: <EmailIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Email Support',
-      details: ['support@arbitalk.com', 'info@arbitalk.com'],
-      description: 'Get in touch with our support team',
+      title: 'Phone',
+      value: '+1 (555) 123-4567',
+      icon: '📞',
+      description: 'Mon-Fri 9AM-6PM EST'
     },
     {
-      icon: <PhoneIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Phone Support',
-      details: ['+91 98765 43210', '+91 98765 43211'],
-      description: 'Call us for immediate assistance',
+      title: 'Email',
+      value: 'info@arbitalk.com',
+      icon: '✉️',
+      description: 'We respond within 24 hours'
     },
     {
-      icon: <LocationIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Office Address',
-      details: ['Mumbai, Maharashtra', 'India'],
-      description: 'Visit our headquarters',
+      title: 'Address',
+      value: 'Plot No. 22, Yogi Nagar Society',
+      icon: '📍',
+      description: 'Near Amroli Bridge, Katargam, Surat - 395004, Gujarat'
     },
     {
-      icon: <ScheduleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Business Hours',
-      details: ['Mon - Fri: 9:00 AM - 6:00 PM', 'Sat: 10:00 AM - 4:00 PM'],
-      description: 'We are here to help you',
-    },
-  ];
-
-  const supportTypes = [
-    {
-      title: 'Technical Support',
-      description: 'Platform issues, bugs, and technical assistance',
-      icon: <SupportIcon />,
-    },
-    {
-      title: 'Legal Consultation',
-      description: 'Arbitration guidance and legal process support',
-      icon: <BusinessIcon />,
-    },
-    {
-      title: 'Account Management',
-      description: 'User accounts, billing, and subscription queries',
-      icon: <EmailIcon />,
-    },
-  ];
-
-  const faqs = [
-    {
-      question: 'What languages does ARBITALK support?',
-      answer: 'ARBITALK currently supports English, Hindi, Marathi, and Gujarati languages with plans to add more regional languages in the future.',
-    },
-    {
-      question: 'How secure is my data on ARBITALK?',
-      answer: 'We use enterprise-grade security with end-to-end encryption and comply with all legal data protection standards to ensure your data is completely secure.',
-    },
-    {
-      question: 'How quickly can I get started?',
-      answer: 'You can register and start using ARBITALK immediately. Our onboarding process takes less than 5 minutes to complete.',
-    },
-    {
-      question: 'What types of cases can I manage?',
-      answer: 'ARBITALK supports all types of legal cases including arbitration, civil disputes, commercial matters, and more.',
-    },
+      title: 'Emergency',
+      value: '+1 (555) 911-LEGAL',
+      icon: '🚨',
+      description: '24/7 emergency support'
+    }
   ];
 
   return (
     <Box>
+      {/* Header */}
+      <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
+        <Toolbar>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Logo width={140} height={35} />
+            </motion.div>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Button color="inherit" component={Link} href="/">Home</Button>
+            <Button color="inherit" component={Link} href="/services">Services</Button>
+            <Button color="inherit" component={Link} href="/about">About</Button>
+            <Button color="primary" component={Link} href="/contact">Contact</Button>
+            <LanguageSelector />
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <IconButton onClick={toggleDarkMode} color="inherit">
+                {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
+            </motion.div>
+            <Button color="primary" component={Link} href="/auth/user-login">
+              Join as Client
+            </Button>
+            <Button color="secondary" component={Link} href="/auth/advocate-login">
+              Join as Advocate
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
       {/* Hero Section */}
       <Box
         sx={{
@@ -169,16 +177,17 @@ export default function ContactPage() {
               component="h1"
               textAlign="center"
               gutterBottom
-              sx={{ fontWeight: 'bold', mb: 3 }}
+              sx={{ fontWeight: 'bold', mb: 4 }}
             >
-              {t('contact.title')}
+              Contact Us
             </Typography>
             <Typography
               variant={isMobile ? 'h6' : 'h5'}
               textAlign="center"
               sx={{ opacity: 0.8, maxWidth: '800px', mx: 'auto' }}
             >
-              {t('contact.subtitle')}
+              Get in touch with our team for any questions, support, or to schedule a consultation. 
+              We're here to help you succeed.
             </Typography>
           </motion.div>
         </Container>
@@ -188,7 +197,7 @@ export default function ContactPage() {
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Grid container spacing={6}>
           {/* Contact Form */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} lg={6}>
             <motion.div
               initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -197,77 +206,80 @@ export default function ContactPage() {
             >
               <Card sx={{ p: 4 }}>
                 <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                  {t('contact.sendMessage')}
+                  Send us a Message
                 </Typography>
+                
+                {showSuccess && (
+                  <Alert severity="success" sx={{ mb: 3 }}>
+                    Thank you for your message! We'll get back to you within 24 hours.
+                  </Alert>
+                )}
+
                 <form onSubmit={handleSubmit}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label={t('contact.fullName')}
+                        label="Full Name"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
                         variant="outlined"
+                        placeholder="Your full name"
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label={t('contact.email')}
+                        label="Email Address"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
                         variant="outlined"
+                        placeholder="your.email@example.com"
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label={t('contact.phone')}
+                        label="Phone Number"
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
                         variant="outlined"
+                        placeholder="+1 (555) 123-4567"
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label={t('contact.userType')}
-                        name="userType"
+                        label="Subject"
+                        name="subject"
                         select
-                        value={formData.userType}
+                        value={formData.subject}
                         onChange={handleInputChange}
+                        required
                         variant="outlined"
                         SelectProps={{
                           native: true,
                         }}
                       >
-                        <option value="user">User</option>
-                        <option value="advocate">Advocate</option>
-                        <option value="admin">Administrator</option>
+                        <option value="">Select a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="support">Technical Support</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="consultation">Free Consultation</option>
+                        <option value="partnership">Partnership Opportunity</option>
                         <option value="other">Other</option>
                       </TextField>
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label={t('contact.subject')}
-                        name="subject"
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        required
-                        variant="outlined"
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label={t('contact.message')}
+                        label="Message"
                         name="message"
                         multiline
                         rows={6}
@@ -275,7 +287,7 @@ export default function ContactPage() {
                         onChange={handleInputChange}
                         required
                         variant="outlined"
-                        placeholder="Please describe your inquiry or issue in detail..."
+                        placeholder="Tell us how we can help you..."
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -284,10 +296,32 @@ export default function ContactPage() {
                         variant="contained"
                         size="large"
                         disabled={isSubmitting}
-                        startIcon={<SendIcon />}
-                        sx={{ py: 1.5, px: 4, fontSize: '1.1rem' }}
+                        fullWidth
+                        sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
                       >
-                        {isSubmitting ? t('contact.sending') : t('contact.send')}
+                        {isSubmitting ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Box sx={{ width: 20, height: 20, mr: 1 }}>
+                              <Box
+                                sx={{
+                                  width: '100%',
+                                  height: '100%',
+                                  border: '2px solid transparent',
+                                  borderTop: '2px solid currentColor',
+                                  borderRadius: '50%',
+                                  animation: 'spin 1s linear infinite',
+                                  '@keyframes spin': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' },
+                                  },
+                                }}
+                              />
+                            </Box>
+                            Sending...
+                          </Box>
+                        ) : (
+                          'Send Message'
+                        )}
                       </Button>
                     </Grid>
                   </Grid>
@@ -297,14 +331,24 @@ export default function ContactPage() {
           </Grid>
 
           {/* Contact Information */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} lg={6}>
             <motion.div
               initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <Stack spacing={3}>
+              <Box sx={{ mb: 6 }}>
+                <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                  Get in Touch
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                  We're here to help you with any questions or concerns. Reach out to us through 
+                  any of the channels below, and we'll get back to you as soon as possible.
+                </Typography>
+              </Box>
+
+              <Stack spacing={3} sx={{ mb: 4 }}>
                 {contactInfo.map((info, index) => (
                   <motion.div
                     key={index}
@@ -313,115 +357,105 @@ export default function ContactPage() {
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     viewport={{ once: true }}
                   >
-                    <Paper
-                      sx={{
-                        p: 3,
-                        textAlign: 'center',
-                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.05),
-                        border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                      }}
-                    >
-                      <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                      <Typography variant="h4" sx={{ color: 'primary.main' }}>
                         {info.icon}
+                      </Typography>
+                      <Box>
+                        <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
+                          {info.title}
+                        </Typography>
+                        <Typography variant="body1" color="primary.main" sx={{ fontWeight: 'medium', mb: 1 }}>
+                          {info.value}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {info.description}
+                        </Typography>
                       </Box>
-                      <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
-                        {info.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {info.description}
-                      </Typography>
-                      <Stack spacing={1}>
-                        {info.details.map((detail, detailIndex) => (
-                          <Typography key={detailIndex} variant="body1" sx={{ fontWeight: 500 }}>
-                            {detail}
-                          </Typography>
-                        ))}
-                      </Stack>
-                    </Paper>
+                    </Box>
                   </motion.div>
                 ))}
               </Stack>
+
+              {/* Office Hours */}
+              <Card sx={{ mb: 4, p: 3 }}>
+                <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                  Office Hours
+                </Typography>
+                <Stack spacing={1}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">Monday - Friday</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>9:00 AM - 6:00 PM</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">Saturday</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>10:00 AM - 4:00 PM</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body2" color="text.secondary">Sunday</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>Closed</Typography>
+                  </Box>
+                </Stack>
+              </Card>
+
+              {/* Emergency Contact */}
+              <Card sx={{ bgcolor: 'error.50', border: '1px solid', borderColor: 'error.200', p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <Typography variant="h4" sx={{ color: 'error.main' }}>
+                    🚨
+                  </Typography>
+                  <Box>
+                    <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                      Emergency Legal Support
+                    </Typography>
+                    <Typography variant="body2" color="error.main" sx={{ mb: 2 }}>
+                      For urgent legal matters that cannot wait for regular business hours.
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
+                      +1 (555) 911-LEGAL
+                    </Typography>
+                  </Box>
+                </Box>
+              </Card>
             </motion.div>
           </Grid>
         </Grid>
       </Container>
 
-      {/* Support Types Section */}
-      <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? 'background.default' : 'grey.50'), py: 8 }}>
+      {/* Footer */}
+      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
         <Container maxWidth="lg">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              How We Can Help
-            </Typography>
-          </motion.div>
           <Grid container spacing={4}>
-            {supportTypes.map((support, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                >
-                  <Card sx={{ height: '100%', textAlign: 'center', p: 3 }}>
-                    <CardContent>
-                      <Box sx={{ mb: 2 }}>
-                        {support.icon}
-                      </Box>
-                      <Typography variant="h6" component="h3" gutterBottom>
-                        {support.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {support.description}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </Grid>
-            ))}
+            <Grid item xs={12} md={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Logo width={120} height={30} />
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Revolutionizing arbitration and legal case management with AI-powered solutions.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+                A product of Gentlefolk Consulting Private Limited
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                Quick Links
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Button color="inherit" component={Link} href="/">Home</Button>
+                <Button color="inherit" component={Link} href="/services">Services</Button>
+                <Button color="inherit" component={Link} href="/about">About</Button>
+                <Button color="inherit" component={Link} href="/contact">Contact</Button>
+              </Box>
+            </Grid>
           </Grid>
+          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, pt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              © 2024 ARBITALK. All rights reserved.
+            </Typography>
+          </Box>
         </Container>
       </Box>
-
-      {/* FAQ Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-            Frequently Asked Questions
-          </Typography>
-        </motion.div>
-        <Grid container spacing={4}>
-          {faqs.map((faq, index) => (
-            <Grid item xs={12} md={6} key={index}>
-              <motion.div
-                initial={{ opacity: 0, x: index % 2 === 0 ? -24 : 24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Paper sx={{ p: 3, mb: 2 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-                    {faq.question}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {faq.answer}
-                  </Typography>
-                </Paper>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
 
       {/* Success Snackbar */}
       <Snackbar
