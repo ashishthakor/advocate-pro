@@ -297,7 +297,7 @@ export default function UserDashboard() {
                           <Button size="small" variant="outlined" sx={{ mr: 1 }} onClick={() => handleViewDetails(caseItem)}>
                             {t('dashboard.viewDetails')}
                           </Button>
-                          <Button size="small" variant="outlined" onClick={() => router.push(`/user/chat/${caseItem.id}`)}>
+                          <Button size="small" variant="outlined">
                             {t('dashboard.chat')}
                           </Button>
                         </TableCell>

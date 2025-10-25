@@ -207,7 +207,7 @@ export default function UserLoginPage() {
                 </Link>
               </Box>
 
-              {/* <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Button
                   component={Link}
                   href="/auth/advocate-login"
@@ -226,7 +226,7 @@ export default function UserLoginPage() {
                 >
                   Admin Login
                 </Button>
-              </Box> */}
+              </Box>
 
               <Box sx={{ textAlign: 'center', mt: 3 }}>
                 <Button

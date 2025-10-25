@@ -48,8 +48,6 @@ import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from 'components/ThemeProvider';
 import { useLanguage } from 'components/LanguageProvider';
 import LanguageSelector from 'components/LanguageSelector';
-import Logo from 'components/Logo';
-import "./globals.css";
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -60,66 +58,74 @@ export default function LandingPage() {
   const features = [
     {
       icon: <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Advanced Case Management',
-      description: 'Streamline your legal practice with comprehensive case tracking, document management, and automated workflows.',
+      title: t('features.caseManagement'),
+      description: t('features.caseManagementDesc'),
     },
     {
       icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Multi-Role Platform',
-      description: 'Seamless collaboration between clients, advocates, and administrators with role-based access controls.',
+      title: t('features.roleBased'),
+      description: t('features.roleBasedDesc'),
     },
     {
       icon: <ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Real-Time Communication',
-      description: 'Instant messaging and video conferencing built directly into your case management workflow.',
+      title: t('features.realtimeChat'),
+      description: t('features.realtimeChatDesc'),
     },
     {
       icon: <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Secure Document Storage',
-      description: 'Enterprise-grade security with encrypted file storage and automated backup systems.',
+      title: t('features.documentManagement'),
+      description: t('features.documentManagementDesc'),
     },
     {
       icon: <SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Privacy & Compliance',
-      description: 'Full compliance with legal data protection standards and client confidentiality requirements.',
+      title: t('features.secure'),
+      description: t('features.secureDesc'),
     },
     {
       icon: <AssessmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Analytics & Reporting',
-      description: 'Comprehensive insights into case progress, performance metrics, and client satisfaction.',
+      title: t('features.analytics'),
+      description: t('features.analyticsDesc'),
     },
   ];
 
   const userTypes = [
     {
-      title: 'For Clients',
-      description: 'Access legal services and manage your cases with ease through our intuitive client portal.',
-      features: ['Create new cases', 'Track case status', 'Chat with advocates', 'Upload documents', 'Schedule consultations'],
+      title: t('userTypes.forUsers'),
+      description: t('userTypes.forUsersDesc'),
+      features: ['Create new cases', 'Track case status', 'Chat with advocates', 'Upload documents'],
       buttonText: 'Get Started',
       buttonLink: '/auth/user-login',
       color: 'primary',
     },
     {
-      title: 'For Advocates',
-      description: 'Streamline your practice with powerful tools designed specifically for legal professionals.',
-      features: ['View assigned cases', 'Update case status', 'Communicate with clients', 'Manage documents', 'Track billable hours'],
+      title: t('userTypes.forAdvocates'),
+      description: t('userTypes.forAdvocatesDesc'),
+      features: ['View assigned cases', 'Update case status', 'Communicate with clients', 'Manage documents'],
       buttonText: 'Join as Advocate',
       buttonLink: '/auth/advocate-login',
       color: 'secondary',
     },
+    {
+      title: t('userTypes.forAdmins'),
+      description: t('userTypes.forAdminsDesc'),
+      features: ['Manage all users', 'Assign cases', 'System analytics', 'User approvals'],
+      buttonText: 'Admin Access',
+      buttonLink: '/auth/admin-login',
+      color: 'error',
+    },
   ];
 
   const stats = [
-    { number: '500+', label: 'Active Advocates' },
-    { number: '10K+', label: 'Cases Managed' },
-    { number: '99%', label: 'Client Satisfaction' },
-    { number: '24/7', label: 'Support Available' },
+    { number: '10,000+', label: 'Active Users' },
+    { number: '50,000+', label: 'Cases Managed' },
+    { number: '99.9%', label: 'Uptime' },
+    { number: '24/7', label: 'Support' },
   ];
 
   return (
     <Box>
       {/* Header */}
-      <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
+      <AppBar position="static" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
         <Toolbar>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <motion.div
@@ -127,13 +133,15 @@ export default function LandingPage() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Logo width={140} height={35} />
+              <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
+                <GavelIcon />
+              </Avatar>
             </motion.div>
+            <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+              ARBITALK
+            </Typography>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/services">Services</Button>
-            <Button color="inherit" component={Link} href="/about">About</Button>
-            <Button color="inherit" component={Link} href="/contact">Contact</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -144,10 +152,13 @@ export default function LandingPage() {
               </IconButton>
             </motion.div>
             <Button color="primary" component={Link} href="/auth/user-login">
-              Join as Client
+              {t('nav.userLogin')}
             </Button>
             <Button color="secondary" component={Link} href="/auth/advocate-login">
-              Join as Advocate
+              {t('nav.advocateLogin')}
+            </Button>
+            <Button color="error" component={Link} href="/auth/admin-login">
+              {t('nav.adminLogin')}
             </Button>
           </Box>
         </Toolbar>
@@ -183,14 +194,13 @@ export default function LandingPage() {
                   gutterBottom
                   sx={{ fontWeight: 800, fontSize: { xs: '2.5rem', md: '3.5rem' }, lineHeight: 1.1 }}
                 >
-                  Revolutionizing Legal Practice Management
+                  {t('hero.title')}
                 </Typography>
                 <Typography
                   variant={isMobile ? 'h6' : 'h5'}
                   sx={{ mb: 4, opacity: 0.8, fontWeight: 400, maxWidth: '90%' }}
                 >
-                  Connect clients, advocates, and administrators in one comprehensive platform. 
-                  Streamline case management, enhance communication, and deliver exceptional legal services.
+                  {t('hero.subtitle')}
                 </Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
                   <motion.div
@@ -211,7 +221,7 @@ export default function LandingPage() {
                         boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(25,118,210,0.3)',
                       }}
                     >
-                      Get Started
+                      {t('hero.getStarted')}
                     </Button>
                   </motion.div>
                   <motion.div
@@ -233,7 +243,7 @@ export default function LandingPage() {
                         '&:hover': { borderWidth: 2 },
                       }}
                     >
-                      Join as Advocate
+                      {t('hero.joinAdvocate')}
                     </Button>
                   </motion.div>
                 </Stack>
@@ -246,8 +256,7 @@ export default function LandingPage() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                     <Chip label="✓ AI-Powered" color="success" size="small" />
                     <Chip label="✓ Multi-Language" color="info" size="small" />
-                    <Chip label="✓ Secure & Compliant" color="warning" size="small" />
-                    <Chip label="✓ 24/7 Support" color="primary" size="small" />
+                    <Chip label="✓ Arbitration Focus" color="warning" size="small" />
                   </Box>
                 </motion.div>
               </motion.div>
@@ -350,10 +359,7 @@ export default function LandingPage() {
           viewport={{ once: true }}
         >
           <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-            Why Choose ARBITALK?
-          </Typography>
-          <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-            We combine decades of legal experience with modern technology to deliver exceptional results.
+            {t('features.title')}
           </Typography>
         </motion.div>
         <Grid container spacing={4}>
@@ -394,15 +400,12 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              Designed for Everyone
-            </Typography>
-            <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-              Whether you're a client seeking legal services or an advocate managing cases.
+              {t('userTypes.title')}
             </Typography>
           </motion.div>
-          <Grid container spacing={4} justifyContent="center">
+          <Grid container spacing={4}>
             {userTypes.map((userType, index) => (
-              <Grid item xs={12} md={6} lg={5} key={index}>
+              <Grid item xs={12} md={4} key={index}>
                 <motion.div 
                   initial={{ opacity: 0, y: 24 }} 
                   whileInView={{ opacity: 1, y: 0 }} 
@@ -448,6 +451,44 @@ export default function LandingPage() {
         </Container>
       </Box>
 
+      {/* CTA Section */}
+      <Box sx={{ bgcolor: 'background.paper', py: 8, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
+        <Container maxWidth="md" sx={{ textAlign: 'center' }}>
+          <motion.div 
+            initial={{ opacity: 0, y: 16 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }} 
+            viewport={{ once: true }}
+          >
+            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold' }}>
+              {t('cta.title')}
+            </Typography>
+            <Typography variant="h6" sx={{ mb: 4, opacity: 0.8 }}>
+              {t('cta.subtitle')}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                size="large"
+                component={Link}
+                href="/auth/user-register"
+                startIcon={<PersonAddIcon />}
+              >
+                {t('cta.startTrial')}
+              </Button>
+              <Button
+                variant="outlined"
+                size="large"
+                component={Link}
+                href="/auth/advocate-register"
+                startIcon={<ArrowForwardIcon />}
+              >
+                {t('cta.becomeAdvocate')}
+              </Button>
+            </Box>
+          </motion.div>
+        </Container>
+      </Box>
 
       {/* Footer */}
       <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
@@ -455,36 +496,37 @@ export default function LandingPage() {
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Logo width={120} height={30} />
+                <GavelIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" component="div" sx={{ fontWeight: 'bold' }}>
+                  ARBITALK
+                </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Revolutionizing arbitration and legal case management with AI-powered solutions. 
-                Connect clients, advocates, and administrators in one comprehensive platform.
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
-                A product of Gentlefolk Consulting Private Limited
+              <Typography variant="body2" color="text.secondary">
+                {t('footer.description')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant="h6" gutterBottom>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/services">Services</Button>
-                <Button color="inherit" component={Link} href="/about">About</Button>
-                <Button color="inherit" component={Link} href="/contact">Contact</Button>
                 <Button color="inherit" component={Link} href="/auth/user-login">
-                  Client Login
+                  {t('nav.userLogin')}
                 </Button>
                 <Button color="inherit" component={Link} href="/auth/advocate-login">
-                  Advocate Login
+                  {t('nav.advocateLogin')}
                 </Button>
+                <Button color="inherit" component={Link} href="/auth/admin-login">
+                  {t('nav.adminLogin')}
+                </Button>
+                <Button color="inherit" component={Link} href="/about">{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact">{t('nav.contact')}</Button>
               </Box>
             </Grid>
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              © 2024 ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>
