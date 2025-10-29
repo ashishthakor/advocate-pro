@@ -1,6 +1,6 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-import { apiFetch } from 'lib/api-client';
-import { fetchUsers, fetchUsersFailure, fetchUsersSuccess, UserItem } from '../slices/usersSlice';
+import { apiFetch } from '@/lib/api-client';
+import { fetchUsers, fetchUsersFailure, fetchUsersSuccess, UserItem } from '@/store/slices/usersSlice';
 
 function* handleFetchUsers(action: ReturnType<typeof fetchUsers>) {
   try {

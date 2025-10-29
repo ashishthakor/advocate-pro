@@ -40,10 +40,10 @@ import {
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUsers } from 'store/slices/usersSlice';
-import type { RootState } from 'store';
-import { apiFetch } from 'lib/api-client';
-import UserDetailsModal from 'components/UserDetailsModal';
+import { fetchUsers } from '@/store/slices/usersSlice';
+import type { RootState } from '@/store';
+import { apiFetch } from '@/lib/api-client';
+import UserDetailsModal from '@/components/UserDetailsModal';
 
 interface User {
   id: number;

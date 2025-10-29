@@ -29,11 +29,11 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Search as SearchIcon, Refresh as RefreshIcon, WhatsApp as WhatsAppIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
-import { useLanguage } from 'components/LanguageProvider';
-import CaseDetailsModal from 'components/CaseDetailsModal';
+import { useLanguage } from '@/components/LanguageProvider';
+import CaseDetailsModal from '@/components/CaseDetailsModal';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from 'lib/api-client';
-import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from 'lib/utils';
+import { apiFetch } from '@/lib/api-client';
+import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 
 interface Case {
   id: number;

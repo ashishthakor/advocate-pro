@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import Image from 'next/image';
-import logoPath from "../assets/images/arbitalk-logo.png";
+import logoPath from "@/assets/images/arbitalk-logo.png";
 
 interface LogoProps {
   width?: number;

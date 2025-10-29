@@ -21,9 +21,9 @@ import {
 } from '@mui/material';
 import { Close as CloseIcon, Delete as DeleteIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { apiFetch } from 'lib/api-client';
+import { apiFetch } from '@/lib/api-client';
 import { RadioGroup, FormControlLabel, Radio, FormGroup, Checkbox, InputLabel } from '@mui/material';
-import { useLanguage } from 'components/LanguageProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 
 interface CreateCaseForm {
   // Case basic info

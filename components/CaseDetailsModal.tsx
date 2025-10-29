@@ -21,8 +21,8 @@ import {
   Description as DescriptionIcon,
   Business as BusinessIcon,
 } from '@mui/icons-material';
-import { useLanguage } from 'components/LanguageProvider';
-import { getStatusConfig } from 'lib/utils';
+import { useLanguage } from '@/components/LanguageProvider';
+import { getStatusConfig } from '@/lib/utils';
 
 interface CaseDetails {
   id: number;

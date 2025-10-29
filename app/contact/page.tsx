@@ -10,7 +10,6 @@ import {
   CardContent,
   TextField,
   Button,
-  Paper,
   useTheme,
   useMediaQuery,
   Alert,
@@ -19,23 +18,11 @@ import {
   AppBar,
   Toolbar,
   IconButton,
-  Avatar,
-  alpha,
 } from '@mui/material';
 import {
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  Business as BusinessIcon,
-  Support as SupportIcon,
-  Schedule as ScheduleIcon,
-  Send as SendIcon,
-  CheckCircle as CheckCircleIcon,
-  Gavel as GavelIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   Language as LanguageIcon,
-  Warning as WarningIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';

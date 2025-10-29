@@ -27,8 +27,8 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { useAuth } from 'components/AuthProvider';
-import { apiFetch } from 'lib/api-client';
+import { useAuth } from '@/components/AuthProvider';
+import { apiFetch } from '@/lib/api-client';
 
 interface UserProfile {
   id: number;

@@ -28,9 +28,9 @@ import {
   Message as MessageIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
-import { useLanguage } from 'components/LanguageProvider';
-import { apiFetch } from 'lib/api-client';
-import CaseDetailsModal from 'components/CaseDetailsModal';
+import { useLanguage } from '@/components/LanguageProvider';
+import { apiFetch } from '@/lib/api-client';
+import CaseDetailsModal from '@/components/CaseDetailsModal';
 
 interface UserStats {
   totalCases: number;

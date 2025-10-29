@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: 'class', // only one string
   content: [
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}', // your app folder
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}', // components
+    './app/**/*.{js,ts,jsx,tsx,mdx}', // your app folder
+    './components/**/*.{js,ts,jsx,tsx,mdx}', // components
   ],
   theme: {
     extend: {

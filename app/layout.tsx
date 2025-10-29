@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import { ThemeProvider } from '../components/ThemeProvider';
-import { LanguageProvider } from '../components/LanguageProvider';
-import { AuthProvider } from '../components/AuthProvider';
-import ReduxProvider from 'components/ReduxProvider';
-import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { LanguageProvider } from '@/components/LanguageProvider';
+import { AuthProvider } from '@/components/AuthProvider';
+import ReduxProvider from '@/components/ReduxProvider';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] });
 
