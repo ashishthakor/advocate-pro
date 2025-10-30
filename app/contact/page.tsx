@@ -10,6 +10,11 @@ import {
   CardContent,
   TextField,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
   useTheme,
   useMediaQuery,
   Alert,
@@ -19,6 +24,7 @@ import {
   Toolbar,
   IconButton,
 } from '@mui/material';
+import { SelectChangeEvent } from '@mui/material/Select';
 import {
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
@@ -46,6 +52,8 @@ export default function ContactPage() {
   });
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -55,37 +63,66 @@ export default function ContactPage() {
     }));
   };
 
+  const validate = () => {
+    const errors: Record<string, string> = {};
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const subject = formData.subject.trim();
+    const message = formData.message.trim();
+    if (!name) errors.name = 'Name is required';
+    if (!email) errors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Invalid email address';
+    if (!subject) errors.subject = 'Subject is required';
+    if (!message) errors.message = 'Message is required';
+    else if (message.length < 10) errors.message = 'Message must be at least 10 characters';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+    if (!validate()) return;
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setShowSuccess(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: '',
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-    }, 2000);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data?.errors) setFormErrors(data.errors);
+        throw new Error(data?.error || 'Failed to send message');
+      }
+      setShowSuccess(true);
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+      setFormErrors({});
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubjectChange = (e: SelectChangeEvent<string>) => {
+    const value = e.target.value as string;
+    setFormData(prev => ({ ...prev, subject: value }));
   };
 
   const contactInfo = [
     {
       title: 'Phone',
-      value: '+1 (555) 123-4567',
+      value: '+91 77780 70439',
       icon: '📞',
-      description: 'Mon-Fri 9AM-6PM EST'
+      description: 'Mon-Fri 9AM-6PM IST'
     },
-    {
-      title: 'Email',
-      value: 'info@arbitalk.com',
-      icon: '✉️',
-      description: 'We respond within 24 hours'
-    },
+    // {
+    //   title: 'Email',
+    //   value: 'info@arbitalk.com',
+    //   icon: '✉️',
+    //   description: 'We respond within 24 hours'
+    // },
     {
       title: 'Address',
       value: 'Plot No. 22, Yogi Nagar Society',
@@ -94,7 +131,7 @@ export default function ContactPage() {
     },
     {
       title: 'Emergency',
-      value: '+1 (555) 911-LEGAL',
+      value: '+91 77780 70439',
       icon: '🚨',
       description: '24/7 emergency support'
     }
@@ -196,6 +233,12 @@ export default function ContactPage() {
                   Send us a Message
                 </Typography>
                 
+                {submitError && (
+                  <Alert severity="error" sx={{ mb: 3 }}>
+                    {submitError}
+                  </Alert>
+                )}
+
                 {showSuccess && (
                   <Alert severity="success" sx={{ mb: 3 }}>
                     Thank you for your message! We'll get back to you within 24 hours.
@@ -214,6 +257,8 @@ export default function ContactPage() {
                         required
                         variant="outlined"
                         placeholder="Your full name"
+                        error={Boolean(formErrors.name)}
+                        helperText={formErrors.name}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -227,6 +272,8 @@ export default function ContactPage() {
                         required
                         variant="outlined"
                         placeholder="your.email@example.com"
+                        error={Boolean(formErrors.email)}
+                        helperText={formErrors.email}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -237,31 +284,31 @@ export default function ContactPage() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         variant="outlined"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+91 9876543210"
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Subject"
-                        name="subject"
-                        select
-                        value={formData.subject}
-                        onChange={handleInputChange}
-                        required
-                        variant="outlined"
-                        SelectProps={{
-                          native: true,
-                        }}
-                      >
-                        <option value="">Select a subject</option>
-                        <option value="general">General Inquiry</option>
-                        <option value="support">Technical Support</option>
-                        <option value="billing">Billing Question</option>
-                        <option value="consultation">Free Consultation</option>
-                        <option value="partnership">Partnership Opportunity</option>
-                        <option value="other">Other</option>
-                      </TextField>
+                      <FormControl fullWidth required error={Boolean(formErrors.subject)}>
+                        <InputLabel id="contact-subject-label">Subject</InputLabel>
+                        <Select
+                          labelId="contact-subject-label"
+                          id="contact-subject"
+                          value={formData.subject}
+                          label="Subject"
+                          onChange={handleSubjectChange}
+                        >
+                          <MenuItem value=""><em>Select a subject</em></MenuItem>
+                          <MenuItem value="general">General Inquiry</MenuItem>
+                          <MenuItem value="support">Technical Support</MenuItem>
+                          <MenuItem value="billing">Billing Question</MenuItem>
+                          <MenuItem value="consultation">Free Consultation</MenuItem>
+                          <MenuItem value="partnership">Partnership Opportunity</MenuItem>
+                          <MenuItem value="other">Other</MenuItem>
+                        </Select>
+                        {formErrors.subject && (
+                          <FormHelperText>{formErrors.subject}</FormHelperText>
+                        )}
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
@@ -275,6 +322,8 @@ export default function ContactPage() {
                         required
                         variant="outlined"
                         placeholder="Tell us how we can help you..."
+                        error={Boolean(formErrors.message)}
+                        helperText={formErrors.message}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -399,7 +448,7 @@ export default function ContactPage() {
                       For urgent legal matters that cannot wait for regular business hours.
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      +1 (555) 911-LEGAL
+                      +91 77780 70439
                     </Typography>
                   </Box>
                 </Box>
