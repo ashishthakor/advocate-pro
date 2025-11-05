@@ -32,8 +32,11 @@ export class SocketManager {
   constructor(server: HTTPServer) {
     this.io = new SocketIOServer(server, {
       cors: {
-        origin: process.env.NEXTAUTH_URL || "http://localhost:3000",
-        methods: ["GET", "POST"]
+        origin: process.env.CORS_ORIGIN 
+        ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+        : ["http://localhost:3000"],
+        methods: ["GET", "POST"],
+        credentials: true
       }
     });
 

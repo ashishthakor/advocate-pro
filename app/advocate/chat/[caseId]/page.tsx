@@ -64,7 +64,7 @@ interface Case {
 
 export default function AdvocateChatPage({ params }: { params: Promise<{ caseId: string }> }) {
   const [caseId, setCaseId] = useState<string>('');
-  
+
   useEffect(() => {
     params.then(({ caseId: id }) => setCaseId(id));
   }, [params]);
@@ -145,38 +145,68 @@ export default function AdvocateChatPage({ params }: { params: Promise<{ caseId:
 
   const initializeSocket = () => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      console.error('No token found for socket authentication');
+      return;
+    }
 
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
-      auth: {
-        token: token
-      }
-    });
+    const url = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const options = {
+      auth: { token: token },
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      path: '/socket.io/',
+    };
 
-    newSocket.on('connect', () => {
-      console.log('Connected to chat server');
-      setIsConnected(true);
-      newSocket.emit('join_case', caseIdNum);
-    });
+    console.log('Initializing socket with URL:', url);
 
-    newSocket.on('disconnect', () => {
-      console.log('Disconnected from chat server');
-      setIsConnected(false);
-    });
+    try {
+      const newSocket = io(url, options);
 
-    newSocket.on('chat_history', (history: ChatMessage[]) => {
-      setMessages(history);
-    });
+      newSocket.on('connect', () => {
+        console.log('Connected to chat server');
+        setIsConnected(true);
+        newSocket.emit('join_case', caseIdNum);
+      });
 
-    newSocket.on('new_message', (message: ChatMessage) => {
-      setMessages(prev => [...prev, message]);
-    });
+      newSocket.on('disconnect', () => {
+        console.log('Disconnected from chat server');
+        setIsConnected(false);
+      });
 
-    newSocket.on('error', (error: any) => {
-      setError(error.message || 'Socket error');
-    });
+      newSocket.on('chat_history', (history: ChatMessage[]) => {
+        setMessages(history || []);
+      });
 
-    setSocket(newSocket);
+      newSocket.on('new_message', (message: ChatMessage) => {
+        setMessages((prev) => [...prev, message]);
+      });
+
+      newSocket.on('error', (error: any) => {
+        console.error('Socket error:', error?.message || error, { url, options });
+        if (error?.stack) console.error('Socket error stack:', error.stack);
+        setError(error?.message || 'Socket error');
+      });
+
+      newSocket.on('connect_error', (error: any) => {
+        console.error('Connection error:', error?.message, { url, options });
+        if (error?.stack) console.error('Connection error stack:', error.stack);
+      });
+
+      newSocket.on('reconnect_error', (error: any) => {
+        console.error('Reconnect error:', error?.message, { url, options });
+      });
+
+      newSocket.on('reconnect_failed', () => {
+        console.error('Reconnect failed', { url, options });
+      });
+
+      setSocket(newSocket);
+    } catch (err: any) {
+      console.error('Failed to initialize socket:', err?.message || err, { url, options });
+      if (err?.stack) console.error('Initialize socket stack:', err.stack);
+      setError('Failed to initialize socket');
+    }
   };
 
   const sendMessage = async () => {
@@ -242,9 +272,9 @@ export default function AdvocateChatPage({ params }: { params: Promise<{ caseId:
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -317,7 +347,7 @@ export default function AdvocateChatPage({ params }: { params: Promise<{ caseId:
             <List>
               {messages.map((message, index) => {
                 const isCurrentUser = message.user_id === user?.id;
-                const showDate = index === 0 || 
+                const showDate = index === 0 ||
                   formatDate(messages[index - 1].created_at) !== formatDate(message.created_at);
 
                 return (
