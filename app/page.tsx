@@ -709,12 +709,13 @@ export default function LandingPage() {
         <Container maxWidth="lg">
           <Grid container spacing={4} justifyContent="center">
             {stats.map((stat, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
+              <Grid item xs={6} sm={4} md={2.4} key={index} sx={{ display: 'flex' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
                   <Paper
                     sx={{
@@ -722,6 +723,11 @@ export default function LandingPage() {
                       textAlign: 'center',
                       bgcolor: 'background.paper',
                       border: (theme) => `1px solid ${theme.palette.divider}`,
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      minHeight: '100%',
                     }}
                   >
                     <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>

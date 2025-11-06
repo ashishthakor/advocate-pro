@@ -61,6 +61,20 @@ export default function AboutPage() {
 
   const team = [
     {
+      name: 'Abhishek Pandey',
+      role: 'Co-founder & CGO',
+      experience: 'Co-founder',
+      specialization: 'Chief Growth Officer',
+      image: '👨‍💼'
+    },
+    {
+      name: 'Vimal Shukla',
+      role: 'Co-founder & Head - Legal & Partnership',
+      experience: 'Co-founder',
+      specialization: 'Legal & Partnership',
+      image: '👨‍💼'
+    },
+    {
       name: 'Nilesh Mishra',
       role: 'Co-founder & COO',
       experience: 'Co-founder',
@@ -72,20 +86,6 @@ export default function AboutPage() {
       role: 'Co-founder & Business Advisor',
       experience: 'Co-founder',
       specialization: 'Business Advisor',
-      image: '👨‍💼'
-    },
-    {
-      name: 'Vimal Shukla',
-      role: 'Co-founder & Head - Legal & Partnership',
-      experience: 'Co-founder',
-      specialization: 'Legal & Partnership',
-      image: '👨‍💼'
-    },
-    {
-      name: 'Abhishek Pandey',
-      role: 'Co-founder & CGO',
-      experience: 'Co-founder',
-      specialization: 'Chief Growth Officer',
       image: '👨‍💼'
     }
   ];
@@ -544,15 +544,16 @@ export default function AboutPage() {
           
           <Grid container spacing={4} justifyContent="center">
             {team.map((member, index) => (
-              <Grid item xs={12} sm={6} md={5} lg={4} key={index}>
+              <Grid item xs={12} sm={6} md={5} lg={3} key={index} sx={{ display: 'flex' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
-                  <Card sx={{ height: '100%', textAlign: 'center', p: 3 }}>
-                    <CardContent>
+                  <Card sx={{ width: '100%', textAlign: 'center', p: 3, display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+                    <CardContent sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                       <Typography variant="h2" sx={{ mb: 3 }}>
                         {member.image}
                       </Typography>
@@ -562,7 +563,7 @@ export default function AboutPage() {
                       <Typography variant="body1" color="primary.main" sx={{ fontWeight: 'medium', mb: 1 }}>
                         {member.role}
                       </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
                         {member.specialization}
                       </Typography>
                     </CardContent>

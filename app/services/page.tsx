@@ -443,20 +443,24 @@ export default function ServicesPage() {
           
           <Grid container spacing={4}>
             {whyChooseUs.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid item xs={12} sm={6} md={3} key={index} sx={{ display: 'flex' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
                   <Paper
                     sx={{
                       p: 3,
                       textAlign: 'center',
-                      height: '100%',
+                      width: '100%',
                       bgcolor: 'background.paper',
                       border: (theme) => `1px solid ${theme.palette.divider}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      minHeight: '100%',
                     }}
                   >
                     <Box sx={{ mb: 2 }}>
@@ -478,7 +482,7 @@ export default function ServicesPage() {
                     <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
                       {item.description}
                     </Typography>
                   </Paper>
