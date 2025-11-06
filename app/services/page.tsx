@@ -21,20 +21,24 @@ import {
   ListItemText,
   Stack,
   alpha,
+  Drawer,
+  ListItemButton,
+  Divider,
 } from '@mui/material';
 import {
   Gavel as GavelIcon,
   Description as DescriptionIcon,
-  FamilyRestroom as FamilyIcon,
   Business as BusinessIcon,
-  Home as HomeIcon,
-  Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   Speed as SpeedIcon,
   Security as SecurityIcon,
   Support as SupportIcon,
+  Chat as ChatIcon,
+  People as PeopleIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -48,66 +52,67 @@ export default function ServicesPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const services = [
     {
-      title: 'Criminal Defense',
-      description: 'Expert legal representation for criminal charges including DUI, theft, assault, and other criminal matters.',
-      icon: <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Expert legal defense', 'Court representation', 'Case strategy development', 'Negotiation support']
+      title: 'Mediation',
+      description: 'Fast, collaborative dispute resolution with neutral mediators. Preserve business relationships while achieving fair outcomes.',
+      icon: <ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      features: ['30-60 day resolution', 'Relationship preservation', 'Cost-effective', 'Confidential process']
     },
     {
-      title: 'Civil Litigation',
-      description: 'Comprehensive civil law services including contract disputes, personal injury, and business litigation.',
+      title: 'Conciliation',
+      description: 'Structured negotiation process with expert conciliators helping parties reach mutually acceptable solutions.',
       icon: <DescriptionIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Contract disputes', 'Personal injury claims', 'Business litigation', 'Settlement negotiations']
+      features: ['Expert guidance', 'Flexible process', 'Business-friendly', 'Quick turnaround']
     },
     {
-      title: 'Family Law',
-      description: 'Sensitive handling of family legal matters including divorce, child custody, and adoption cases.',
-      icon: <FamilyIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Divorce proceedings', 'Child custody', 'Adoption services', 'Family mediation']
+      title: 'Arbitration',
+      description: 'Binding dispute resolution through neutral arbitrators. Faster than courts, fairer than litigation.',
+      icon: <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      features: ['60-90 day resolution', 'Legally binding', 'Expert arbitrators', 'Transparent process']
     },
     {
-      title: 'Corporate Law',
-      description: 'Business legal services including incorporation, contracts, compliance, and corporate governance.',
+      title: 'Contract Disputes',
+      description: 'Resolve commercial contract conflicts quickly and fairly. Perfect for MSMEs, vendors, and service providers.',
       icon: <BusinessIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Business formation', 'Contract drafting', 'Compliance guidance', 'Corporate governance']
+      features: ['Commercial contracts', 'Payment disputes', 'Service agreements', 'Partnership conflicts']
     },
     {
-      title: 'Property Law',
-      description: 'Real estate legal services including property disputes, transactions, and land use matters.',
-      icon: <HomeIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Property disputes', 'Real estate transactions', 'Land use issues', 'Property rights']
+      title: 'Business Disputes',
+      description: 'Handle vendor-supplier conflicts, partnership disputes, and commercial disagreements without court delays.',
+      icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      features: ['Vendor disputes', 'Partnership issues', 'Commercial conflicts', 'MSME-focused']
     },
     {
-      title: 'Estate Planning',
-      description: 'Comprehensive estate planning services including wills, trusts, and probate administration.',
-      icon: <AssignmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Will drafting', 'Trust creation', 'Probate administration', 'Estate planning']
+      title: 'AI-Powered Workflow',
+      description: 'Automated case management from notice drafting to hearing scheduling. Technology that works for you.',
+      icon: <SpeedIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
+      features: ['Automated notices', 'Smart scheduling', 'Document management', 'Progress tracking']
     }
   ];
 
   const whyChooseUs = [
     {
-      title: 'Proven Track Record',
-      description: '95% success rate in case outcomes',
+      title: 'Fast Resolution',
+      description: '30-90 day dispute resolution',
+      icon: <SpeedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+    },
+    {
+      title: 'Expert Neutrals',
+      description: 'Verified arbitrators and mediators',
+      icon: <PeopleIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+    },
+    {
+      title: 'Transparent Pricing',
+      description: 'Fixed, affordable packages',
       icon: <CheckCircleIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     },
     {
-      title: '24/7 Support',
-      description: 'Round-the-clock legal assistance',
-      icon: <SupportIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-    },
-    {
-      title: 'Confidential',
-      description: 'Complete privacy and confidentiality',
-      icon: <SecurityIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-    },
-    {
-      title: 'Fast Response',
-      description: 'Quick turnaround on all legal matters',
-      icon: <SpeedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
+      title: 'Relationship-Focused',
+      description: 'Preserve business ties',
+      icon: <ChatIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     }
   ];
 
@@ -115,39 +120,137 @@ export default function ServicesPage() {
     <Box>
       {/* Header */}
       <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
-        <Toolbar>
+        <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Logo width={140} height={35} />
+              <Logo width={isMobile ? 120 : 140} height={isMobile ? 30 : 35} />
             </motion.div>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/">Home</Button>
-            <Button color="primary" component={Link} href="/services">Services</Button>
-            <Button color="inherit" component={Link} href="/about">About</Button>
-            <Button color="inherit" component={Link} href="/contact">Contact</Button>
+          
+          {/* Desktop Navigation */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
+            <Button color="primary" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <IconButton onClick={toggleDarkMode} color="inherit">
+              <IconButton onClick={toggleDarkMode} color="inherit" size="small">
                 {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </motion.div>
-            <Button color="primary" component={Link} href="/auth/user-login">
+            <Button 
+              color="primary" 
+              component={Link} 
+              href="/auth/user-login"
+              size="small"
+              sx={{ fontSize: '0.85rem', px: 1.5 }}
+            >
               Join as Client
             </Button>
-            <Button color="secondary" component={Link} href="/auth/advocate-login">
+            <Button 
+              color="secondary" 
+              component={Link} 
+              href="/auth/advocate-login"
+              size="small"
+              sx={{ fontSize: '0.85rem', px: 1.5 }}
+            >
               Join as Advocate
             </Button>
           </Box>
+
+          {/* Mobile Menu Button */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, alignItems: 'center' }}>
+            <LanguageSelector />
+            <IconButton onClick={toggleDarkMode} color="inherit" size="small">
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Logo width={120} height={30} />
+          <IconButton onClick={() => setMobileMenuOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Services" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="About" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Contact" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <Box sx={{ p: 2 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            component={Link}
+            href="/auth/user-login"
+            onClick={() => setMobileMenuOpen(false)}
+            sx={{ mb: 2 }}
+          >
+            Join as Client
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            color="secondary"
+            component={Link}
+            href="/auth/advocate-login"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Join as Advocate
+          </Button>
+        </Box>
+      </Drawer>
 
       {/* Hero Section */}
       <Box
@@ -171,21 +274,21 @@ export default function ServicesPage() {
             viewport={{ once: true }}
           >
             <Typography
-              variant={isMobile ? 'h3' : 'h2'}
+              variant={isMobile ? 'h4' : 'h2'}
               component="h1"
               textAlign="center"
               gutterBottom
-              sx={{ fontWeight: 'bold', mb: 3 }}
+              sx={{ fontWeight: 'bold', mb: 3, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
             >
-              Legal Services
+              Dispute Resolution Services
             </Typography>
             <Typography
-              variant={isMobile ? 'h6' : 'h5'}
+              variant={isMobile ? 'body1' : 'h5'}
               textAlign="center"
-              sx={{ opacity: 0.8, maxWidth: '800px', mx: 'auto' }}
+              sx={{ opacity: 0.8, maxWidth: { xs: '100%', md: '800px' }, mx: 'auto', fontSize: { xs: '0.95rem', md: '1.25rem' }, lineHeight: 1.6 }}
             >
-              Comprehensive legal services tailored to meet your specific needs. 
-              Our experienced advocates provide expert representation across various areas of law.
+              Fast, fair, and digital dispute resolution for modern businesses. 
+              Choose from mediation, conciliation, or arbitration — all designed to resolve conflicts in weeks, not years.
             </Typography>
           </motion.div>
         </Container>
@@ -253,10 +356,10 @@ export default function ServicesPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              Why Choose Our Legal Services?
+              Why Choose Arbitalk?
             </Typography>
             <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-              We combine decades of legal experience with modern technology to deliver exceptional results.
+              We combine verified neutral experts with AI-powered technology to deliver fast, fair dispute resolution.
             </Typography>
           </motion.div>
           
@@ -318,10 +421,10 @@ export default function ServicesPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Need Legal Assistance?
+              Ready to Resolve Your Dispute?
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.8 }}>
-              Contact us today for a free consultation and let us help you with your legal needs.
+              Take the first step toward faster, stress-free resolution. Book a free consultation today.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
@@ -331,16 +434,16 @@ export default function ServicesPage() {
                 href="/contact"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Get Free Consultation
+                Book a Free Consultation
               </Button>
               <Button
                 variant="outlined"
                 size="large"
                 component={Link}
-                href="/auth/advocate-register"
+                href="/auth/user-register"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Join as Advocate
+                Start a Case on Arbitalk
               </Button>
             </Stack>
           </motion.div>
@@ -348,34 +451,42 @@ export default function ServicesPage() {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
+      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: { xs: 3, md: 4 }, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4}>
+          <Grid container spacing={{ xs: 3, md: 4 }}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Logo width={120} height={30} />
+                <Logo width={isMobile ? 100 : 120} height={isMobile ? 25 : 30} />
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Revolutionizing arbitration and legal case management with AI-powered solutions.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
                 A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                 Quick Links
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/">Home</Button>
-                <Button color="inherit" component={Link} href="/services">Services</Button>
-                <Button color="inherit" component={Link} href="/about">About</Button>
-                <Button color="inherit" component={Link} href="/contact">Contact</Button>
+              {/* Desktop: Grid Layout */}
+              <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
+              </Box>
+              {/* Mobile: Vertical List */}
+              <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
               </Box>
             </Grid>
           </Grid>
-          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, pt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
+          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
               © 2024 ARBITALK. All rights reserved.
             </Typography>
           </Box>
