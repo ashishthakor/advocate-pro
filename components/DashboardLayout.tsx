@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   CssBaseline,
@@ -39,6 +39,7 @@ import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
 import { alpha } from '@mui/material/styles';
+import { useMediaQuery, useTheme } from '@mui/material';
 
 const drawerWidth = 240;
 
@@ -58,6 +59,8 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
   const pathname = usePathname();
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -81,6 +84,15 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
+
+  // Close drawer when pathname changes (navigation occurs)
+  useEffect(() => {
+    if (isMobile && mobileOpen) {
+      setMobileOpen(false);
+      setIsClosing(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, isMobile]);
 
   const getNavItems = () => {
     switch (userType) {
@@ -138,8 +150,16 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
         {getNavItems().map((item) => {
           const active = pathname?.startsWith(item.path);
           return (
-            <ListItem key={item.text} disablePadding component={Link} href={item.path} sx={{ mb: 0.5 }}>
+            <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
+                component={Link}
+                href={item.path}
+                onClick={() => {
+                  // Close drawer on mobile when navigation item is clicked
+                  if (isMobile) {
+                    handleDrawerClose();
+                  }
+                }}
                 sx={{
                   borderRadius: 9999,
                   px: 1.25,
@@ -249,6 +269,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerClose}
+          onTransitionEnd={handleDrawerTransitionEnd}
           ModalProps={{
             keepMounted: true,
           }}
