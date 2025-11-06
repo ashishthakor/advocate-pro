@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Assignment as AssignmentIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -36,6 +36,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
+import { getCapitalizedString } from '@/lib/utils';
 
 interface Case {
   id: number;
@@ -156,10 +157,6 @@ export default function AdvocateChatPage() {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <WhatsAppIcon color="primary" sx={{ fontSize: 32 }} />
-        <Typography variant="h4">{t('chat.advocateTitle')}</Typography>
-      </Stack>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
@@ -223,7 +220,7 @@ export default function AdvocateChatPage() {
         <Card>
           <CardContent>
             <Box textAlign="center" py={4}>
-              <WhatsAppIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <MessageIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 {searchTerm || statusFilter !== 'all' ? t('chat.noCasesFound') : t('chat.noAssignedCases')}
               </Typography>
@@ -272,12 +269,12 @@ export default function AdvocateChatPage() {
                     <Grid item xs={12} sm={6} md={3}>
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <Chip
-                          label={case_.status}
+                          label={getCapitalizedString(case_.status)}
                           color={getStatusColor(case_.status) as any}
                           size="small"
                         />
                         <Chip
-                          label={case_.priority}
+                          label={getCapitalizedString(case_.priority)}
                           color={getPriorityColor(case_.priority) as any}
                           size="small"
                           variant="outlined"
@@ -288,7 +285,7 @@ export default function AdvocateChatPage() {
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AssignmentIcon fontSize="small" color="action" />
                         <Typography variant="body2" color="text.secondary">
-                          {case_.case_type}
+                          {getCapitalizedString(case_.case_type)}
                         </Typography>
                       </Stack>
                     </Grid>

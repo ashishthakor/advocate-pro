@@ -18,6 +18,12 @@ import {
   Avatar,
   Stack,
   alpha,
+  Drawer,
+  ListItemButton,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import {
   DarkMode as DarkModeIcon,
@@ -26,6 +32,8 @@ import {
   Visibility as VisibilityIcon,
   Security as SecurityIcon,
   CheckCircle as CheckCircleIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -33,12 +41,16 @@ import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/components/AuthProvider';
+import { Logout as LogoutIcon } from '@mui/icons-material';
 
 export default function AboutPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const stats = [
     { number: '500+', label: 'Active Advocates' },
@@ -49,17 +61,31 @@ export default function AboutPage() {
 
   const team = [
     {
-      name: 'Abhishek Umashankar Pande',
-      role: 'Managing Director',
-      experience: 'Director',
-      specialization: 'Gujarat',
+      name: 'Nilesh Mishra',
+      role: 'Co-founder & COO',
+      experience: 'Co-founder',
+      specialization: 'Chief Operating Officer',
       image: '👨‍💼'
     },
     {
-      name: 'Prashant Kumar Singh',
-      role: 'Director',
-      experience: 'Director',
-      specialization: 'Gujarat',
+      name: 'Naresh Kikani',
+      role: 'Co-founder & Business Advisor',
+      experience: 'Co-founder',
+      specialization: 'Business Advisor',
+      image: '👨‍💼'
+    },
+    {
+      name: 'Vimal Shukla',
+      role: 'Co-founder & Head - Legal & Partnership',
+      experience: 'Co-founder',
+      specialization: 'Legal & Partnership',
+      image: '👨‍💼'
+    },
+    {
+      name: 'Abhishek Pandey',
+      role: 'Co-founder & CGO',
+      experience: 'Co-founder',
+      specialization: 'Chief Growth Officer',
       image: '👨‍💼'
     }
   ];
@@ -86,39 +112,212 @@ export default function AboutPage() {
     <Box>
       {/* Header */}
       <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
-        <Toolbar>
+        <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Logo width={140} height={35} />
+              <Logo width={isMobile ? 120 : 140} height={isMobile ? 30 : 35} />
             </motion.div>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/">Home</Button>
-            <Button color="inherit" component={Link} href="/services">Services</Button>
-            <Button color="primary" component={Link} href="/about">About</Button>
-            <Button color="inherit" component={Link} href="/contact">Contact</Button>
+          
+          {/* Desktop Navigation */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
+            <Button color="primary" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <IconButton onClick={toggleDarkMode} color="inherit">
+              <IconButton onClick={toggleDarkMode} color="inherit" size="small">
                 {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </motion.div>
-            <Button color="primary" component={Link} href="/auth/user-login">
-              Join as Client
-            </Button>
-            <Button color="secondary" component={Link} href="/auth/advocate-login">
-              Join as Advocate
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  color="inherit" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  My Profile
+                </Button>
+                <Button 
+                  color="secondary" 
+                  onClick={logout}
+                  startIcon={<LogoutIcon />}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href="/auth/user-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Client
+                </Button>
+                <Button 
+                  color="secondary" 
+                  component={Link} 
+                  href="/auth/advocate-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Advocate
+                </Button>
+              </>
+            )}
+          </Box>
+
+          {/* Mobile Menu Button */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, alignItems: 'center' }}>
+            <LanguageSelector />
+            <IconButton onClick={toggleDarkMode} color="inherit" size="small">
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Logo width={120} height={30} />
+          <IconButton onClick={() => setMobileMenuOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Services" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="About" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Contact" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <Box sx={{ p: 2 }}>
+          {isAuthenticated ? (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Dashboard
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                My Profile
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                startIcon={<LogoutIcon />}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href="/auth/user-login"
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Join as Client
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="secondary"
+                component={Link}
+                href="/auth/advocate-login"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Join as Advocate
+              </Button>
+            </>
+          )}
+        </Box>
+      </Drawer>
 
       {/* Hero Section */}
       <Box
@@ -162,9 +361,8 @@ export default function AboutPage() {
               textAlign="center"
               sx={{ opacity: 0.8, maxWidth: '800px', mx: 'auto', lineHeight: 1.6 }}
             >
-              We are a leading legal practice management platform that empowers advocates 
-              to deliver exceptional legal services through innovative technology and 
-              comprehensive case management solutions.
+              Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles. 
+              A digital arbitration and dispute resolution platform built for speed, fairness, and trust.
             </Typography>
           </motion.div>
         </Container>
@@ -234,9 +432,9 @@ export default function AboutPage() {
                       Our Mission
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      To revolutionize legal practice management by providing advocates with cutting-edge 
-                      technology that streamlines case management, enhances client relationships, and 
-                      improves overall efficiency in delivering legal services.
+                      To empower India's MSMEs and businesses to resolve commercial disputes quickly, 
+                      affordably, and fairly through digital arbitration and trusted neutral panels. 
+                      We believe justice should work for business, not against it.
                     </Typography>
                   </CardContent>
                 </Card>
@@ -270,9 +468,9 @@ export default function AboutPage() {
                       Our Vision
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      To be the global leader in legal technology solutions, empowering every advocate 
-                      to provide exceptional legal services through innovative, user-friendly, and 
-                      comprehensive practice management tools.
+                      To be India's most trusted digital dispute resolution platform, where businesses 
+                      can resolve conflicts in weeks, not years — preserving relationships while 
+                      achieving fair outcomes through technology and expertise.
                     </Typography>
                   </CardContent>
                 </Card>
@@ -296,30 +494,30 @@ export default function AboutPage() {
                 Our Story
               </Typography>
               <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-                Founded by legal professionals who understand the challenges of modern legal practice
+                Founded by business and legal professionals who understand the challenges of MSME dispute resolution
               </Typography>
               
               <Box sx={{ maxWidth: 'none' }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  ARBITALK was born out of a simple observation: legal professionals were spending 
-                  more time on administrative tasks than on what they do best - practicing law. 
-                  Our founders, experienced advocates themselves, recognized the need for a comprehensive 
-                  solution that would streamline practice management while maintaining the highest 
-                  standards of legal service.
+                  Arbitalk was founded to solve a critical problem: India's MSMEs were losing growth 
+                  to legal delays. Court cases take 2–5 years to resolve, legal costs often exceed 
+                  the disputed amount, and business relationships break due to long, adversarial processes. 
+                  Many small businesses simply give up their rights to avoid litigation.
                 </Typography>
                 
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  Since our inception, we have been committed to developing innovative technology 
-                  solutions that address the real-world challenges faced by legal professionals. 
-                  Our platform combines powerful case management tools, client relationship management, 
-                  document management, and billing systems into one integrated solution.
+                  Our founders recognized that businesses needed a better way — fast, fair, and digital. 
+                  We built Arbitalk to connect businesses with verified neutrals, AI-assisted tools, 
+                  and transparent processes. Our platform enables dispute resolution within 30–90 days, 
+                  not years, while preserving business relationships through collaborative, 
+                  non-adversarial settlement.
                 </Typography>
                 
                 <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Today, ARBITALK serves hundreds of advocates worldwide, helping them manage 
-                  thousands of cases and deliver exceptional legal services to their clients. 
-                  We continue to evolve and improve our platform based on feedback from our 
-                  community of legal professionals.
+                  Today, Arbitalk serves MSMEs, startups, vendors, suppliers, contractors, and service 
+                  agencies across India. We've helped businesses save over ₹50+ Lakhs in legal costs 
+                  and resolve disputes in weeks instead of years. Our mission remains clear: 
+                  <strong> Justice that Works for Business.</strong>
                 </Typography>
               </Box>
             </CardContent>
@@ -340,7 +538,7 @@ export default function AboutPage() {
               Our Leadership Team
             </Typography>
             <Typography variant="h6" textAlign="center" sx={{ mb: 8, opacity: 0.8 }}>
-              Experienced leaders dedicated to revolutionizing legal practice management
+              Experienced leaders dedicated to revolutionizing business dispute resolution
             </Typography>
           </motion.div>
           
@@ -364,11 +562,8 @@ export default function AboutPage() {
                       <Typography variant="body1" color="primary.main" sx={{ fontWeight: 'medium', mb: 1 }}>
                         {member.role}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {member.experience}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Resident of {member.specialization}
+                        <Typography variant="body2" color="text.secondary">
+                        {member.specialization}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -437,6 +632,69 @@ export default function AboutPage() {
         </motion.div>
       </Container>
 
+      {/* Contact Information Section */}
+      <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? 'background.default' : 'grey.50'), py: 8 }}>
+        <Container maxWidth="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 6 }}>
+              Contact Information
+            </Typography>
+            <Grid container spacing={4} justifyContent="center">
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 4, height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                      📧 Email
+                    </Typography>
+                    <Typography variant="body1" color="primary.main" sx={{ mb: 2 }}>
+                      <a href="mailto:info@arbitalk.com" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        info@arbitalk.com
+                      </a>
+                    </Typography>
+                    <Typography variant="body1" color="primary.main">
+                      <a href="mailto:support@arbitalk.com" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        support@arbitalk.com
+                      </a>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Card sx={{ p: 4, height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                      📞 Phone
+                    </Typography>
+                    <Typography variant="body1" color="primary.main" sx={{ mb: 2 }}>
+                      <a href="tel:+917990809141" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        +91 7990809141
+                      </a>
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12}>
+                <Card sx={{ p: 4 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                      📍 Address
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      11th Floor, The Citadel, Opp. Star Bazar, Adajan Gam, Surat - 395009
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </motion.div>
+        </Container>
+      </Box>
+
       {/* CTA Section */}
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -447,29 +705,29 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Ready to Get Started?
+              Ready to Resolve?
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.8 }}>
-              Join thousands of advocates who trust ARBITALK for their practice management needs.
+              Take the first step toward faster, stress-free dispute resolution.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
                 variant="contained"
                 size="large"
                 component={Link}
-                href="/auth/user-register"
+                href="/contact"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Start Free Trial
+                Book a Free Consultation
               </Button>
               <Button
                 variant="outlined"
                 size="large"
                 component={Link}
-                href="/contact"
+                href="/auth/user-register"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Contact Us
+                Start a Case on Arbitalk
               </Button>
             </Stack>
           </motion.div>
@@ -477,35 +735,67 @@ export default function AboutPage() {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
+      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: { xs: 3, md: 4 }, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4}>
+          <Grid container spacing={{ xs: 3, md: 4 }}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Logo width={120} height={30} />
+                <Logo width={isMobile ? 100 : 120} height={isMobile ? 25 : 30} />
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Revolutionizing arbitration and legal case management with AI-powered solutions.
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
+                Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
                 A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                 Quick Links
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/">Home</Button>
-                <Button color="inherit" component={Link} href="/services">Services</Button>
-                <Button color="inherit" component={Link} href="/about">About</Button>
-                <Button color="inherit" component={Link} href="/contact">Contact</Button>
+              {/* Desktop: Grid Layout */}
+              <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                {isAuthenticated && (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      My Profile
+                    </Button>
+                  </>
+                )}
+              </Box>
+              {/* Mobile: Vertical List */}
+              <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                {isAuthenticated && (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      My Profile
+                    </Button>
+                  </>
+                )}
               </Box>
             </Grid>
           </Grid>
-          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, pt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              © 2024 ARBITALK. All rights reserved.
+          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+              © {new Date().getFullYear()} ARBITALK. All rights reserved.
             </Typography>
           </Box>
         </Container>

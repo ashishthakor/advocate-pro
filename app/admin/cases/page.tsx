@@ -38,7 +38,7 @@ import {
   Visibility as VisibilityIcon,
   Assignment as AssignmentIcon,
   Schedule as ScheduleIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
@@ -330,7 +330,7 @@ export default function CasesPage() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <WhatsAppIcon />
+                  <MessageIcon />
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
@@ -549,7 +549,7 @@ export default function CasesPage() {
                               color="primary"
                               onClick={() => router.push(`/admin/chat/${case_.id}`)}
                             >
-                              <WhatsAppIcon />
+                              <MessageIcon />
                             </IconButton>
                           </Tooltip>
                         </Box>

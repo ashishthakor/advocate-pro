@@ -226,10 +226,6 @@ export default function AdvocateProfilePage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
-        Advocate Profile
-      </Typography>
-
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
@@ -305,7 +301,7 @@ export default function AdvocateProfilePage() {
                     type="email"
                     value={formData.email}
                     onChange={handleInputChange('email')}
-                    disabled={!isEditing}
+                    disabled={true}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">

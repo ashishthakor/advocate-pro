@@ -61,7 +61,7 @@ const translations = {
     // Footer
     'footer.description': 'Advanced arbitration and legal case management platform with AI-powered solutions and multi-language support.',
     'footer.quickLinks': 'Quick Links',
-    'footer.copyright': '© 2024 ARBITALK. All rights reserved.',
+    'footer.copyright': `© ${new Date().getFullYear()} ARBITALK. All rights reserved.`,
     
     // About Page
     'about.title': 'About ARBITALK',
@@ -295,7 +295,7 @@ const translations = {
     // Footer
     'footer.description': 'AI-संचालित समाधानों और बहु-भाषा समर्थन के साथ उन्नत मध्यस्थता और कानूनी मामला प्रबंधन प्लेटफॉर्म।',
     'footer.quickLinks': 'त्वरित लिंक',
-    'footer.copyright': '© 2024 ARBITALK। सभी अधिकार सुरक्षित।',
+    'footer.copyright': `© ${new Date().getFullYear()} ARBITALK। सभी अधिकार सुरक्षित।`,
     
     // About Page
     'about.title': 'ARBITALK के बारे में',
@@ -529,7 +529,7 @@ const translations = {
     // Footer
     'footer.description': 'AI-चालित उपाय आणि बहु-भाषा समर्थनासह प्रगत मध्यस्थता आणि कायदेशीर केस व्यवस्थापन प्लॅटफॉर्म.',
     'footer.quickLinks': 'द्रुत दुवे',
-    'footer.copyright': '© 2024 ARBITALK. सर्व हक्क सुरक्षित.',
+    'footer.copyright': `© ${new Date().getFullYear()} ARBITALK. सर्व हक्क सुरक्षित.`,
     
     // About Page
     'about.title': 'ARBITALK बद्दल',
@@ -763,7 +763,7 @@ const translations = {
     // Footer
     'footer.description': 'AI-ચાલિત સોલ્યુશન્સ અને મલ્ટી-લેંગ્વેજ સપોર્ટ સાથે અદ્યતન મધ્યસ્થતા અને કાનૂની કેસ મેનેજમેન્ટ પ્લેટફોર્મ.',
     'footer.quickLinks': 'ઝડપી લિંક્સ',
-    'footer.copyright': '© 2024 ARBITALK. બધા અધિકારો સુરક્ષિત.',
+    'footer.copyright': `© ${new Date().getFullYear()} ARBITALK. બધા અધિકારો સુરક્ષિત.`,
     
     // About Page
     'about.title': 'ARBITALK વિશે',

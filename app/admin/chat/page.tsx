@@ -35,7 +35,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Assignment as AssignmentIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -339,7 +339,7 @@ export default function AdminChatPage() {
         <Card>
           <CardContent>
             <Box textAlign="center" py={4}>
-              <WhatsAppIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <MessageIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 {searchTerm || statusFilter !== 'all' || advocateFilter !== 'all' ? t('chat.noCasesFound') : t('chat.noCasesYet')}
               </Typography>

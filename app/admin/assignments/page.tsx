@@ -54,9 +54,11 @@ interface Case {
   priority: string;
   case_type: string;
   user_id: number;
-  advocate_id?: number;
+  advocate_id?: number | null;
   user_name?: string;
+  user_email?: string;
   advocate_name?: string;
+  advocate_email?: string;
   created_at: string;
   updated_at: string;
 }
@@ -124,6 +126,7 @@ export default function AssignmentsPage() {
       
       if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
       if (statusFilter) params.append('status', statusFilter);
+      if (assignmentFilter) params.append('assignment', assignmentFilter);
 
       const response = await apiFetch(`/api/cases?${params.toString()}`);
       
@@ -227,7 +230,8 @@ export default function AssignmentsPage() {
   };
 
   const getAssignmentStatus = (case_: Case) => {
-    if (case_.advocate_id) {
+    // Check if advocate_id exists and is not null/undefined/0
+    if (case_.advocate_id != null && case_.advocate_id !== 0) {
       return (
         <Chip
           label="Assigned"
@@ -301,7 +305,7 @@ export default function AssignmentsPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {cases.filter(c => c.advocate_id).length}
+                    {cases.filter(c => c.advocate_id != null && c.advocate_id !== 0).length}
                   </Typography>
                   <Typography color="text.secondary">
                     Assigned Cases
@@ -321,7 +325,7 @@ export default function AssignmentsPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {cases.filter(c => !c.advocate_id).length}
+                    {cases.filter(c => c.advocate_id == null || c.advocate_id === 0).length}
                   </Typography>
                   <Typography color="text.secondary">
                     Unassigned Cases
@@ -485,22 +489,28 @@ export default function AssignmentsPage() {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar sx={{ mr: 1, width: 32, height: 32 }}>
-                            <PersonIcon />
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body2">
-                              {case_.user_name || 'N/A'}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {case_.user_name || 'N/A'}
-                            </Typography>
+                        {case_.user_name ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar sx={{ mr: 1, width: 32, height: 32 }}>
+                              <PersonIcon />
+                            </Avatar>
+                            <Box>
+                              <Typography variant="body2">
+                                {case_.user_name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {case_.user_email || ''}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            N/A
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell>
-                        {case_.advocate_name ? (
+                        {case_.advocate_id != null && case_.advocate_id !== 0 && case_.advocate_name ? (
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Avatar sx={{ mr: 1, width: 32, height: 32 }}>
                               <WorkIcon />
@@ -508,6 +518,9 @@ export default function AssignmentsPage() {
                             <Box>
                               <Typography variant="body2">
                                 {case_.advocate_name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {case_.advocate_email || ''}
                               </Typography>
                             </Box>
                           </Box>

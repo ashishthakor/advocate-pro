@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
+import { col } from 'sequelize';
 
 export async function GET(
   request: NextRequest,
@@ -19,18 +20,31 @@ export async function GET(
     const caseId = parseInt(id);
 
     // Get case details with user and advocate information using Sequelize ORM
+    // Use attributes with col to directly select joined columns as flat fields
     const caseData = await Case.findOne({
       where: { id: caseId },
+      attributes: {
+        include: [
+          [col('user.name'), 'user_name'],
+          [col('user.email'), 'user_email'],
+          [col('user.phone'), 'user_phone'],
+          [col('advocate.name'), 'advocate_name'],
+          [col('advocate.email'), 'advocate_email'],
+          [col('advocate.phone'), 'advocate_phone'],
+          [col('advocate.specialization'), 'advocate_specialization']
+        ]
+      },
       include: [
         {
           model: User,
           as: 'user',
-          attributes: ['name', 'email', 'phone']
+          attributes: [] // Don't include nested user object
         },
         {
           model: User,
           as: 'advocate',
-          attributes: ['name', 'email', 'phone', 'specialization']
+          attributes: [], // Don't include nested advocate object
+          required: false // LEFT JOIN for advocate (can be null)
         }
       ]
     });
@@ -57,9 +71,17 @@ export async function GET(
       );
     }
 
+    // Case already has flat fields from attributes literal, just convert to JSON
+    const caseDataJson = caseData.toJSON ? caseData.toJSON() : caseData;
+    const transformedCase = {
+      ...caseDataJson,
+      // Ensure advocate_id is properly set (could be null)
+      advocate_id: caseDataJson.advocate_id || null,
+    };
+
     return NextResponse.json({
       success: true,
-      data: caseData
+      data: transformedCase
     });
 
   } catch (error) {
@@ -100,7 +122,7 @@ export async function PUT(
       );
     }
 
-    // Check permissions
+    // Check permissions - Admin can update any case
     if (authResult.user.role === 'user' && existingCase.user_id !== authResult.user.userId) {
       return NextResponse.json(
         { success: false, message: 'Access denied' },
@@ -108,6 +130,7 @@ export async function PUT(
       );
     }
 
+    // Advocates can only update cases assigned to them, but admin can update any case
     if (authResult.user.role === 'advocate' && existingCase.advocate_id !== authResult.user.userId) {
       return NextResponse.json(
         { success: false, message: 'Access denied' },
@@ -120,8 +143,16 @@ export async function PUT(
     const updateData_filtered: any = {};
     
     for (const [key, value] of Object.entries(updateData)) {
+      // Allow null values for advocate_id (to unassign), but exclude undefined
       if (allowedFields.includes(key) && value !== undefined) {
-        updateData_filtered[key] = value;
+        if (key === 'advocate_id' && value === null) {
+          updateData_filtered[key] = null;
+        } else if (key === 'advocate_id' && value === '') {
+          // Allow empty string to be converted to null for unassignment
+          updateData_filtered[key] = null;
+        } else {
+          updateData_filtered[key] = value;
+        }
       }
     }
 
@@ -133,6 +164,49 @@ export async function PUT(
     }
 
     await existingCase.update(updateData_filtered);
+
+    // Fetch the updated case with user and advocate information
+    // Use attributes with col to directly select joined columns as flat fields
+    const updatedCase = await Case.findOne({
+      where: { id: caseId },
+      attributes: {
+        include: [
+          [col('user.name'), 'user_name'],
+          [col('user.email'), 'user_email'],
+          [col('advocate.name'), 'advocate_name'],
+          [col('advocate.email'), 'advocate_email']
+        ]
+      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [] // Don't include nested user object
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: [], // Don't include nested advocate object
+          required: false // LEFT JOIN for advocate (can be null)
+        }
+      ]
+    });
+
+    // Case already has flat fields from attributes col, just convert to JSON
+    if (updatedCase) {
+      const caseData = updatedCase.toJSON ? updatedCase.toJSON() : updatedCase;
+      const transformedCase = {
+        ...caseData,
+        // Ensure advocate_id is properly set (could be null)
+        advocate_id: caseData.advocate_id || null,
+      };
+
+      return NextResponse.json({
+        success: true,
+        message: 'Case updated successfully',
+        data: transformedCase
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -22,7 +22,7 @@ import {
   Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
-import { getStatusConfig } from '@/lib/utils';
+import { getCapitalizedString, getStatusConfig } from '@/lib/utils';
 
 interface CaseDetails {
   id: number;
@@ -176,12 +176,12 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
               size="small"
             />
             <Chip
-              label={caseDetails.priority.toUpperCase()}
+              label={getCapitalizedString(caseDetails.priority)}
               color={getPriorityColor(caseDetails.priority) as any}
               size="small"
             />
             <Chip
-              label={caseDetails.case_type}
+              label={getCapitalizedString(caseDetails.case_type)}
               color="info"
               size="small"
             />
@@ -803,7 +803,7 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
         >
                 {t('caseDetails.close')}
               </Button>
-              <Button
+              {/* <Button
                 variant="contained"
                 color="primary"
                 sx={{
@@ -828,7 +828,7 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 }}
               >
                 {t('caseDetails.chatWithAdvocate')}
-        </Button>
+        </Button> */}
       </DialogActions>
     </Dialog>
   );

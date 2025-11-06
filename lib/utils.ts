@@ -92,3 +92,21 @@ export function getStatusConfig(status: string) {
     icon: '📋'
   };
 }
+
+
+/**
+ * Get Capitalized String
+ * Output of waiting_for_action will be Waiting For Action
+ * Output of neutrals_needs_to_be_assigned will be Neutrals Needs to be Assigned
+ * Output of consented will be Consented
+ * Output of closed_no_consent will be Closed No Consent
+ * Output of close_no_settlement will be Close No Settlement
+ * Output of temporary_non_starter will be Temporary Non Starter
+ * Output of settled will be Settled
+ * Output of hold will be Hold
+ * Output of withdrawn will be Withdrawn
+ * Output of other will be Other
+ */
+export function getCapitalizedString(string: string) {
+  return string.replace(/_/g, ' ').charAt(0).toUpperCase() + string.slice(1).replace(/_/g, ' ');
+}

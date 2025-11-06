@@ -30,7 +30,7 @@ import {
   Image as ImageIcon,
   Download as DownloadIcon,
   ArrowBack as ArrowBackIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';

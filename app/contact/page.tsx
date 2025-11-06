@@ -23,18 +23,28 @@ import {
   AppBar,
   Toolbar,
   IconButton,
+  Drawer,
+  ListItemButton,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 import {
   DarkMode as DarkModeIcon,
   LightMode as LightModeIcon,
   Language as LanguageIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/components/AuthProvider';
+import { Logout as LogoutIcon } from '@mui/icons-material';
 import Link from 'next/link';
 
 export default function ContactPage() {
@@ -42,6 +52,8 @@ export default function ContactPage() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -113,27 +125,27 @@ export default function ContactPage() {
   const contactInfo = [
     {
       title: 'Phone',
-      value: '+91 77780 70439',
+      value: '+91 7990809141',
       icon: '📞',
       description: 'Mon-Fri 9AM-6PM IST'
     },
-    // {
-    //   title: 'Email',
-    //   value: 'info@arbitalk.com',
-    //   icon: '✉️',
-    //   description: 'We respond within 24 hours'
-    // },
     {
-      title: 'Address',
-      value: 'Plot No. 22, Yogi Nagar Society',
-      icon: '📍',
-      description: 'Near Amroli Bridge, Katargam, Surat - 395004, Gujarat'
+      title: 'Email',
+      value: 'info@arbitalk.com',
+      icon: '✉️',
+      description: 'We respond within 24 hours'
     },
     {
-      title: 'Emergency',
-      value: '+91 77780 70439',
-      icon: '🚨',
-      description: '24/7 emergency support'
+      title: 'Support Email',
+      value: 'support@arbitalk.com',
+      icon: '✉️',
+      description: 'For technical support and inquiries'
+    },
+    {
+      title: 'Address',
+      value: '11th Floor, The Citadel',
+      icon: '📍',
+      description: 'Opp. Star Bazar, Adajan Gam, Surat - 395009'
     }
   ];
 
@@ -141,39 +153,212 @@ export default function ContactPage() {
     <Box>
       {/* Header */}
       <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', color: 'text.primary', borderBottom: (t) => `1px solid ${t.palette.divider}` }}>
-        <Toolbar>
+        <Toolbar sx={{ px: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <Logo width={140} height={35} />
+              <Logo width={isMobile ? 120 : 140} height={isMobile ? 30 : 35} />
             </motion.div>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/">Home</Button>
-            <Button color="inherit" component={Link} href="/services">Services</Button>
-            <Button color="inherit" component={Link} href="/about">About</Button>
-            <Button color="primary" component={Link} href="/contact">Contact</Button>
+          
+          {/* Desktop Navigation */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
+            <Button color="primary" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              <IconButton onClick={toggleDarkMode} color="inherit">
+              <IconButton onClick={toggleDarkMode} color="inherit" size="small">
                 {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </motion.div>
-            <Button color="primary" component={Link} href="/auth/user-login">
-              Join as Client
-            </Button>
-            <Button color="secondary" component={Link} href="/auth/advocate-login">
-              Join as Advocate
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  color="inherit" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  My Profile
+                </Button>
+                <Button 
+                  color="secondary" 
+                  onClick={logout}
+                  startIcon={<LogoutIcon />}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href="/auth/user-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Client
+                </Button>
+                <Button 
+                  color="secondary" 
+                  component={Link} 
+                  href="/auth/advocate-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Advocate
+                </Button>
+              </>
+            )}
+          </Box>
+
+          {/* Mobile Menu Button */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1, alignItems: 'center' }}>
+            <LanguageSelector />
+            <IconButton onClick={toggleDarkMode} color="inherit" size="small">
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+            <IconButton
+              edge="end"
+              color="inherit"
+              aria-label="menu"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <MenuIcon />
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            width: 280,
+            boxSizing: 'border-box',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Logo width={120} height={30} />
+          <IconButton onClick={() => setMobileMenuOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Home" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Services" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="About" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary="Contact" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <Box sx={{ p: 2 }}>
+          {isAuthenticated ? (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Dashboard
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                My Profile
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                startIcon={<LogoutIcon />}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href="/auth/user-login"
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Join as Client
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="secondary"
+                component={Link}
+                href="/auth/advocate-login"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Join as Advocate
+              </Button>
+            </>
+          )}
+        </Box>
+      </Drawer>
 
       {/* Hero Section */}
       <Box
@@ -197,18 +382,18 @@ export default function ContactPage() {
             viewport={{ once: true }}
           >
             <Typography
-              variant={isMobile ? 'h3' : 'h2'}
+              variant={isMobile ? 'h4' : 'h2'}
               component="h1"
               textAlign="center"
               gutterBottom
-              sx={{ fontWeight: 'bold', mb: 4 }}
+              sx={{ fontWeight: 'bold', mb: 4, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
             >
               Contact Us
             </Typography>
             <Typography
-              variant={isMobile ? 'h6' : 'h5'}
+              variant={isMobile ? 'body1' : 'h5'}
               textAlign="center"
-              sx={{ opacity: 0.8, maxWidth: '800px', mx: 'auto' }}
+              sx={{ opacity: 0.8, maxWidth: { xs: '100%', md: '800px' }, mx: 'auto', fontSize: { xs: '0.95rem', md: '1.25rem' }, lineHeight: 1.6 }}
             >
               Get in touch with our team for any questions, support, or to schedule a consultation. 
               We're here to help you succeed.
@@ -448,7 +633,7 @@ export default function ContactPage() {
                       For urgent legal matters that cannot wait for regular business hours.
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      +91 77780 70439
+                      +91 7990809141
                     </Typography>
                   </Box>
                 </Box>
@@ -459,35 +644,67 @@ export default function ContactPage() {
       </Container>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: 4, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
+      <Box sx={{ bgcolor: 'background.default', color: 'text.primary', py: { xs: 3, md: 4 }, borderTop: (t) => `1px solid ${t.palette.divider}` }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4}>
+          <Grid container spacing={{ xs: 3, md: 4 }}>
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Logo width={120} height={30} />
+                <Logo width={isMobile ? 100 : 120} height={isMobile ? 25 : 30} />
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
                 Revolutionizing arbitration and legal case management with AI-powered solutions.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', opacity: 0.8 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
                 A product of Gentlefolk Consulting Private Limited
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
                 Quick Links
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/">Home</Button>
-                <Button color="inherit" component={Link} href="/services">Services</Button>
-                <Button color="inherit" component={Link} href="/about">About</Button>
-                <Button color="inherit" component={Link} href="/contact">Contact</Button>
+              {/* Desktop: Grid Layout */}
+              <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                {isAuthenticated && (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      My Profile
+                    </Button>
+                  </>
+                )}
+              </Box>
+              {/* Mobile: Vertical List */}
+              <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                {isAuthenticated && (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      My Profile
+                    </Button>
+                  </>
+                )}
               </Box>
             </Grid>
           </Grid>
-          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: 4, pt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary">
-              © 2024 ARBITALK. All rights reserved.
+          <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+              © {new Date().getFullYear()} ARBITALK. All rights reserved.
             </Typography>
           </Box>
         </Container>

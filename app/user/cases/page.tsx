@@ -28,7 +28,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { Search as SearchIcon, Refresh as RefreshIcon, WhatsApp as WhatsAppIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Refresh as RefreshIcon, Message as MessageIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import { useRouter } from 'next/navigation';
@@ -377,7 +377,7 @@ export default function UserCasesPage() {
                               color="primary"
                               onClick={() => router.push(`/user/chat/${c.id}`)}
                             >
-                              <WhatsAppIcon />
+                              <MessageIcon />
                             </IconButton>
                           </Tooltip>
                         </Box>
