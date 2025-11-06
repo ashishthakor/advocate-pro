@@ -52,6 +52,8 @@ import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/components/AuthProvider';
+import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
 
 export default function LandingPage() {
@@ -60,6 +62,7 @@ export default function LandingPage() {
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const problems = [
@@ -179,24 +182,58 @@ export default function LandingPage() {
                 {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </motion.div>
-            <Button 
-              color="primary" 
-              component={Link} 
-              href="/auth/user-login"
-              size="small"
-              sx={{ fontSize: '0.85rem', px: 1.5 }}
-            >
-              Join as Client
-            </Button>
-            <Button 
-              color="secondary" 
-              component={Link} 
-              href="/auth/advocate-login"
-              size="small"
-              sx={{ fontSize: '0.85rem', px: 1.5 }}
-            >
-              Join as Advocate
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Dashboard
+                </Button>
+                <Button 
+                  color="inherit" 
+                  component={Link} 
+                  href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  My Profile
+                </Button>
+                <Button 
+                  color="secondary" 
+                  onClick={logout}
+                  startIcon={<LogoutIcon />}
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  color="primary" 
+                  component={Link} 
+                  href="/auth/user-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Client
+                </Button>
+                <Button 
+                  color="secondary" 
+                  component={Link} 
+                  href="/auth/advocate-login"
+                  size="small"
+                  sx={{ fontSize: '0.85rem', px: 1.5 }}
+                >
+                  Join as Advocate
+                </Button>
+              </>
+            )}
           </Box>
 
           {/* Mobile Menu Button */}
@@ -261,27 +298,68 @@ export default function LandingPage() {
         </List>
         <Divider />
         <Box sx={{ p: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            component={Link}
-            href="/auth/user-login"
-            onClick={() => setMobileMenuOpen(false)}
-            sx={{ mb: 2 }}
-          >
-            Join as Client
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            color="secondary"
-            component={Link}
-            href="/auth/advocate-login"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Join as Advocate
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Dashboard
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="primary"
+                component={Link}
+                href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'}
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                My Profile
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="error"
+                startIcon={<LogoutIcon />}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                component={Link}
+                href="/auth/user-login"
+                onClick={() => setMobileMenuOpen(false)}
+                sx={{ mb: 2 }}
+              >
+                Join as Client
+              </Button>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="secondary"
+                component={Link}
+                href="/auth/advocate-login"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Join as Advocate
+              </Button>
+            </>
+          )}
         </Box>
       </Drawer>
 
@@ -746,24 +824,50 @@ export default function LandingPage() {
                 <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                  Client Login
-                </Button>
-                <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                  Advocate Login
-                </Button>
+                {isAuthenticated ? (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      My Profile
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      Client Login
+                    </Button>
+                    <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
+                      Advocate Login
+                    </Button>
+                  </>
+                )}
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
                 <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                  Client Login
-                </Button>
-                <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                  Advocate Login
-                </Button>
+                {isAuthenticated ? (
+                  <>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      Dashboard
+                    </Button>
+                    <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      My Profile
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      Client Login
+                    </Button>
+                    <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
+                      Advocate Login
+                    </Button>
+                  </>
+                )}
               </Box>
             </Grid>
           </Grid>
