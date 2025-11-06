@@ -28,7 +28,7 @@ import {
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
   TrendingUp as TrendingUpIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
@@ -176,14 +176,9 @@ export default function AdvocateDashboardPage() {
   return (
     <Box>
       {/* Welcome Section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Welcome back, {user?.name || 'Advocate'}!
+        <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
+          Welcome back, {user?.name || 'Advocate'}! Here&apos;s an overview of your assigned cases and recent activity.
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Here&apos;s an overview of your assigned cases and recent activity.
-        </Typography>
-      </Box>
 
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -352,7 +347,7 @@ export default function AdvocateDashboardPage() {
                               color="primary"
                               onClick={() => handleChatCase(case_.id)}
                             >
-                              <WhatsAppIcon />
+                              <MessageIcon />
                             </IconButton>
                           </Tooltip>
                         </Box>
@@ -385,7 +380,7 @@ export default function AdvocateDashboardPage() {
                 </Button>
                 <Button
                   variant="outlined"
-                  startIcon={<WhatsAppIcon />}
+                  startIcon={<MessageIcon />}
                   onClick={() => router.push('/advocate/chat')}
                   fullWidth
                 >

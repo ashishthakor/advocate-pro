@@ -29,8 +29,9 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   Search as SearchIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Assignment as AssignmentIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
 import { apiFetch } from '@/lib/api-client';
@@ -121,15 +122,7 @@ export default function AdvocateClientsPage() {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            My Clients
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage your client relationships and communications
-          </Typography>
-        </Box>
+      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<AssignmentIcon />}
@@ -137,6 +130,14 @@ export default function AdvocateClientsPage() {
         >
           View All Cases
         </Button>
+        <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => fetchClients()}
+        disabled={loading}
+      >
+        {t('cases.refresh')}
+      </Button>
       </Box>
 
       {/* Search */}
@@ -205,7 +206,7 @@ export default function AdvocateClientsPage() {
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
-                  <WhatsAppIcon />
+                  <MessageIcon />
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
@@ -338,7 +339,7 @@ export default function AdvocateClientsPage() {
                               color="primary"
                               onClick={() => handleChatClient(client.id)}
                             >
-                              <WhatsAppIcon />
+                              <MessageIcon />
                             </IconButton>
                           </Tooltip>
                         </Box>

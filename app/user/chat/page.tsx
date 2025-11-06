@@ -26,7 +26,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Assignment as AssignmentIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -153,7 +153,7 @@ export default function UserChatPage() {
   return (
     <Box>
       {/* <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-        <WhatsAppIcon color="primary" sx={{ fontSize: 32 }} />
+        <MessageIcon color="primary" sx={{ fontSize: 32 }} />
         <Typography variant="h4">{t('chat.title')}</Typography>
       </Stack> */}
 
@@ -219,7 +219,7 @@ export default function UserChatPage() {
         <Card>
           <CardContent>
             <Box textAlign="center" py={4}>
-              <WhatsAppIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+              <MessageIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
               <Typography variant="h6" color="text.secondary" gutterBottom>
                 {searchTerm || statusFilter !== 'all' ? t('chat.noCasesFound') : t('chat.noCasesYet')}
               </Typography>

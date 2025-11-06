@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
-import { Op } from 'sequelize';
+import { Op, col } from 'sequelize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     const caseType = searchParams.get('case_type');
     const priority = searchParams.get('priority');
     const search = searchParams.get('search');
+    const assignment = searchParams.get('assignment'); // 'assigned' or 'unassigned'
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'DESC';
     const offset = (page - 1) * limit;
@@ -62,6 +63,11 @@ export async function GET(request: NextRequest) {
     if (priority) {
       whereConditions.priority = priority;
     }
+    if (assignment === 'assigned') {
+      whereConditions.advocate_id = { [Op.ne]: null };
+    } else if (assignment === 'unassigned') {
+      whereConditions.advocate_id = null;
+    }
     if (search) {
       whereConditions[Op.or] = [
         { title: { [Op.like]: `%${search}%` } },
@@ -71,23 +77,34 @@ export async function GET(request: NextRequest) {
     }
 
     // Get cases with user and advocate information using Sequelize ORM
+    // Use attributes with col to directly select joined columns as flat fields
     const cases = await Case.findAll({
       where: whereConditions,
+      attributes: {
+        include: [
+          [col('user.name'), 'user_name'],
+          [col('user.email'), 'user_email'],
+          [col('advocate.name'), 'advocate_name'],
+          [col('advocate.email'), 'advocate_email']
+        ]
+      },
       include: [
         {
           model: User,
           as: 'user',
-          attributes: ['name', 'email']
+          attributes: [] // Don't include nested user object
         },
         {
           model: User,
           as: 'advocate',
-          attributes: ['name', 'email']
+          attributes: [], // Don't include nested advocate object
+          required: false // LEFT JOIN for advocate (can be null)
         }
       ],
       order: [[sortBy, sortOrder.toUpperCase()]],
       limit: limit,
-      offset: offset
+      offset: offset,
+      raw: false // We need toJSON to work properly
     });
 
     // Get total count
@@ -109,10 +126,20 @@ export async function GET(request: NextRequest) {
     
     const totalPages = Math.ceil(total / limit);
 
+    // Cases already have flat fields from attributes literal, just convert to JSON
+    const transformedCases = cases.map((case_: any) => {
+      const caseData = case_.toJSON ? case_.toJSON() : case_;
+      return {
+        ...caseData,
+        // Ensure advocate_id is properly set (could be null)
+        advocate_id: caseData.advocate_id || null,
+      };
+    });
+
     return NextResponse.json({
       success: true,
       data: {
-        cases,
+        cases: transformedCases,
         pagination: {
           currentPage: page,
           totalPages,
@@ -236,26 +263,43 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch the created case with joined user/advocate fields using Sequelize ORM
+    // Use attributes with col to directly select joined columns as flat fields
     const createdCase = await Case.findOne({
       where: { case_number: caseNumber },
+      attributes: {
+        include: [
+          [col('user.name'), 'user_name'],
+          [col('user.email'), 'user_email'],
+          [col('advocate.name'), 'advocate_name'],
+          [col('advocate.email'), 'advocate_email']
+        ]
+      },
       include: [
         {
           model: User,
           as: 'user',
-          attributes: ['name', 'email']
+          attributes: [] // Don't include nested user object
         },
         {
           model: User,
           as: 'advocate',
-          attributes: ['name', 'email']
+          attributes: [], // Don't include nested advocate object
+          required: false // LEFT JOIN for advocate (can be null)
         }
       ]
     });
 
+    // Case already has flat fields from attributes col, just convert to JSON
+    const caseData = createdCase?.toJSON ? createdCase.toJSON() : createdCase;
+    const transformedCase = {
+      ...caseData,
+      advocate_id: caseData?.advocate_id || null,
+    };
+
     return NextResponse.json({
       success: true,
       message: 'Case created successfully',
-      data: createdCase
+      data: transformedCase
     });
 
   } catch (error) {

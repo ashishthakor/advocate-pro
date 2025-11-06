@@ -38,7 +38,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  WhatsApp as WhatsAppIcon,
+  Message as MessageIcon,
   Assignment as AssignmentIcon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
@@ -227,11 +227,7 @@ export default function AdvocateCasesPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <AssignmentIcon color="primary" sx={{ fontSize: 32 }} />
-          <Typography variant="h4">{t('cases.assignedCases')}</Typography>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -434,7 +430,7 @@ export default function AdvocateCasesPage() {
                               color="primary"
                               onClick={() => handleCaseClick(c.id)}
                             >
-                              <WhatsAppIcon />
+                              <MessageIcon />
                             </IconButton>
                           </Tooltip>
                         </Box>

@@ -226,10 +226,6 @@ export default function AdvocateProfilePage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
-        Advocate Profile
-      </Typography>
-
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
