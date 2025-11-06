@@ -285,7 +285,7 @@ export default function AdminProfilePage() {
                     type="email"
                     value={formData.email}
                     onChange={handleInputChange('email')}
-                    disabled={!isEditing}
+                    disabled={true}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">

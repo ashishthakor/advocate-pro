@@ -20,6 +20,13 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { motion } from 'framer-motion';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { useTheme as useAppTheme } from '@/components/ThemeProvider';
+import { useLanguage } from '@/components/LanguageProvider';
+import LanguageSelector from '@/components/LanguageSelector';
 import {
   Person as PersonIcon,
   Email as EmailIcon,
@@ -33,6 +40,9 @@ import {
 import { useRouter } from 'next/navigation';
 
 export default function AdvocateRegisterPage() {
+  const theme = useTheme();
+  const { darkMode, toggleDarkMode } = useAppTheme();
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -130,18 +140,17 @@ export default function AdvocateRegisterPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
+          bgcolor: 'background.default',
           py: 4,
         }}
       >
         <Container maxWidth="sm">
           <Paper
-            elevation={24}
+            elevation={theme.palette.mode === 'dark' ? 8 : 12}
             sx={{
               borderRadius: 3,
               overflow: 'hidden',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
+              bgcolor: 'background.paper',
               p: 4,
               textAlign: 'center',
             }}
@@ -163,38 +172,54 @@ export default function AdvocateRegisterPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
+        bgcolor: 'background.default',
+        backgroundImage: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'radial-gradient(1000px 400px at 10% -10%, rgba(156, 39, 176, 0.15), transparent), radial-gradient(800px 400px at 110% 10%, rgba(103, 80, 164, 0.12), transparent)'
+            : 'radial-gradient(1000px 400px at 10% -10%, rgba(156, 39, 176, 0.08), transparent), radial-gradient(800px 400px at 110% 10%, rgba(103, 80, 164, 0.06), transparent)',
         py: 4,
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+          <LanguageSelector />
+          <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
+            {darkMode ? 'Light' : 'Dark'} mode
+          </Button>
+        </Box>
         <Paper
-          elevation={24}
+          elevation={theme.palette.mode === 'dark' ? 8 : 12}
           sx={{
             borderRadius: 3,
             overflow: 'hidden',
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(10px)',
+            bgcolor: 'background.paper',
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            transition: 'transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 12px 30px rgba(0,0,0,0.5)' : '0 12px 30px rgba(0,0,0,0.12)'),
+            },
           }}
         >
           <Box
             sx={{
-              background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
-              color: 'white',
-              p: 3,
+              bgcolor: 'background.paper',
+              color: 'text.primary',
+              p: { xs: 2, sm: 3 },
               textAlign: 'center',
+              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <WorkIcon sx={{ fontSize: 48, mb: 2 }} />
-            <Typography variant="h4" component="h1" gutterBottom>
+            <WorkIcon color="secondary" sx={{ fontSize: { xs: 40, sm: 48 }, mb: 1 }} />
+            <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2rem' } }}>
               Advocate Registration
             </Typography>
-            <Typography variant="subtitle1" color="rgba(255,255,255,0.8)">
+            <Typography variant="subtitle1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
               Register as an advocate to provide legal services
             </Typography>
           </Box>
 
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
             <form onSubmit={handleSubmit}>
               {error && (
                 <Alert severity="error" sx={{ mb: 3 }}>
@@ -202,9 +227,9 @@ export default function AdvocateRegisterPage() {
                 </Alert>
               )}
 
-              <Grid container spacing={3}>
+              <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 1 }}>
                     Personal Information
                   </Typography>
                 </Grid>
@@ -283,7 +308,6 @@ export default function AdvocateRegisterPage() {
                       value={formData.specialization}
                       onChange={handleSelectChange}
                       label="Specialization"
-                      startAdornment={<WorkIcon sx={{ mr: 1, color: 'action.active' }} />}
                     >
                       {specializations.map((spec) => (
                         <MenuItem key={spec} value={spec}>
@@ -381,16 +405,14 @@ export default function AdvocateRegisterPage() {
                 type="submit"
                 fullWidth
                 variant="contained"
+                color="secondary"
                 size="large"
                 disabled={loading}
                 sx={{
                   py: 1.5,
                   mt: 3,
                   mb: 2,
-                  background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%)',
-                  },
+                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
                 }}
               >
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Register as Advocate'}
