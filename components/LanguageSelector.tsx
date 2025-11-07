@@ -8,6 +8,7 @@ import {
   Box,
   Typography,
   useTheme,
+  SelectChangeEvent,
 } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
 import { useLanguage, Language } from './LanguageProvider';
@@ -30,13 +31,34 @@ export default function LanguageSelector() {
   const theme = useTheme();
   const { language, setLanguage } = useLanguage();
 
+  const handleLanguageChange = (event: SelectChangeEvent<Language>) => {
+    // MUI Select passes value through event.target.value
+    const newLanguage = (event.target.value as string) as Language;
+    console.log('LanguageSelector: onChange triggered');
+    console.log('  Event:', event);
+    console.log('  event.target.value:', event.target.value);
+    console.log('  newLanguage:', newLanguage);
+    console.log('  current language:', language);
+    
+    if (newLanguage && ['en', 'hi', 'mr', 'gu'].includes(newLanguage)) {
+      if (newLanguage !== language) {
+        console.log('LanguageSelector: Setting language to', newLanguage);
+        setLanguage(newLanguage);
+      } else {
+        console.log('LanguageSelector: Language is already', newLanguage);
+      }
+    } else {
+      console.error('LanguageSelector: Invalid language value:', newLanguage);
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <LanguageIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
       <FormControl size="small" sx={{ minWidth: 120 }}>
         <Select
           value={language}
-          onChange={(e) => setLanguage(e.target.value as Language)}
+          onChange={handleLanguageChange}
           displayEmpty
           sx={{
             '& .MuiSelect-select': {

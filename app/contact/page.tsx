@@ -81,12 +81,12 @@ export default function ContactPage() {
     const email = formData.email.trim();
     const subject = formData.subject.trim();
     const message = formData.message.trim();
-    if (!name) errors.name = 'Name is required';
-    if (!email) errors.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Invalid email address';
-    if (!subject) errors.subject = 'Subject is required';
-    if (!message) errors.message = 'Message is required';
-    else if (message.length < 10) errors.message = 'Message must be at least 10 characters';
+    if (!name) errors.name = t('contact.nameRequired');
+    if (!email) errors.email = t('contact.emailRequired');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = t('contact.emailInvalid');
+    if (!subject) errors.subject = t('contact.subjectRequired');
+    if (!message) errors.message = t('contact.messageRequired');
+    else if (message.length < 10) errors.message = t('contact.messageMinLength');
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -105,13 +105,13 @@ export default function ContactPage() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data?.errors) setFormErrors(data.errors);
-        throw new Error(data?.error || 'Failed to send message');
+        throw new Error(data?.error || t('contact.failedToSend'));
       }
       setShowSuccess(true);
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
       setFormErrors({});
     } catch (err: any) {
-      setSubmitError(err?.message || 'Something went wrong');
+      setSubmitError(err?.message || t('contact.failedToSend'));
     } finally {
       setIsSubmitting(false);
     }
@@ -124,25 +124,25 @@ export default function ContactPage() {
 
   const contactInfo = [
     {
-      title: 'Phone',
+      title: t('about.phone'),
       value: '+91 7990809141',
       icon: '📞',
-      description: 'Mon-Fri 9AM-6PM IST'
+      description: t('contact.monFri')
     },
     {
-      title: 'Email',
+      title: t('about.email'),
       value: 'info@arbitalk.com',
       icon: '✉️',
-      description: 'We respond within 24 hours'
+      description: t('contact.weRespond')
     },
     {
-      title: 'Support Email',
+      title: t('contact.supportEmail'),
       value: 'support@arbitalk.com',
       icon: '✉️',
-      description: 'For technical support and inquiries'
+      description: t('contact.forTechnicalSupport')
     },
     {
-      title: 'Address',
+      title: t('about.address'),
       value: '11th Floor, The Citadel',
       icon: '📍',
       description: 'Opp. Star Bazar, Adajan Gam, Surat - 395009'
@@ -166,10 +166,10 @@ export default function ContactPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
-            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="primary" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>{t('nav.home')}</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="primary" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -188,7 +188,7 @@ export default function ContactPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -197,7 +197,7 @@ export default function ContactPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -206,7 +206,7 @@ export default function ContactPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -218,7 +218,7 @@ export default function ContactPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -227,7 +227,7 @@ export default function ContactPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -274,22 +274,22 @@ export default function ContactPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -306,7 +306,7 @@ export default function ContactPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -317,7 +317,7 @@ export default function ContactPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -329,7 +329,7 @@ export default function ContactPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -343,7 +343,7 @@ export default function ContactPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -353,7 +353,7 @@ export default function ContactPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -388,15 +388,14 @@ export default function ContactPage() {
               gutterBottom
               sx={{ fontWeight: 'bold', mb: 4, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
             >
-              Contact Us
+              {t('contact.contactUs')}
             </Typography>
             <Typography
               variant={isMobile ? 'body1' : 'h5'}
               textAlign="center"
               sx={{ opacity: 0.8, maxWidth: { xs: '100%', md: '800px' }, mx: 'auto', fontSize: { xs: '0.95rem', md: '1.25rem' }, lineHeight: 1.6 }}
             >
-              Get in touch with our team for any questions, support, or to schedule a consultation. 
-              We're here to help you succeed.
+              {t('contact.getInTouchDesc')}
             </Typography>
           </motion.div>
         </Container>
@@ -415,7 +414,7 @@ export default function ContactPage() {
             >
               <Card sx={{ p: 4 }}>
                 <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                  Send us a Message
+                  {t('contact.send')}
                 </Typography>
                 
                 {submitError && (
@@ -426,7 +425,7 @@ export default function ContactPage() {
 
                 {showSuccess && (
                   <Alert severity="success" sx={{ mb: 3 }}>
-                    Thank you for your message! We'll get back to you within 24 hours.
+                    {t('contact.thankYou')}
                   </Alert>
                 )}
 
@@ -435,13 +434,13 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Full Name"
+                        label={t('contact.name')}
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
                         variant="outlined"
-                        placeholder="Your full name"
+                        placeholder={t('contact.name')}
                         error={Boolean(formErrors.name)}
                         helperText={formErrors.name}
                       />
@@ -449,14 +448,14 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Email Address"
+                        label={t('contact.email')}
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
                         variant="outlined"
-                        placeholder="your.email@example.com"
+                        placeholder={t('contact.email')}
                         error={Boolean(formErrors.email)}
                         helperText={formErrors.email}
                       />
@@ -464,31 +463,31 @@ export default function ContactPage() {
                     <Grid item xs={12} sm={6}>
                       <TextField
                         fullWidth
-                        label="Phone Number"
+                        label={t('contact.phone')}
                         name="phone"
                         value={formData.phone}
                         onChange={handleInputChange}
                         variant="outlined"
-                        placeholder="+91 9876543210"
+                        placeholder={t('contact.phone')}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth required error={Boolean(formErrors.subject)}>
-                        <InputLabel id="contact-subject-label">Subject</InputLabel>
+                        <InputLabel id="contact-subject-label">{t('contact.subject')}</InputLabel>
                         <Select
                           labelId="contact-subject-label"
                           id="contact-subject"
                           value={formData.subject}
-                          label="Subject"
+                          label={t('contact.subject')}
                           onChange={handleSubjectChange}
                         >
-                          <MenuItem value=""><em>Select a subject</em></MenuItem>
-                          <MenuItem value="general">General Inquiry</MenuItem>
-                          <MenuItem value="support">Technical Support</MenuItem>
-                          <MenuItem value="billing">Billing Question</MenuItem>
-                          <MenuItem value="consultation">Free Consultation</MenuItem>
-                          <MenuItem value="partnership">Partnership Opportunity</MenuItem>
-                          <MenuItem value="other">Other</MenuItem>
+                          <MenuItem value=""><em>{t('contact.subjectSelect')}</em></MenuItem>
+                          <MenuItem value="general">{t('contact.subjectGeneral')}</MenuItem>
+                          <MenuItem value="support">{t('contact.subjectSupport')}</MenuItem>
+                          <MenuItem value="billing">{t('contact.subjectBilling')}</MenuItem>
+                          <MenuItem value="consultation">{t('contact.subjectConsultation')}</MenuItem>
+                          <MenuItem value="partnership">{t('contact.subjectPartnership')}</MenuItem>
+                          <MenuItem value="other">{t('contact.subjectOther')}</MenuItem>
                         </Select>
                         {formErrors.subject && (
                           <FormHelperText>{formErrors.subject}</FormHelperText>
@@ -498,7 +497,7 @@ export default function ContactPage() {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Message"
+                        label={t('contact.message')}
                         name="message"
                         multiline
                         rows={6}
@@ -506,7 +505,7 @@ export default function ContactPage() {
                         onChange={handleInputChange}
                         required
                         variant="outlined"
-                        placeholder="Tell us how we can help you..."
+                        placeholder={t('contact.message')}
                         error={Boolean(formErrors.message)}
                         helperText={formErrors.message}
                       />
@@ -538,10 +537,10 @@ export default function ContactPage() {
                                 }}
                               />
                             </Box>
-                            Sending...
+                            {t('contact.sending')}
                           </Box>
                         ) : (
-                          'Send Message'
+                          t('contact.send')
                         )}
                       </Button>
                     </Grid>
@@ -561,11 +560,10 @@ export default function ContactPage() {
             >
               <Box sx={{ mb: 6 }}>
                 <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                  Get in Touch
+                  {t('contact.getInTouch')}
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                  We're here to help you with any questions or concerns. Reach out to us through 
-                  any of the channels below, and we'll get back to you as soon as possible.
+                  {t('contact.contactDesc')}
                 </Typography>
               </Box>
 
@@ -601,20 +599,20 @@ export default function ContactPage() {
               {/* Office Hours */}
               <Card sx={{ mb: 4, p: 3 }}>
                 <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                  Office Hours
+                  {t('contact.officeHours')}
                 </Typography>
                 <Stack spacing={1}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Monday - Friday</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('contact.mondayFriday')}</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 'medium' }}>9:00 AM - 6:00 PM</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Saturday</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('contact.saturday')}</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 'medium' }}>10:00 AM - 4:00 PM</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Sunday</Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>Closed</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('contact.sunday')}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>{t('contact.closed')}</Typography>
                   </Box>
                 </Stack>
               </Card>
@@ -627,10 +625,10 @@ export default function ContactPage() {
                   </Typography>
                   <Box>
                     <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      Emergency Legal Support
+                      {t('contact.emergencyLegalSupport')}
                     </Typography>
                     <Typography variant="body2" color="error.main" sx={{ mb: 2 }}>
-                      For urgent legal matters that cannot wait for regular business hours.
+                      {t('contact.emergencyDesc')}
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
                       +91 7990809141
@@ -660,42 +658,42 @@ export default function ContactPage() {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
@@ -704,7 +702,7 @@ export default function ContactPage() {
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>
@@ -718,7 +716,7 @@ export default function ContactPage() {
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert onClose={() => setShowSuccess(false)} severity="success" sx={{ width: '100%' }}>
-          Thank you! Your message has been sent successfully. We&apos;ll get back to you within 24 hours.
+          {t('contact.thankYou')}
         </Alert>
       </Snackbar>
     </Box>

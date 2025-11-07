@@ -85,10 +85,10 @@ export default function UserChatPage() {
       if (data.success) {
         setCases(data.data.cases || data.data);
       } else {
-        setError(data.message || 'Failed to fetch cases');
+        setError(data.message || t('cases.fetchFailed'));
       }
     } catch (err) {
-      setError('An error occurred while fetching cases');
+      setError(t('cases.fetchError'));
     } finally {
       setLoading(false);
     }

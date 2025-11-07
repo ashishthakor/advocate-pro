@@ -73,10 +73,10 @@ export default function UserLoginPage() {
         login(data.user, data.token);
         router.push('/user/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || t('auth.loginFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('auth.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ export default function UserLoginPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <LanguageSelector />
           <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
-            {darkMode ? 'Light' : 'Dark'} mode
+            {darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}
           </Button>
         </Box>
         <Paper
@@ -129,10 +129,10 @@ export default function UserLoginPage() {
           >
             <PersonIcon color="primary" sx={{ fontSize: 48, mb: 1 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              User Login
+              {t('auth.userLogin')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Sign in to your user account
+              {t('auth.signInUser')}
             </Typography>
           </Box>
 
@@ -146,7 +146,7 @@ export default function UserLoginPage() {
 
               <TextField
                 fullWidth
-                label="Email Address"
+                label={t('auth.email')}
                 name="email"
                 type="email"
                 value={formData.email}
@@ -162,7 +162,7 @@ export default function UserLoginPage() {
 
               <TextField
                 fullWidth
-                label="Password"
+                label={t('auth.password')}
                 name="password"
                 type="password"
                 value={formData.password}
@@ -188,12 +188,12 @@ export default function UserLoginPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(25,118,210,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In as User'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signInUser')}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Don&apos;t have an account?
+                  {t('auth.noAccount')}
                 </Typography>
               </Divider>
 
@@ -203,7 +203,7 @@ export default function UserLoginPage() {
                   underline="hover"
                   sx={{ fontWeight: 500 }}
                 >
-                  Create Account
+                  {t('auth.createAccount')}
                 </Link>
               </Box>
 
@@ -236,7 +236,7 @@ export default function UserLoginPage() {
                   color="inherit"
                   sx={{ textTransform: 'none' }}
                 >
-                  Back to Home
+                  {t('auth.backToHome')}
                 </Button>
               </Box>
             </form>

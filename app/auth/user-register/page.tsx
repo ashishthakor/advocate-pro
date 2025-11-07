@@ -64,7 +64,7 @@ export default function UserRegisterPage() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsDoNotMatch'));
       setLoading(false);
       return;
     }
@@ -89,10 +89,10 @@ export default function UserRegisterPage() {
           router.push('/auth/user-login');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.message || t('auth.registrationFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('auth.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ export default function UserRegisterPage() {
             }}
           >
             <Alert severity="success" sx={{ mb: 3 }}>
-              Registration successful! Redirecting to login...
+              {t('auth.registrationSuccess')}
             </Alert>
             <CircularProgress />
           </Paper>
@@ -150,7 +150,7 @@ export default function UserRegisterPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <LanguageSelector />
           <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
-            {darkMode ? 'Light' : 'Dark'} mode
+            {darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}
           </Button>
         </Box>
         <Paper
@@ -178,10 +178,10 @@ export default function UserRegisterPage() {
           >
             <PersonIcon color="primary" sx={{ fontSize: 48, mb: 1 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              User Registration
+              {t('auth.userRegistration')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Create your user account
+              {t('auth.registerUser')}
             </Typography>
           </Box>
 
@@ -197,7 +197,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Full Name"
+                    label={t('auth.name')}
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -212,7 +212,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Email Address"
+                    label={t('auth.email')}
                     name="email"
                     type="email"
                     value={formData.email}
@@ -228,7 +228,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Phone Number"
+                    label={t('auth.phone')}
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -243,7 +243,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Address"
+                    label={t('auth.address')}
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
@@ -259,7 +259,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Password"
+                    label={t('auth.password')}
                     name="password"
                     type="password"
                     value={formData.password}
@@ -275,7 +275,7 @@ export default function UserRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Confirm Password"
+                    label={t('auth.confirmPassword')}
                     name="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
@@ -302,12 +302,12 @@ export default function UserRegisterPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(25,118,210,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Register as User'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.registerAsUser')}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Already have an account?
+                  {t('auth.haveAccount')}
                 </Typography>
               </Divider>
 
@@ -317,7 +317,7 @@ export default function UserRegisterPage() {
                   underline="hover"
                   sx={{ fontWeight: 500 }}
                 >
-                  Sign In Here
+                  {t('auth.signInHere')}
                 </Link>
               </Box>
 
@@ -329,7 +329,7 @@ export default function UserRegisterPage() {
                   color="inherit"
                   sx={{ textTransform: 'none' }}
                 >
-                  Back to Home
+                  {t('auth.backToHome')}
                 </Button>
               </Box>
             </form>

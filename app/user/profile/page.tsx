@@ -28,6 +28,7 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { apiFetch } from '@/lib/api-client';
 
 interface UserProfile {
@@ -44,6 +45,7 @@ interface UserProfile {
 
 export default function UserProfilePage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -88,10 +90,10 @@ export default function UserProfilePage() {
           address: profileData.address || '',
         });
       } else {
-        setError(response.message || 'Failed to fetch profile');
+        setError(response.message || t('profile.fetchFailed'));
       }
     } catch (err) {
-      setError('Failed to fetch profile');
+      setError(t('profile.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -123,15 +125,15 @@ export default function UserProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Profile updated successfully');
+        setSuccess(t('profile.updateSuccess'));
         setIsEditing(false);
         await fetchProfile();
         // Profile updated successfully
       } else {
-        setError(response.message || 'Failed to update profile');
+        setError(response.message || t('profile.updateFailed'));
       }
     } catch (err) {
-      setError('Failed to update profile');
+      setError(t('profile.updateFailed'));
     } finally {
       setSaving(false);
     }
@@ -144,12 +146,12 @@ export default function UserProfilePage() {
       setSuccess('');
 
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setError('New passwords do not match');
+        setError(t('profile.passwordsDoNotMatch'));
         return;
       }
 
       if (passwordData.newPassword.length < 6) {
-        setError('Password must be at least 6 characters long');
+        setError(t('profile.passwordTooShort'));
         return;
       }
 
@@ -162,17 +164,17 @@ export default function UserProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Password changed successfully');
+        setSuccess(t('profile.passwordChangeSuccess'));
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         });
       } else {
-        setError(response.message || 'Failed to change password');
+        setError(response.message || t('profile.passwordChangeFailed'));
       }
     } catch (err) {
-      setError('Failed to change password');
+      setError(t('profile.passwordChangeFailed'));
     } finally {
       setSaving(false);
     }
@@ -225,7 +227,7 @@ export default function UserProfilePage() {
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6">
-                  Personal Information
+                  {t('profile.personalInformation')}
                 </Typography>
                 {!isEditing ? (
                   <Button
@@ -233,7 +235,7 @@ export default function UserProfilePage() {
                     startIcon={<EditIcon />}
                     onClick={() => setIsEditing(true)}
                   >
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Button>
                 ) : (
                   <Box sx={{ display: 'flex', gap: 1 }}>
@@ -243,7 +245,7 @@ export default function UserProfilePage() {
                       onClick={handleSaveProfile}
                       disabled={saving}
                     >
-                      Save
+                      {t('profile.save')}
                     </Button>
                     <Button
                       variant="outlined"
@@ -251,7 +253,7 @@ export default function UserProfilePage() {
                       onClick={handleCancel}
                       disabled={saving}
                     >
-                      Cancel
+                      {t('profile.cancel')}
                     </Button>
                   </Box>
                 )}
@@ -261,7 +263,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Full Name"
+                    label={t('profile.fullName')}
                     value={formData.name}
                     onChange={handleInputChange('name')}
                     disabled={!isEditing}
@@ -277,7 +279,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Email"
+                    label={t('profile.email')}
                     type="email"
                     value={formData.email}
                     onChange={handleInputChange('email')}
@@ -294,7 +296,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Phone"
+                    label={t('profile.phone')}
                     value={formData.phone}
                     onChange={handleInputChange('phone')}
                     disabled={!isEditing}
@@ -310,7 +312,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Address"
+                    label={t('profile.address')}
                     value={formData.address}
                     onChange={handleInputChange('address')}
                     disabled={!isEditing}
@@ -351,10 +353,10 @@ export default function UserProfilePage() {
                 {profile?.email || 'user@example.com'}
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Role: {profile?.role || 'User'}
+                {t('profile.role')}: {profile?.role || t('profile.user')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
+                {t('profile.memberSince')} {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
@@ -365,14 +367,14 @@ export default function UserProfilePage() {
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 3 }}>
-                Change Password
+                {t('profile.changePassword')}
               </Typography>
 
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
-                    label="Current Password"
+                    label={t('profile.currentPassword')}
                     type={showCurrentPassword ? 'text' : 'password'}
                     value={passwordData.currentPassword}
                     onChange={handlePasswordChange('currentPassword')}
@@ -393,7 +395,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
-                    label="New Password"
+                    label={t('profile.newPassword')}
                     type={showPassword ? 'text' : 'password'}
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange('newPassword')}
@@ -414,7 +416,7 @@ export default function UserProfilePage() {
                 <Grid item xs={12} sm={4}>
                   <TextField
                     fullWidth
-                    label="Confirm New Password"
+                    label={t('profile.confirmNewPassword')}
                     type="password"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange('confirmPassword')}
@@ -428,7 +430,7 @@ export default function UserProfilePage() {
                   onClick={handleChangePassword}
                   disabled={saving || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
                 >
-                  {saving ? <CircularProgress size={20} /> : 'Change Password'}
+                  {saving ? <CircularProgress size={20} /> : t('profile.changePassword')}
                 </Button>
               </Box>
             </CardContent>

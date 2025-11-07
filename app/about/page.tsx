@@ -53,10 +53,10 @@ export default function AboutPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const stats = [
-    { number: '500+', label: 'Active Advocates' },
-    { number: '10K+', label: 'Cases Managed' },
-    { number: '99%', label: 'Client Satisfaction' },
-    { number: '15+', label: 'Years Experience' }
+    { number: '500+', label: t('about.stats.activeAdvocates') },
+    { number: '10K+', label: t('about.stats.casesManaged') },
+    { number: '99%', label: t('about.stats.clientSatisfaction') },
+    { number: '15+', label: t('about.stats.yearsExperience') }
   ];
 
   const team = [
@@ -125,10 +125,10 @@ export default function AboutPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
-            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="primary" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>{t('nav.home')}</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="primary" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -147,7 +147,7 @@ export default function AboutPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -156,7 +156,7 @@ export default function AboutPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -165,7 +165,7 @@ export default function AboutPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -177,7 +177,7 @@ export default function AboutPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -186,7 +186,7 @@ export default function AboutPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -233,22 +233,22 @@ export default function AboutPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -265,7 +265,7 @@ export default function AboutPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -276,7 +276,7 @@ export default function AboutPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -288,7 +288,7 @@ export default function AboutPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -302,7 +302,7 @@ export default function AboutPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -312,7 +312,7 @@ export default function AboutPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -347,22 +347,21 @@ export default function AboutPage() {
               gutterBottom
               sx={{ fontWeight: 'bold', mb: 6 }}
             >
-              About ARBITALK
+              {t('about.title')}
             </Typography>
             <Typography
               variant="h6"
               textAlign="center"
               sx={{ mb: 4, opacity: 0.9, fontWeight: 'medium' }}
             >
-              A product of Gentlefolk Consulting Private Limited
+              {t('about.productOf')}
             </Typography>
             <Typography
               variant={isMobile ? 'h6' : 'h5'}
               textAlign="center"
               sx={{ opacity: 0.8, maxWidth: '800px', mx: 'auto', lineHeight: 1.6 }}
             >
-              Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles. 
-              A digital arbitration and dispute resolution platform built for speed, fairness, and trust.
+              {t('about.empowering')}
             </Typography>
           </motion.div>
         </Container>
@@ -429,12 +428,10 @@ export default function AboutPage() {
                       <SpeedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
                     </Box>
                     <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      Our Mission
+                      {t('about.ourMission')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      To empower India's MSMEs and businesses to resolve commercial disputes quickly, 
-                      affordably, and fairly through digital arbitration and trusted neutral panels. 
-                      We believe justice should work for business, not against it.
+                      {t('about.missionDesc')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -465,12 +462,10 @@ export default function AboutPage() {
                       <VisibilityIcon sx={{ fontSize: 32, color: 'primary.main' }} />
                     </Box>
                     <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      Our Vision
+                      {t('about.ourVision')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      To be India's most trusted digital dispute resolution platform, where businesses 
-                      can resolve conflicts in weeks, not years — preserving relationships while 
-                      achieving fair outcomes through technology and expertise.
+                      {t('about.visionDesc')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -491,33 +486,23 @@ export default function AboutPage() {
           <Card sx={{ p: 4 }}>
             <CardContent>
               <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-                Our Story
+                {t('about.ourStory')}
               </Typography>
               <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-                Founded by business and legal professionals who understand the challenges of MSME dispute resolution
+                {t('about.storySubtitle')}
               </Typography>
               
               <Box sx={{ maxWidth: 'none' }}>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  Arbitalk was founded to solve a critical problem: India's MSMEs were losing growth 
-                  to legal delays. Court cases take 2–5 years to resolve, legal costs often exceed 
-                  the disputed amount, and business relationships break due to long, adversarial processes. 
-                  Many small businesses simply give up their rights to avoid litigation.
+                  {t('about.storyDesc1')}
                 </Typography>
                 
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
-                  Our founders recognized that businesses needed a better way — fast, fair, and digital. 
-                  We built Arbitalk to connect businesses with verified neutrals, AI-assisted tools, 
-                  and transparent processes. Our platform enables dispute resolution within 30–90 days, 
-                  not years, while preserving business relationships through collaborative, 
-                  non-adversarial settlement.
+                  {t('about.storyDesc2')}
                 </Typography>
                 
                 <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Today, Arbitalk serves MSMEs, startups, vendors, suppliers, contractors, and service 
-                  agencies across India. We've helped businesses save over ₹50+ Lakhs in legal costs 
-                  and resolve disputes in weeks instead of years. Our mission remains clear: 
-                  <strong> Justice that Works for Business.</strong>
+                  {t('about.storyDesc3')}
                 </Typography>
               </Box>
             </CardContent>
@@ -535,10 +520,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Our Leadership Team
+              {t('about.leadershipTeam')}
             </Typography>
             <Typography variant="h6" textAlign="center" sx={{ mb: 8, opacity: 0.8 }}>
-              Experienced leaders dedicated to revolutionizing business dispute resolution
+              {t('about.leadershipSubtitle')}
             </Typography>
           </motion.div>
           
@@ -586,10 +571,10 @@ export default function AboutPage() {
           <Card sx={{ p: 4 }}>
             <CardContent>
               <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-                Our Values
+                {t('about.ourValues')}
               </Typography>
               <Typography variant="h6" textAlign="center" sx={{ mb: 8, opacity: 0.8 }}>
-                The principles that guide everything we do
+                {t('about.valuesSubtitle')}
               </Typography>
               
               <Grid container spacing={4}>
@@ -618,10 +603,10 @@ export default function AboutPage() {
                           {value.icon}
                         </Box>
                         <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                          {value.title}
+                          {value.title === 'Excellence' ? t('about.excellence') : value.title === 'Integrity' ? t('about.integrity') : t('about.innovation')}
                         </Typography>
                         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                          {value.description}
+                          {value.title === 'Excellence' ? t('about.excellenceDesc') : value.title === 'Integrity' ? t('about.integrityDesc') : t('about.innovationDesc')}
                         </Typography>
                       </Box>
                     </motion.div>
@@ -643,14 +628,14 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 6 }}>
-              Contact Information
+              {t('about.contactInfo')}
             </Typography>
             <Grid container spacing={4} justifyContent="center">
               <Grid item xs={12} md={6}>
                 <Card sx={{ p: 4, height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      📧 Email
+                      📧 {t('about.email')}
                     </Typography>
                     <Typography variant="body1" color="primary.main" sx={{ mb: 2 }}>
                       <a href="mailto:info@arbitalk.com" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -669,7 +654,7 @@ export default function AboutPage() {
                 <Card sx={{ p: 4, height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      📞 Phone
+                      📞 {t('about.phone')}
                     </Typography>
                     <Typography variant="body1" color="primary.main" sx={{ mb: 2 }}>
                       <a href="tel:+917990809141" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -683,7 +668,7 @@ export default function AboutPage() {
                 <Card sx={{ p: 4 }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                      📍 Address
+                      📍 {t('about.address')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
                       11th Floor, The Citadel, Opp. Star Bazar, Adajan Gam, Surat - 395009
@@ -706,10 +691,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Ready to Resolve?
+              {t('about.readyToResolve')}
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.8 }}>
-              Take the first step toward faster, stress-free dispute resolution.
+              {t('about.readySubtitle')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
@@ -719,7 +704,7 @@ export default function AboutPage() {
                 href="/contact"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Book a Free Consultation
+                {t('about.bookConsultation')}
               </Button>
               <Button
                 variant="outlined"
@@ -728,7 +713,7 @@ export default function AboutPage() {
                 href="/auth/user-register"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Start a Case on Arbitalk
+                {t('about.startCase')}
               </Button>
             </Stack>
           </motion.div>
@@ -752,42 +737,42 @@ export default function AboutPage() {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
@@ -796,7 +781,7 @@ export default function AboutPage() {
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>

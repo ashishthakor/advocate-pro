@@ -97,7 +97,7 @@ export default function AdvocateRegisterPage() {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordsDoNotMatch'));
       setLoading(false);
       return;
     }
@@ -123,10 +123,10 @@ export default function AdvocateRegisterPage() {
           router.push('/auth/advocate-login');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.message || t('auth.registrationFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('auth.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -156,7 +156,7 @@ export default function AdvocateRegisterPage() {
             }}
           >
             <Alert severity="success" sx={{ mb: 3 }}>
-              Registration successful! Your account is pending approval. Redirecting to login...
+              {t('auth.registrationSuccessPending')}
             </Alert>
             <CircularProgress />
           </Paper>
@@ -184,7 +184,7 @@ export default function AdvocateRegisterPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
           <LanguageSelector />
           <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
-            {darkMode ? 'Light' : 'Dark'} mode
+            {darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}
           </Button>
         </Box>
         <Paper
@@ -212,10 +212,10 @@ export default function AdvocateRegisterPage() {
           >
             <WorkIcon color="secondary" sx={{ fontSize: { xs: 40, sm: 48 }, mb: 1 }} />
             <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: '1.75rem', sm: '2rem' } }}>
-              Advocate Registration
+              {t('auth.advocateRegistration')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
-              Register as an advocate to provide legal services
+              {t('auth.registerAdvocate')}
             </Typography>
           </Box>
 
@@ -230,14 +230,14 @@ export default function AdvocateRegisterPage() {
               <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 1 }}>
-                    Personal Information
+                    {t('auth.personalInformation')}
                   </Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Full Name"
+                    label={t('auth.name')}
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
@@ -252,7 +252,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Email Address"
+                    label={t('auth.email')}
                     name="email"
                     type="email"
                     value={formData.email}
@@ -268,7 +268,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Phone Number"
+                    label={t('auth.phone')}
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
@@ -283,7 +283,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Address"
+                    label={t('auth.address')}
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
@@ -296,22 +296,22 @@ export default function AdvocateRegisterPage() {
 
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
-                    Professional Information
+                    {t('auth.professionalInformation')}
                   </Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth required>
-                    <InputLabel>Specialization</InputLabel>
+                    <InputLabel>{t('auth.specialization')}</InputLabel>
                     <Select
                       name="specialization"
                       value={formData.specialization}
                       onChange={handleSelectChange}
-                      label="Specialization"
+                      label={t('auth.specialization')}
                     >
                       {specializations.map((spec) => (
                         <MenuItem key={spec} value={spec}>
-                          {spec}
+                          {t(`auth.specialization.${spec.toLowerCase().replace(/\s+/g, '')}`) || spec}
                         </MenuItem>
                       ))}
                     </Select>
@@ -321,7 +321,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Years of Experience"
+                    label={t('auth.yearsOfExperience')}
                     name="experience_years"
                     type="number"
                     value={formData.experience_years}
@@ -337,7 +337,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Bar Number"
+                    label={t('auth.barNumber')}
                     name="bar_number"
                     value={formData.bar_number}
                     onChange={handleInputChange}
@@ -351,7 +351,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="License Number"
+                    label={t('auth.licenseNumber')}
                     name="license_number"
                     value={formData.license_number}
                     onChange={handleInputChange}
@@ -364,14 +364,14 @@ export default function AdvocateRegisterPage() {
 
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
-                    Account Security
+                    {t('auth.accountSecurity')}
                   </Typography>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Password"
+                    label={t('auth.password')}
                     name="password"
                     type="password"
                     value={formData.password}
@@ -387,7 +387,7 @@ export default function AdvocateRegisterPage() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Confirm Password"
+                    label={t('auth.confirmPassword')}
                     name="confirmPassword"
                     type="password"
                     value={formData.confirmPassword}
@@ -415,12 +415,12 @@ export default function AdvocateRegisterPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Register as Advocate'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.registerAsAdvocate')}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Already have an account?
+                  {t('auth.haveAccount')}
                 </Typography>
               </Divider>
 
@@ -430,7 +430,7 @@ export default function AdvocateRegisterPage() {
                   underline="hover"
                   sx={{ fontWeight: 500 }}
                 >
-                  Sign In Here
+                  {t('auth.signInHere')}
                 </Link>
               </Box>
 
@@ -442,7 +442,7 @@ export default function AdvocateRegisterPage() {
                   color="inherit"
                   sx={{ textTransform: 'none' }}
                 >
-                  Back to Home
+                  {t('auth.backToHome')}
                 </Button>
               </Box>
             </form>

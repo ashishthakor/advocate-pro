@@ -558,7 +558,11 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 }}>{t('caseDetails.natureOfDispute')}</Typography>
                 <Typography variant="body1" sx={{ 
                   color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
-                }}>{caseDetails.nature_of_dispute || '-'}</Typography>
+                }}>
+                  {caseDetails.nature_of_dispute ? (() => {
+                    return caseDetails.nature_of_dispute;
+                  })() : '-'}
+                </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="body2" sx={{ 

@@ -297,33 +297,33 @@ export default function UserCasesPage() {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('case_number')}
                   >
-                    Case No. {sortBy === 'case_number' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    {t('cases.caseNumber')} {sortBy === 'case_number' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('title')}
                   >
-                    Title {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    {t('cases.caseTitle')} {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('status')}
                   >
-                    Status {sortBy === 'status' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    {t('dashboard.status')} {sortBy === 'status' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('priority')}
                   >
-                    Priority {sortBy === 'priority' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    {t('dashboard.priority')} {sortBy === 'priority' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('created_at')}
                   >
-                    Created {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    {t('cases.created')} {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell>{t('cases.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -337,7 +337,7 @@ export default function UserCasesPage() {
                   <TableRow>
                     <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No cases found
+                        {t('cases.noCases')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -366,12 +366,12 @@ export default function UserCasesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title="View Details">
+                          <Tooltip title={t('cases.viewDetails')}>
                             <IconButton size="small" onClick={() => handleViewDetails(c)}>
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Chat">
+                          <Tooltip title={t('cases.chat')}>
                             <IconButton 
                               size="small" 
                               color="primary"

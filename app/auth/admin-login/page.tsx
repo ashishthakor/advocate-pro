@@ -74,10 +74,10 @@ export default function AdminLoginPage() {
         login(data.user, data.token);
         router.push('/admin/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || t('auth.loginFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('auth.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function AdminLoginPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <LanguageSelector />
           <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
-            {darkMode ? 'Light' : 'Dark'} mode
+            {darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}
           </Button>
         </Box>
         <Paper
@@ -131,10 +131,10 @@ export default function AdminLoginPage() {
           >
             <SecurityIcon color="primary" sx={{ fontSize: 48, mb: 1 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              Admin Login
+              {t('auth.adminLogin')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Sign in to your admin account
+              {t('auth.signInToAdmin')}
             </Typography>
           </Box>
 
@@ -148,7 +148,7 @@ export default function AdminLoginPage() {
 
               <TextField
                 fullWidth
-                label="Admin Email"
+                label={t('auth.email')}
                 name="email"
                 type="email"
                 value={formData.email}
@@ -164,7 +164,7 @@ export default function AdminLoginPage() {
 
               <TextField
                 fullWidth
-                label="Password"
+                label={t('auth.password')}
                 name="password"
                 type="password"
                 value={formData.password}
@@ -190,11 +190,11 @@ export default function AdminLoginPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(25,118,210,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In as Admin'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signInAdmin')}
               </Button>
 
               <Alert severity="info" sx={{ mt: 2, mb: 3 }}>
-                Admin access is restricted. Contact system administrator for credentials.
+                {t('auth.adminAccessRestricted')}
               </Alert>
 
               <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -205,7 +205,7 @@ export default function AdminLoginPage() {
                   size="small"
                   color="primary"
                 >
-                  User Login
+                  {t('auth.userLogin')}
                 </Button>
                 <Button
                   component={Link}
@@ -214,7 +214,7 @@ export default function AdminLoginPage() {
                   size="small"
                   color="secondary"
                 >
-                  Advocate Login
+                  {t('auth.advocateLogin')}
                 </Button>
               </Box>
 
@@ -226,7 +226,7 @@ export default function AdminLoginPage() {
                   color="inherit"
                   sx={{ textTransform: 'none' }}
                 >
-                  Back to Home
+                  {t('auth.backToHome')}
                 </Button>
               </Box>
             </form>

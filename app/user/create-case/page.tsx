@@ -53,7 +53,7 @@ interface CreateCaseForm {
 
   // Dispute details
   relationship_between_parties: 'Client' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
-  nature_of_dispute: 'Commercial' | 'Real Estate' | 'Contract breach' | 'Invoice default' | 'Employment' | '';
+  nature_of_dispute: 'Commercial & Business Disputes' | 'E-Commerce & Consumer Complaints' | 'Real Estate & Property' | 'Employment & Workplace' | 'Financial & Banking' | 'Government / Public Sector' | 'Cross-Border / International' | 'Family & Civil' | 'Technology & Digital' | '';
   brief_description_of_dispute: string;
   occurrence_date: string; // yyyy-MM-dd
 
@@ -67,6 +67,18 @@ interface CreateCaseForm {
   sought_other: boolean;
   sought_other_text: string;
 }
+
+const NATURE_OF_DISPUTE_OPTIONS = [
+  'Commercial & Business Disputes',
+  'E-Commerce & Consumer Complaints',
+  'Real Estate & Property',
+  'Employment & Workplace',
+  'Financial & Banking',
+  'Government / Public Sector',
+  'Cross-Border / International',
+  'Family & Civil',
+  'Technology & Digital',
+] as const;
 
 export default function CreateCasePage() {
   const router = useRouter();
@@ -185,9 +197,9 @@ export default function CreateCasePage() {
           return;
         }
       }
-      setError((res as any).message || 'Failed to create case');
+      setError((res as any).message || t('createCase.failedToCreate'));
     } catch (err: any) {
-      setError(err?.message || 'Failed to create case');
+      setError(err?.message || t('createCase.failedToCreate'));
     } finally {
       setSubmitting(false);
     }
@@ -258,7 +270,7 @@ export default function CreateCasePage() {
                   type="email"
                   fullWidth
                   required
-                  helperText={form.requester_email && !isEmail(form.requester_email) ? 'Enter a valid email address' : ' '}
+                  helperText={form.requester_email && !isEmail(form.requester_email) ? t('contact.emailInvalid') : ' '}
                   error={!!form.requester_email && !isEmail(form.requester_email)}
                   value={form.requester_email}
                   onChange={handleChange('requester_email')}
@@ -357,11 +369,14 @@ export default function CreateCasePage() {
                   value={form.nature_of_dispute}
                   onChange={handleChange('nature_of_dispute')}
                 >
-                  <MenuItem value="Commercial">Commercial</MenuItem>
-                  <MenuItem value="Real Estate">Real Estate</MenuItem>
-                  <MenuItem value="Contract breach">Contract breach</MenuItem>
-                  <MenuItem value="Invoice default">Invoice default</MenuItem>
-                  <MenuItem value="Employment">Employment</MenuItem>
+                  {NATURE_OF_DISPUTE_OPTIONS.map((option) => {
+                    const key = option.toLowerCase().replace(/[&/]/g, '').replace(/\s+/g, '');
+                    return (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    );
+                  })}
                 </TextField>
               </Grid>
 
