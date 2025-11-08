@@ -55,6 +55,12 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/components/AuthProvider';
 import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
+import constitutionalMandateImage from '@/assets/images/constitutional-mandate-adr.png';
+
+// Get image source string
+const constitutionalMandateImageSrc = typeof constitutionalMandateImage === 'string' 
+  ? constitutionalMandateImage 
+  : (constitutionalMandateImage as any).src || constitutionalMandateImage;
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -741,6 +747,169 @@ export default function LandingPage() {
               </Grid>
             ))}
           </Grid>
+        </Container>
+      </Box>
+
+      {/* Constitutional and Legislative Mandate Section */}
+      <Box sx={{ bgcolor: 'background.default', py: { xs: 6, md: 8 } }}>
+        <Container maxWidth="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              textAlign="center" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 'bold', 
+                mb: 2,
+                fontSize: { xs: '1.75rem', md: '2.5rem' }
+              }}
+            >
+              {t('home.legalMandate.title')}
+            </Typography>
+            <Typography 
+              variant="h6" 
+              textAlign="center" 
+              sx={{ 
+                mb: 6, 
+                opacity: 0.8,
+                fontSize: { xs: '1rem', md: '1.25rem' },
+                maxWidth: '800px',
+                mx: 'auto'
+              }}
+            >
+              {t('home.legalMandate.subtitle')}
+            </Typography>
+
+            {/* Image Section */}
+            <Box sx={{ mb: 6, textAlign: 'center' }}>
+              <Box
+                component="img"
+                src={constitutionalMandateImageSrc}
+                alt={t('home.legalMandate.imageAlt')}
+                sx={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: 2,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' 
+                    ? '0 8px 32px rgba(0,0,0,0.4)' 
+                    : '0 8px 32px rgba(0,0,0,0.1)',
+                  mb: 4,
+                }}
+              />
+            </Box>
+
+            {/* Legal Provisions Grid */}
+            <Grid container spacing={3}>
+              {[
+                {
+                  key: 'article14',
+                  color: 'warning',
+                },
+                {
+                  key: 'companiesAct',
+                  color: 'info',
+                },
+                {
+                  key: 'commercialCourts',
+                  color: 'warning',
+                },
+                {
+                  key: 'arbitrationAct',
+                  color: 'primary',
+                },
+                {
+                  key: 'civilProcedure',
+                  color: 'primary',
+                },
+                {
+                  key: 'realEstateAct',
+                  color: 'warning',
+                },
+                {
+                  key: 'legalServices',
+                  color: 'info',
+                },
+                {
+                  key: 'industriesDisputes',
+                  color: 'warning',
+                },
+              ].map((provision, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <Paper
+                      sx={{
+                        p: 3,
+                        height: '100%',
+                        minHeight: { xs: 140, sm: 160, md: 180 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        bgcolor: 'background.paper',
+                        border: (theme) => `2px solid ${alpha(theme.palette[provision.color as 'primary' | 'warning' | 'info'].main, 0.3)}`,
+                        borderRadius: 2,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: (theme) => theme.palette.mode === 'dark' 
+                            ? '0 12px 40px rgba(0,0,0,0.5)' 
+                            : '0 12px 40px rgba(0,0,0,0.15)',
+                          borderColor: (theme) => theme.palette[provision.color as 'primary' | 'warning' | 'info'].main,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
+                        <Chip
+                          label={index + 1}
+                          color={provision.color as 'primary' | 'warning' | 'info'}
+                          sx={{
+                            fontWeight: 'bold',
+                            minWidth: 40,
+                            height: 40,
+                            fontSize: '1rem',
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              mb: 1,
+                              color: 'text.primary',
+                              lineHeight: 1.5,
+                            }}
+                          >
+                            {t(`home.legalMandate.${provision.key}.title`)}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              lineHeight: 1.6,
+                              fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                              flex: 1,
+                            }}
+                          >
+                            {t(`home.legalMandate.${provision.key}.description`)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </motion.div>
+                </Grid>
+              ))}
+            </Grid>
+          </motion.div>
         </Container>
       </Box>
 
