@@ -307,7 +307,7 @@ export default function TermsConditionsPage() {
               {t('terms.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-              {t('terms.lastUpdated')}: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {t('terms.lastUpdated')}: {new Date("11-09-2025").toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </Typography>
 
             <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, bgcolor: 'background.paper', borderRadius: 2 }}>
