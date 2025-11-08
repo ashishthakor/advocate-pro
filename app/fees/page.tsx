@@ -46,6 +46,34 @@ export default function FeesPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+  // Helper function to render text with clickable email addresses
+  const renderTextWithEmailLinks = (text: string) => {
+    // Email regex pattern
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+    const parts = text.split(emailRegex);
+    
+    return parts.map((part, index) => {
+      // Check if part is an email address
+      const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part);
+      if (isEmail) {
+        return (
+          <Link
+            key={index}
+            href={`mailto:${part}`}
+            style={{
+              color: 'inherit',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            {part}
+          </Link>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   // Arbitration Fee Schedule based on claim amounts (INR)
   const arbitrationFees = [
     { range: t('fees.arbitration.upTo50k'), fee: t('fees.arbitration.fee5k') },
@@ -350,6 +378,20 @@ export default function FeesPage() {
               </Typography>
               <Typography variant="body1" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
                 {t('fees.codeOfConduct.description')}
+                {' '}
+                <Link 
+                  href="/auth/user-login" 
+                  style={{ 
+                    color: 'inherit', 
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: 500
+                  }}
+                >
+                  {t('fees.codeOfConduct.clickHere')}
+                </Link>
+                {' '}
+                {t('fees.codeOfConduct.clickHereSuffix')}
               </Typography>
             </Paper>
 
@@ -414,7 +456,7 @@ export default function FeesPage() {
                 </Box>
                 {t('fees.arbitration.contactUs') && (
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    {t('fees.arbitration.contactUs')}
+                    {renderTextWithEmailLinks(t('fees.arbitration.contactUs'))}
                   </Typography>
                 )}
               </Box>
@@ -462,7 +504,7 @@ export default function FeesPage() {
                 </Box>
                 {t('fees.arbitration.usd.contactUs') && (
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    {t('fees.arbitration.usd.contactUs')}
+                    {renderTextWithEmailLinks(t('fees.arbitration.usd.contactUs'))}
                   </Typography>
                 )}
               </Box>
@@ -483,7 +525,7 @@ export default function FeesPage() {
                     <strong>(c)</strong> {t('fees.arbitration.noteC')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>(d)</strong> {t('fees.arbitration.noteD')}
+                    <strong>(d)</strong> {renderTextWithEmailLinks(t('fees.arbitration.noteD'))}
                   </Typography>
                 </Stack>
               </Box>
@@ -684,9 +726,30 @@ export default function FeesPage() {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
                     {t('fees.contact.writeToUs')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                    {t('fees.contact.emailValue')}
-                  </Typography>
+                  <Link 
+                    href={`mailto:${t('fees.contact.emailValue')}`}
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      color="text.secondary" 
+                      component="span"
+                      sx={{ 
+                        mb: 1,
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        }
+                      }}
+                    >
+                      {t('fees.contact.emailValue')}
+                    </Typography>
+                  </Link>
                   <Typography variant="body2" color="text.secondary">
                     {t('fees.contact.emailDescription')}
                   </Typography>
@@ -695,9 +758,30 @@ export default function FeesPage() {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
                     {t('fees.contact.supportEmail')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-                    {t('fees.contact.supportEmailValue')}
-                  </Typography>
+                  <Link 
+                    href={`mailto:${t('fees.contact.supportEmailValue')}`}
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      color="text.secondary" 
+                      component="span"
+                      sx={{ 
+                        mb: 1,
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        }
+                      }}
+                    >
+                      {t('fees.contact.supportEmailValue')}
+                    </Typography>
+                  </Link>
                   <Typography variant="body2" color="text.secondary">
                     {t('fees.contact.supportEmailDescription')}
                   </Typography>
