@@ -46,44 +46,62 @@ export default function FeesPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  const feePackages = [
-    {
-      service: 'Mediation',
-      duration: '30-60 days',
-      description: 'Fast, collaborative dispute resolution with neutral mediators',
-      tiers: [
-        { range: 'Up to ₹5 Lakhs', fee: '₹15,000', features: ['Single mediator', 'Online sessions', 'Document management', '30-day resolution'] },
-        { range: '₹5 Lakhs - ₹25 Lakhs', fee: '₹35,000', features: ['Expert mediator', 'Extended sessions', 'Priority support', '60-day resolution'] },
-        { range: 'Above ₹25 Lakhs', fee: 'Custom Quote', features: ['Senior mediator', 'Flexible scheduling', 'Dedicated support', 'Custom timeline'] },
-      ],
-    },
-    {
-      service: 'Conciliation',
-      duration: '45-75 days',
-      description: 'Structured negotiation with expert conciliators',
-      tiers: [
-        { range: 'Up to ₹5 Lakhs', fee: '₹18,000', features: ['Expert conciliator', 'Structured process', 'Document review', '45-day resolution'] },
-        { range: '₹5 Lakhs - ₹25 Lakhs', fee: '₹40,000', features: ['Senior conciliator', 'Comprehensive review', 'Priority handling', '75-day resolution'] },
-        { range: 'Above ₹25 Lakhs', fee: 'Custom Quote', features: ['Panel of conciliators', 'Extended support', 'Custom process', 'Flexible timeline'] },
-      ],
-    },
-    {
-      service: 'Arbitration',
-      duration: '60-90 days',
-      description: 'Binding dispute resolution through neutral arbitrators',
-      tiers: [
-        { range: 'Up to ₹5 Lakhs', fee: '₹25,000', features: ['Single arbitrator', 'Binding award', 'Legal compliance', '60-day resolution'] },
-        { range: '₹5 Lakhs - ₹25 Lakhs', fee: '₹60,000', features: ['Panel of arbitrators', 'Comprehensive hearing', 'Legal documentation', '90-day resolution'] },
-        { range: 'Above ₹25 Lakhs', fee: 'Custom Quote', features: ['Expert panel', 'Full arbitration process', 'Legal representation support', 'Custom timeline'] },
-      ],
-    },
+  // Helper function to render text with clickable email addresses
+  const renderTextWithEmailLinks = (text: string) => {
+    // Email regex pattern
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+    const parts = text.split(emailRegex);
+    
+    return parts.map((part, index) => {
+      // Check if part is an email address
+      const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part);
+      if (isEmail) {
+        return (
+          <Link
+            key={index}
+            href={`mailto:${part}`}
+            style={{
+              color: 'inherit',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            {part}
+          </Link>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  // Arbitration Fee Schedule based on claim amounts (INR)
+  const arbitrationFees = [
+    { range: t('fees.arbitration.upTo1l'), fee: t('fees.arbitration.fee5k') },
+    { range: t('fees.arbitration.1LTo5L'), fee: t('fees.arbitration.fee20k') },
+    { range: t('fees.arbitration.5LTo25L'), fee: t('fees.arbitration.fee20kPlus3') },
+    { range: t('fees.arbitration.25LTo50L'), fee: t('fees.arbitration.fee80kPlus2') },
+    { range: t('fees.arbitration.50LTo1Cr'), fee: t('fees.arbitration.fee130kPlus1') },
+    { range: t('fees.arbitration.1CrTo5Cr'), fee: t('fees.arbitration.fee180kPlus075') },
+    { range: t('fees.arbitration.5CrTo10Cr'), fee: t('fees.arbitration.fee480kPlus06') },
+    { range: t('fees.arbitration.10CrTo20Cr'), fee: t('fees.arbitration.fee780kPlus05') },
+    { range: t('fees.arbitration.above20Cr'), fee: t('fees.arbitration.contactUs') },
   ];
 
-  const additionalFees = [
-    { item: 'Case filing fee', amount: '₹2,000', description: 'One-time fee for initiating a case' },
-    { item: 'Document processing', amount: '₹1,000', description: 'Per document set (if applicable)' },
-    { item: 'Extended sessions', amount: '₹5,000', description: 'Per additional session beyond package' },
-    { item: 'Expedited processing', amount: '+50%', description: 'For resolution within 15 days' },
+  // Arbitration Fee Schedule based on claim amounts (USD) - Cross-border disputes
+  const arbitrationFeesUsd = [
+    { range: t('fees.arbitration.usd.upTo5k'), fee: t('fees.arbitration.usd.fee500') },
+    { range: t('fees.arbitration.usd.5kTo10k'), fee: t('fees.arbitration.usd.fee750') },
+    { range: t('fees.arbitration.usd.10kTo25k'), fee: t('fees.arbitration.usd.fee1500') },
+    { range: t('fees.arbitration.usd.25kTo50k'), fee: t('fees.arbitration.usd.fee3000Plus3') },
+    { range: t('fees.arbitration.usd.50kTo100k'), fee: t('fees.arbitration.usd.fee7500Plus2') },
+    { range: t('fees.arbitration.usd.above100k'), fee: t('fees.arbitration.usd.contactUs') },
+  ];
+
+  // Mediation/Conciliation Fees
+  const mediationFees = [
+    { item: t('fees.mediation.registrationFee'), amount: t('fees.mediation.registrationAmount') },
+    { item: t('fees.mediation.adminFee'), amount: t('fees.mediation.adminAmount') },
+    { item: t('fees.mediation.mediatorFee'), amount: t('fees.mediation.mediatorAmount') },
   ];
 
   return (
@@ -110,10 +128,10 @@ export default function FeesPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
-            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>{t('nav.home')}</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -132,7 +150,7 @@ export default function FeesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -141,7 +159,7 @@ export default function FeesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -150,7 +168,7 @@ export default function FeesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -162,7 +180,7 @@ export default function FeesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -171,7 +189,7 @@ export default function FeesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -218,22 +236,22 @@ export default function FeesPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -250,7 +268,7 @@ export default function FeesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -261,7 +279,7 @@ export default function FeesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -273,7 +291,7 @@ export default function FeesPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -287,7 +305,7 @@ export default function FeesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -297,7 +315,7 @@ export default function FeesPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -318,87 +336,13 @@ export default function FeesPage() {
               gutterBottom
               sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}
             >
-              Transparent Pricing
+              {t('fees.title')}
             </Typography>
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-              Fixed, affordable packages for fast dispute resolution
+            <Typography variant="h6" color="text.secondary" sx={{ mb: 6, textAlign: 'center' }}>
+              {t('fees.subtitle')}
             </Typography>
 
-            {/* Service Packages */}
-            <Stack spacing={6} sx={{ mb: 6 }}>
-              {feePackages.map((packageItem, index) => (
-                <Paper
-                  key={index}
-                  elevation={0}
-                  sx={{
-                    p: { xs: 3, md: 4 },
-                    bgcolor: 'background.paper',
-                    borderRadius: 2,
-                    border: (t) => `1px solid ${t.palette.divider}`,
-                  }}
-                >
-                  <Box sx={{ mb: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                      <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                        {packageItem.service}
-                      </Typography>
-                      <Chip label={packageItem.duration} size="small" color="primary" />
-                    </Box>
-                    <Typography variant="body1" color="text.secondary">
-                      {packageItem.description}
-                    </Typography>
-                  </Box>
-
-                  <Grid container spacing={3}>
-                    {packageItem.tiers.map((tier, tierIndex) => (
-                      <Grid item xs={12} md={4} key={tierIndex}>
-                        <Paper
-                          elevation={0}
-                          sx={{
-                            p: 3,
-                            height: '100%',
-                            bgcolor: tierIndex === 1 ? 'primary.main' : 'background.default',
-                            color: tierIndex === 1 ? 'primary.contrastText' : 'text.primary',
-                            borderRadius: 2,
-                            border: (t) => `1px solid ${t.palette.divider}`,
-                            display: 'flex',
-                            flexDirection: 'column',
-                          }}
-                        >
-                          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
-                            {tier.range}
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{ fontWeight: 'bold', mb: 3, color: tierIndex === 1 ? 'inherit' : 'primary.main' }}
-                          >
-                            {tier.fee}
-                          </Typography>
-                          <Stack spacing={1.5} sx={{ flex: 1 }}>
-                            {tier.features.map((feature, featureIndex) => (
-                              <Box key={featureIndex} sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                                <CheckCircleIcon
-                                  sx={{
-                                    fontSize: 20,
-                                    color: tierIndex === 1 ? 'inherit' : 'primary.main',
-                                    mt: 0.25,
-                                  }}
-                                />
-                                <Typography variant="body2" sx={{ flex: 1 }}>
-                                  {feature}
-                                </Typography>
-                              </Box>
-                            ))}
-                          </Stack>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Paper>
-              ))}
-            </Stack>
-
-            {/* Additional Fees */}
+            {/* Dispute Resolution Rules Section */}
             <Paper
               elevation={0}
               sx={{
@@ -406,40 +350,18 @@ export default function FeesPage() {
                 bgcolor: 'background.paper',
                 borderRadius: 2,
                 border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
               }}
             >
               <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-                Additional Fees
+                {t('fees.disputeResolutionRules.title')}
               </Typography>
-              <Grid container spacing={3}>
-                {additionalFees.map((fee, index) => (
-                  <Grid item xs={12} sm={6} key={index}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 1,
-                        bgcolor: 'background.default',
-                        border: (t) => `1px solid ${t.palette.divider}`,
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {fee.item}
-                        </Typography>
-                        <Typography variant="h6" color="primary.main" sx={{ fontWeight: 'bold' }}>
-                          {fee.amount}
-                        </Typography>
-                      </Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {fee.description}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+                {t('fees.disputeResolutionRules.description')}
+              </Typography>
             </Paper>
 
-            {/* Important Notes */}
+            {/* Code of Conduct and Disclosure Rules Section */}
             <Paper
               elevation={0}
               sx={{
@@ -447,43 +369,424 @@ export default function FeesPage() {
                 bgcolor: 'background.paper',
                 borderRadius: 2,
                 border: (t) => `1px solid ${t.palette.divider}`,
-                mt: 4,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.codeOfConduct.title')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+                {t('fees.codeOfConduct.description')}
+                {' '}
+                <Link 
+                  href="/auth/user-login" 
+                  style={{ 
+                    color: 'inherit', 
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    fontWeight: 500
+                  }}
+                >
+                  {t('fees.codeOfConduct.clickHere')}
+                </Link>
+                {' '}
+                {t('fees.codeOfConduct.clickHereSuffix')}
+              </Typography>
+            </Paper>
+
+            {/* Model Fee Schedule Section */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.arbitration.title')}
+              </Typography>
+
+              {/* Arbitration Subsection */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.arbitration.subtitle')}
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 2, whiteSpace: 'pre-line' }}>
+                  {t('fees.arbitration.description')}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.arbitration.inrDescription')}
+                </Typography>
+                <Box sx={{ overflowX: 'auto', mb: 2 }}>
+                  <Box
+                    component="table"
+                    sx={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      '& th, & td': {
+                        border: (t) => `1px solid ${t.palette.divider}`,
+                        padding: 2,
+                        textAlign: 'left',
+                      },
+                      '& th': {
+                        bgcolor: 'background.default',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th>{t('fees.arbitration.claimAmountInr')}</th>
+                        <th>{t('fees.arbitration.consolidatedFeeInr')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {arbitrationFees.map((fee, index) => (
+                        <tr key={index}>
+                          <td>{fee.range}</td>
+                          <td>{fee.fee}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Box>
+                </Box>
+                {t('fees.arbitration.contactUs') && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    {renderTextWithEmailLinks(t('fees.arbitration.contactUs'))}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* USD Arbitration Subsection */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 2, whiteSpace: 'pre-line' }}>
+                  {t('fees.arbitration.usdDescription')}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.arbitration.usdTableTitle')}
+                </Typography>
+                <Box sx={{ overflowX: 'auto', mb: 2 }}>
+                  <Box
+                    component="table"
+                    sx={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      '& th, & td': {
+                        border: (t) => `1px solid ${t.palette.divider}`,
+                        padding: 2,
+                        textAlign: 'left',
+                      },
+                      '& th': {
+                        bgcolor: 'background.default',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th>{t('fees.arbitration.claimAmountUsd')}</th>
+                        <th>{t('fees.arbitration.consolidatedFeeUsd')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {arbitrationFeesUsd.map((fee, index) => (
+                        <tr key={index}>
+                          <td>{fee.range}</td>
+                          <td>{fee.fee}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Box>
+                </Box>
+                {t('fees.arbitration.usd.contactUs') && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    {renderTextWithEmailLinks(t('fees.arbitration.usd.contactUs'))}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* Arbitration Notes */}
+              <Box sx={{ mt: 4 }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.arbitration.noteTitle')}
+                </Typography>
+                <Stack spacing={1.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(a)</strong> {t('fees.arbitration.noteA')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(b)</strong> {t('fees.arbitration.noteB')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(c)</strong> {t('fees.arbitration.noteC')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(d)</strong> {renderTextWithEmailLinks(t('fees.arbitration.noteD'))}
+                  </Typography>
+                </Stack>
+              </Box>
+            </Paper>
+
+            {/* Mediation/Conciliation Fees Section */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.mediation.title')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3, whiteSpace: 'pre-line' }}>
+                {t('fees.mediation.description')}
+              </Typography>
+
+              {/* Domestic Mediation/Conciliation */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.mediation.inrTitle')}
+                </Typography>
+                <Stack spacing={1.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrRegistrationFee')}</strong> – {t('fees.mediation.inrRegistrationAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrAdminFee')}</strong> – {t('fees.mediation.inrAdminAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrMediatorFee')}</strong> – {t('fees.mediation.inrMediatorAmount')}.
+                  </Typography>
+                </Stack>
+              </Box>
+
+              {/* International Mediation/Conciliation */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 2, whiteSpace: 'pre-line' }}>
+                  {t('fees.mediation.usdDescription')}
+                </Typography>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.mediation.usdTitle')}
+                </Typography>
+                <Stack spacing={1.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.usdRegistrationFee')}</strong> – {t('fees.mediation.usdRegistrationAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.usdAdminFee')}</strong> – {t('fees.mediation.usdAdminAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.usdMediatorFee')}</strong> – {t('fees.mediation.usdMediatorAmount')}.
+                  </Typography>
+                </Stack>
+              </Box>
+
+              {/* Mediation Notes */}
+              <Box>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.mediation.noteTitle')}
+                </Typography>
+                <Stack spacing={1.5}>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(a)</strong> {t('fees.mediation.noteA')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(b)</strong> {t('fees.mediation.noteB')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(c)</strong> {t('fees.mediation.noteC')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(d)</strong> {t('fees.mediation.noteD')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>(e)</strong> {t('fees.mediation.noteE')}
+                  </Typography>
+                </Stack>
+              </Box>
+            </Paper>
+
+            {/* Special Projects Section */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.projects.title')}
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      height: '100%',
+                      bgcolor: 'background.default',
+                      borderRadius: 2,
+                      border: (t) => `2px solid ${t.palette.primary.main}`,
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main', mb: 2 }}>
+                      {t('fees.projects.arbitalkForAll.title')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {t('fees.projects.arbitalkForAll.description')}
+                    </Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      height: '100%',
+                      bgcolor: 'background.default',
+                      borderRadius: 2,
+                      border: (t) => `2px solid ${t.palette.secondary.main}`,
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 2 }}>
+                      {t('fees.projects.hearTheDifference.title')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {t('fees.projects.hearTheDifference.description')}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Disclaimer */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.default',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
               }}
             >
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Important Notes
+                {t('fees.disclaimer.title')}
               </Typography>
-              <Stack spacing={1.5}>
-                <Typography variant="body1" color="text.secondary">
-                  • All fees are exclusive of applicable taxes (GST)
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  • Fees are payable in advance or as per the agreed payment schedule
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  • Custom quotes are available for disputes above ₹25 Lakhs or complex cases
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  • Refund policies apply as per our Terms and Conditions
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  • All fees are in Indian Rupees (INR)
-                </Typography>
-              </Stack>
+              <Typography variant="body1" color="text.secondary">
+                {t('fees.disclaimer.text')}
+              </Typography>
             </Paper>
 
-            {/* CTA */}
-            <Box sx={{ textAlign: 'center', mt: 6 }}>
-              <Button
-                variant="contained"
-                size="large"
-                component={Link}
-                href="/contact"
-                sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
-              >
-                Get a Custom Quote
-              </Button>
-            </Box>
+            {/* Contact Information */}
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.contact.title')}
+              </Typography>
+              <Stack spacing={3}>
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {t('fees.contact.locateUs')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {t('fees.contact.addressValue')}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {t('fees.contact.contactUs')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                    {t('fees.contact.telephone')}: {t('fees.contact.phoneValue')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('fees.contact.phoneDescription')}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {t('fees.contact.writeToUs')}
+                  </Typography>
+                  <Link 
+                    href={`mailto:${t('fees.contact.emailValue')}`}
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      color="text.secondary" 
+                      component="span"
+                      sx={{ 
+                        mb: 1,
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        }
+                      }}
+                    >
+                      {t('fees.contact.emailValue')}
+                    </Typography>
+                  </Link>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('fees.contact.emailDescription')}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {t('fees.contact.supportEmail')}
+                  </Typography>
+                  <Link 
+                    href={`mailto:${t('fees.contact.supportEmailValue')}`}
+                    style={{ 
+                      color: 'inherit', 
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                      marginBottom: '8px'
+                    }}
+                  >
+                    <Typography 
+                      variant="body1" 
+                      color="text.secondary" 
+                      component="span"
+                      sx={{ 
+                        mb: 1,
+                        '&:hover': {
+                          textDecoration: 'underline',
+                        }
+                      }}
+                    >
+                      {t('fees.contact.supportEmailValue')}
+                    </Typography>
+                  </Link>
+                  <Typography variant="body2" color="text.secondary">
+                    {t('fees.contact.supportEmailDescription')}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
           </motion.div>
         </Container>
       </Box>
@@ -497,39 +800,39 @@ export default function FeesPage() {
                 <Logo width={isMobile ? 100 : 120} height={isMobile ? 25 : 30} />
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-                Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles.
+                {t('footer.description')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                A product of Gentlefolk Consulting Private Limited
+                {t('about.productOf')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
               </Box>
             </Grid>
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>

@@ -59,62 +59,62 @@ export default function ServicesPage() {
 
   const services = [
     {
-      title: 'Mediation',
-      description: 'Fast, collaborative dispute resolution with neutral mediators. Preserve business relationships while achieving fair outcomes.',
+      title: t('services.mediation'),
+      description: t('services.mediationDesc'),
       icon: <ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['30-60 day resolution', 'Relationship preservation', 'Cost-effective', 'Confidential process']
+      features: [t('services.mediationFeatures1'), t('services.mediationFeatures2'), t('services.mediationFeatures3'), t('services.mediationFeatures4')]
     },
     {
-      title: 'Conciliation',
-      description: 'Structured negotiation process with expert conciliators helping parties reach mutually acceptable solutions.',
+      title: t('services.conciliation'),
+      description: t('services.conciliationDesc'),
       icon: <DescriptionIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Expert guidance', 'Flexible process', 'Business-friendly', 'Quick turnaround']
+      features: [t('services.conciliationFeatures1'), t('services.conciliationFeatures2'), t('services.conciliationFeatures3'), t('services.conciliationFeatures4')]
     },
     {
-      title: 'Arbitration',
-      description: 'Binding dispute resolution through neutral arbitrators. Faster than courts, fairer than litigation.',
+      title: t('services.arbitration'),
+      description: t('services.arbitrationDesc'),
       icon: <GavelIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['60-90 day resolution', 'Legally binding', 'Expert arbitrators', 'Transparent process']
+      features: [t('services.arbitrationFeatures1'), t('services.arbitrationFeatures2'), t('services.arbitrationFeatures3'), t('services.arbitrationFeatures4')]
     },
     {
-      title: 'Contract Disputes',
-      description: 'Resolve commercial contract conflicts quickly and fairly. Perfect for MSMEs, vendors, and service providers.',
+      title: t('services.contractDisputes'),
+      description: t('services.contractDisputesDesc'),
       icon: <BusinessIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Commercial contracts', 'Payment disputes', 'Service agreements', 'Partnership conflicts']
+      features: [t('services.contractDisputesFeatures1'), t('services.contractDisputesFeatures2'), t('services.contractDisputesFeatures3'), t('services.contractDisputesFeatures4')]
     },
     {
-      title: 'Business Disputes',
-      description: 'Handle vendor-supplier conflicts, partnership disputes, and commercial disagreements without court delays.',
+      title: t('services.businessDisputes'),
+      description: t('services.businessDisputesDesc'),
       icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Vendor disputes', 'Partnership issues', 'Commercial conflicts', 'MSME-focused']
+      features: [t('services.businessDisputesFeatures1'), t('services.businessDisputesFeatures2'), t('services.businessDisputesFeatures3'), t('services.businessDisputesFeatures4')]
     },
     {
-      title: 'AI-Powered Workflow',
-      description: 'Automated case management from notice drafting to hearing scheduling. Technology that works for you.',
+      title: t('services.aiWorkflow'),
+      description: t('services.aiWorkflowDesc'),
       icon: <SpeedIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      features: ['Automated notices', 'Smart scheduling', 'Document management', 'Progress tracking']
+      features: [t('services.aiWorkflowFeatures1'), t('services.aiWorkflowFeatures2'), t('services.aiWorkflowFeatures3'), t('services.aiWorkflowFeatures4')]
     }
   ];
 
   const whyChooseUs = [
     {
-      title: 'Fast Resolution',
-      description: '30-90 day dispute resolution',
+      title: t('services.fastResolution'),
+      description: t('services.fastResolutionDesc'),
       icon: <SpeedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     },
     {
-      title: 'Expert Neutrals',
-      description: 'Verified arbitrators and mediators',
+      title: t('services.expertNeutrals'),
+      description: t('services.expertNeutralsDesc'),
       icon: <PeopleIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     },
     {
-      title: 'Transparent Pricing',
-      description: 'Fixed, affordable packages',
+      title: t('services.transparentPricing'),
+      description: t('services.transparentPricingDesc'),
       icon: <CheckCircleIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     },
     {
-      title: 'Relationship-Focused',
-      description: 'Preserve business ties',
+      title: t('services.relationshipFocused'),
+      description: t('services.relationshipFocusedDesc'),
       icon: <ChatIcon sx={{ fontSize: 32, color: 'primary.main' }} />
     }
   ];
@@ -136,10 +136,10 @@ export default function ServicesPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
-            <Button color="primary" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>{t('nav.home')}</Button>
+            <Button color="primary" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -158,7 +158,7 @@ export default function ServicesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -167,7 +167,7 @@ export default function ServicesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -176,7 +176,7 @@ export default function ServicesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -188,7 +188,7 @@ export default function ServicesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -197,7 +197,7 @@ export default function ServicesPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -244,22 +244,22 @@ export default function ServicesPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -276,7 +276,7 @@ export default function ServicesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -287,7 +287,7 @@ export default function ServicesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -299,7 +299,7 @@ export default function ServicesPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -313,7 +313,7 @@ export default function ServicesPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -323,7 +323,7 @@ export default function ServicesPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -358,15 +358,14 @@ export default function ServicesPage() {
               gutterBottom
               sx={{ fontWeight: 'bold', mb: 3, fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
             >
-              Dispute Resolution Services
+              {t('services.title')}
             </Typography>
             <Typography
               variant={isMobile ? 'body1' : 'h5'}
               textAlign="center"
               sx={{ opacity: 0.8, maxWidth: { xs: '100%', md: '800px' }, mx: 'auto', fontSize: { xs: '0.95rem', md: '1.25rem' }, lineHeight: 1.6 }}
             >
-              Fast, fair, and digital dispute resolution for modern businesses. 
-              Choose from mediation, conciliation, or arbitration — all designed to resolve conflicts in weeks, not years.
+              {t('services.subtitle')}
             </Typography>
           </motion.div>
         </Container>
@@ -414,7 +413,7 @@ export default function ServicesPage() {
                       href="/contact"
                       sx={{ borderRadius: 2 }}
                     >
-                      Learn More
+                      {t('services.learnMore')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -434,29 +433,33 @@ export default function ServicesPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6 }}>
-              Why Choose Arbitalk?
+              {t('services.whyChooseUs')}
             </Typography>
             <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8 }}>
-              We combine verified neutral experts with AI-powered technology to deliver fast, fair dispute resolution.
+              {t('services.whyChooseUsDesc')}
             </Typography>
           </motion.div>
           
           <Grid container spacing={4}>
             {whyChooseUs.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
+              <Grid item xs={12} sm={6} md={3} key={index} sx={{ display: 'flex' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
                   <Paper
                     sx={{
                       p: 3,
                       textAlign: 'center',
-                      height: '100%',
+                      width: '100%',
                       bgcolor: 'background.paper',
                       border: (theme) => `1px solid ${theme.palette.divider}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      minHeight: '100%',
                     }}
                   >
                     <Box sx={{ mb: 2 }}>
@@ -478,7 +481,7 @@ export default function ServicesPage() {
                     <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
                       {item.description}
                     </Typography>
                   </Paper>
@@ -499,10 +502,10 @@ export default function ServicesPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Ready to Resolve Your Dispute?
+              {t('services.readyToResolve')}
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.8 }}>
-              Take the first step toward faster, stress-free resolution. Book a free consultation today.
+              {t('services.readySubtitle')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
@@ -512,7 +515,7 @@ export default function ServicesPage() {
                 href="/contact"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Book a Free Consultation
+                {t('services.bookConsultation')}
               </Button>
               <Button
                 variant="outlined"
@@ -521,7 +524,7 @@ export default function ServicesPage() {
                 href="/auth/user-register"
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Start a Case on Arbitalk
+                {t('services.startCase')}
               </Button>
             </Stack>
           </motion.div>
@@ -545,42 +548,42 @@ export default function ServicesPage() {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
                 {isAuthenticated && (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 )}
@@ -589,7 +592,7 @@ export default function ServicesPage() {
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>

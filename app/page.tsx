@@ -55,6 +55,12 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/components/AuthProvider';
 import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
+import constitutionalMandateImage from '@/assets/images/constitutional-mandate-adr.png';
+
+// Get image source string
+const constitutionalMandateImageSrc = typeof constitutionalMandateImage === 'string' 
+  ? constitutionalMandateImage 
+  : (constitutionalMandateImage as any).src || constitutionalMandateImage;
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -67,90 +73,90 @@ export default function LandingPage() {
 
   const problems = [
     {
-      title: 'Court cases take 2–5 years to resolve',
-      description: 'Legal delays are costing MSMEs valuable growth opportunities and resources.',
+      title: t('home.problem1'),
+      description: t('home.problem1Desc'),
     },
     {
-      title: 'Legal costs often exceed the disputed amount',
-      description: 'Traditional litigation expenses can outweigh the value of the dispute itself.',
+      title: t('home.problem2'),
+      description: t('home.problem2Desc'),
     },
     {
-      title: 'Business relationships break due to long, adversarial processes',
-      description: 'Prolonged court battles damage professional relationships beyond repair.',
+      title: t('home.problem3'),
+      description: t('home.problem3Desc'),
     },
     {
-      title: 'Many small businesses simply give up their rights',
-      description: 'The complexity and cost of litigation forces businesses to abandon legitimate claims.',
+      title: t('home.problem4'),
+      description: t('home.problem4Desc'),
     },
   ];
 
   const advantages = [
     {
       icon: <SpeedIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Fast-Track Resolutions',
-      description: 'Settle commercial disputes within 30–90 days, not years.',
+      title: t('home.fastTrack'),
+      description: t('home.fastTrackDesc'),
     },
     {
       icon: <PeopleIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Expert & Neutral Panel',
-      description: 'Work with vetted arbitrators and mediators trained in MSME and contract disputes.',
+      title: t('home.expertPanel'),
+      description: t('home.expertPanelDesc'),
     },
     {
       icon: <AssessmentIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'AI-Powered Workflow',
-      description: 'Automate everything from notice drafting to hearing scheduling.',
+      title: t('home.aiWorkflow'),
+      description: t('home.aiWorkflowDesc'),
     },
     {
       icon: <SecurityIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Transparent Pricing',
-      description: 'Fixed packages for mediation, conciliation, or arbitration.',
+      title: t('home.transparentPricing'),
+      description: t('home.transparentPricingDesc'),
     },
     {
       icon: <ChatIcon sx={{ fontSize: 40, color: 'primary.main' }} />,
-      title: 'Relationship-Focused',
-      description: 'Preserve business ties with win-win outcomes.',
+      title: t('home.relationshipFocused'),
+      description: t('home.relationshipFocusedDesc'),
     },
   ];
 
   const businessTypes = [
-    'MSMEs and Startups',
-    'Vendors, Suppliers & Contractors',
-    'Marketing, IT & Service Agencies',
-    'Builders, Consultants, and Manufacturers',
+    t('home.businessType1'),
+    t('home.businessType2'),
+    t('home.businessType3'),
+    t('home.businessType4'),
   ];
 
   const valueMatrix = [
-    { need: 'Justice without delay', deliver: 'Resolution within 90 days' },
-    { need: 'Cost transparency', deliver: 'Fixed, affordable packages' },
-    { need: 'Legal confidence', deliver: 'Verified experts & AI-backed processes' },
-    { need: 'Relationship safety', deliver: 'Collaborative, non-adversarial settlement' },
+    { need: t('home.need1'), deliver: t('home.deliver1') },
+    { need: t('home.need2'), deliver: t('home.deliver2') },
+    { need: t('home.need3'), deliver: t('home.deliver3') },
+    { need: t('home.need4'), deliver: t('home.deliver4') },
   ];
 
   const userTypes = [
     {
-      title: 'For Clients',
-      description: 'Access legal services and manage your cases with ease through our intuitive client portal.',
-      features: ['Create new cases', 'Track case status', 'Chat with advocates', 'Upload documents', 'Schedule consultations'],
-      buttonText: 'Get Started',
+      title: t('home.forClients'),
+      description: t('home.forClientsDesc'),
+      features: [t('home.clientFeatures1'), t('home.clientFeatures2'), t('home.clientFeatures3'), t('home.clientFeatures4'), t('home.clientFeatures5')],
+      buttonText: t('home.getStarted'),
       buttonLink: '/auth/user-login',
       color: 'primary',
     },
     {
-      title: 'For Advocates',
-      description: 'Streamline your practice with powerful tools designed specifically for legal professionals.',
-      features: ['View assigned cases', 'Update case status', 'Communicate with clients', 'Manage documents', 'Track billable hours'],
-      buttonText: 'Join as Advocate',
+      title: t('home.forAdvocates'),
+      description: t('home.forAdvocatesDesc'),
+      features: [t('home.advocateFeatures1'), t('home.advocateFeatures2'), t('home.advocateFeatures3'), t('home.advocateFeatures4'), t('home.advocateFeatures5')],
+      buttonText: t('common.joinAsAdvocate'),
       buttonLink: '/auth/advocate-login',
       color: 'secondary',
     },
   ];
 
   const stats = [
-    { number: '30+', label: 'Experienced Lawyers' },
-    { number: '₹50+ Lakhs', label: 'Saved' },
-    { number: '15+', label: 'Clients' },
-    { number: '8+ Years', label: 'Avg. Experience' },
-    { number: '50+', label: 'Trusted CA Firms' },
+    { number: '30+', label: t('home.stat1') },
+    { number: '₹50+ Lakhs', label: t('home.stat2') },
+    { number: '15+', label: t('home.stat3') },
+    { number: '8+ Years', label: t('home.stat4') },
+    { number: '50+', label: t('home.stat5') },
   ];
 
   return (
@@ -170,9 +176,9 @@ export default function LandingPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -191,7 +197,7 @@ export default function LandingPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -200,7 +206,7 @@ export default function LandingPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -209,7 +215,7 @@ export default function LandingPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -221,7 +227,7 @@ export default function LandingPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -230,7 +236,7 @@ export default function LandingPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -277,22 +283,22 @@ export default function LandingPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -309,7 +315,7 @@ export default function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -320,7 +326,7 @@ export default function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -332,7 +338,7 @@ export default function LandingPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -346,7 +352,7 @@ export default function LandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -356,7 +362,7 @@ export default function LandingPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -393,13 +399,13 @@ export default function LandingPage() {
                   gutterBottom
                   sx={{ fontWeight: 800, fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3.5rem' }, lineHeight: 1.1, mb: 3 }}
                 >
-                  Resolve Business Disputes. Faster, Fairer, and Without Court Hassles.
+                  {t('hero.title')}
                 </Typography>
                 <Typography
                   variant={isMobile ? 'body1' : 'h5'}
                   sx={{ mb: 4, opacity: 0.8, fontWeight: 400, maxWidth: { xs: '100%', md: '90%' }, lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.25rem' } }}
                 >
-                  Arbitalk helps businesses settle commercial conflicts quickly and affordably — through trusted neutrals and digital arbitration tools.
+                  {t('hero.subtitle')}
                 </Typography>
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 4 }}>
                   <motion.div
@@ -421,7 +427,7 @@ export default function LandingPage() {
                         boxShadow: (theme) => theme.palette.mode === 'dark' ? '0 8px 32px rgba(0,0,0,0.4)' : '0 8px 32px rgba(25,118,210,0.3)',
                       }}
                     >
-                      Get Started
+                      {t('hero.getStarted')}
                     </Button>
                   </motion.div>
                   <motion.div
@@ -444,7 +450,7 @@ export default function LandingPage() {
                         '&:hover': { borderWidth: 2 },
                       }}
                     >
-                      Book a Free Consultation
+                      {t('about.bookConsultation')}
                     </Button>
                   </motion.div>
                 </Stack>
@@ -528,12 +534,71 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant={isMobile ? 'h4' : 'h3'} component="h2" textAlign="center" gutterBottom sx={{ mb: 2, fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}>
-              India's MSMEs are losing growth to legal delays.
+              {t('home.problemsTitle')}
             </Typography>
-            <Typography variant={isMobile ? 'body1' : 'h6'} textAlign="center" sx={{ mb: 6, opacity: 0.8, fontStyle: 'italic', fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
+            <Typography variant={isMobile ? 'body1' : 'h6'} textAlign="center" sx={{ mb: 4, opacity: 0.8, fontStyle: 'italic', fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
               Justice delayed is growth denied.
             </Typography>
           </motion.div>
+          
+          {/* Niti Aayog Statistic */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <Paper
+              sx={{
+                p: { xs: 3, md: 4 },
+                mb: 6,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                borderRadius: 2,
+                position: 'relative',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                <Box
+                  sx={{
+                    minWidth: 4,
+                    height: '100%',
+                    bgcolor: 'primary.main',
+                    borderRadius: 1,
+                    mt: 0.5,
+                  }}
+                />
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant={isMobile ? 'body1' : 'h6'}
+                    sx={{
+                      fontStyle: 'italic',
+                      lineHeight: 1.8,
+                      color: 'text.primary',
+                      fontSize: { xs: '0.95rem', md: '1.1rem' },
+                      mb: 1,
+                    }}
+                  >
+                    {t('home.nitiAayogStatistic')}
+                  </Typography>
+                  {/* <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontStyle: 'normal',
+                      fontSize: { xs: '0.75rem', md: '0.875rem' },
+                      display: 'block',
+                      textAlign: 'right',
+                      mt: 1,
+                    }}
+                  >
+                    — Niti Aayog
+                  </Typography> */}
+                </Box>
+              </Box>
+            </Paper>
+          </motion.div>
+
           <Grid container spacing={3}>
             {problems.map((problem, index) => (
               <Grid item xs={12} sm={6} md={6} lg={6} key={index}>
@@ -576,7 +641,7 @@ export default function LandingPage() {
             We simplify dispute resolution for modern businesses.
           </Typography>
           <Typography variant="h6" textAlign="center" sx={{ mb: 6, opacity: 0.8, maxWidth: '900px', mx: 'auto' }}>
-            Resolve disputes in weeks, not years — without stepping into a courtroom. Arbitalk connects you with verified neutrals, AI-assisted tools, and transparent processes — all built for speed, fairness, and trust.
+            {t('hero.subtitle')}
           </Typography>
         </motion.div>
       </Container>
@@ -591,7 +656,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6, fontWeight: 'bold' }}>
-              Why Businesses Choose Arbitalk
+              {t('home.advantagesTitle')}
             </Typography>
           </motion.div>
           <Grid container spacing={4}>
@@ -632,7 +697,7 @@ export default function LandingPage() {
           viewport={{ once: true }}
         >
           <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6, fontWeight: 'bold' }}>
-            Built for Businesses Like Yours
+            {t('home.businessTypes')}
           </Typography>
           <Grid container spacing={2} justifyContent="center">
             {businessTypes.map((type, index) => (
@@ -668,7 +733,7 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ mb: 6, fontWeight: 'bold' }}>
-              The Value We Deliver
+              {t('home.valueMatrix')}
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
@@ -709,12 +774,13 @@ export default function LandingPage() {
         <Container maxWidth="lg">
           <Grid container spacing={4} justifyContent="center">
             {stats.map((stat, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index}>
+              <Grid item xs={6} sm={4} md={2.4} key={index} sx={{ display: 'flex' }}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
                   <Paper
                     sx={{
@@ -722,6 +788,11 @@ export default function LandingPage() {
                       textAlign: 'center',
                       bgcolor: 'background.paper',
                       border: (theme) => `1px solid ${theme.palette.divider}`,
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      minHeight: '100%',
                     }}
                   >
                     <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
@@ -738,6 +809,169 @@ export default function LandingPage() {
         </Container>
       </Box>
 
+      {/* Constitutional and Legislative Mandate Section */}
+      <Box sx={{ bgcolor: 'background.default', py: { xs: 6, md: 8 } }}>
+        <Container maxWidth="lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Typography 
+              variant="h3" 
+              component="h2" 
+              textAlign="center" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 'bold', 
+                mb: 2,
+                fontSize: { xs: '1.75rem', md: '2.5rem' }
+              }}
+            >
+              {t('home.legalMandate.title')}
+            </Typography>
+            <Typography 
+              variant="h6" 
+              textAlign="center" 
+              sx={{ 
+                mb: 6, 
+                opacity: 0.8,
+                fontSize: { xs: '1rem', md: '1.25rem' },
+                maxWidth: '800px',
+                mx: 'auto'
+              }}
+            >
+              {t('home.legalMandate.subtitle')}
+            </Typography>
+
+            {/* Image Section */}
+            <Box sx={{ mb: 6, textAlign: 'center' }}>
+              <Box
+                component="img"
+                src={constitutionalMandateImageSrc}
+                alt={t('home.legalMandate.imageAlt')}
+                sx={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  borderRadius: 2,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' 
+                    ? '0 8px 32px rgba(0,0,0,0.4)' 
+                    : '0 8px 32px rgba(0,0,0,0.1)',
+                  mb: 4,
+                }}
+              />
+            </Box>
+
+            {/* Legal Provisions Grid */}
+            <Grid container spacing={3}>
+              {[
+                {
+                  key: 'article14',
+                  color: 'warning',
+                },
+                {
+                  key: 'companiesAct',
+                  color: 'info',
+                },
+                {
+                  key: 'commercialCourts',
+                  color: 'warning',
+                },
+                {
+                  key: 'arbitrationAct',
+                  color: 'primary',
+                },
+                {
+                  key: 'civilProcedure',
+                  color: 'primary',
+                },
+                {
+                  key: 'realEstateAct',
+                  color: 'warning',
+                },
+                {
+                  key: 'legalServices',
+                  color: 'info',
+                },
+                {
+                  key: 'industriesDisputes',
+                  color: 'warning',
+                },
+              ].map((provision, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                  >
+                    <Paper
+                      sx={{
+                        p: 3,
+                        height: '100%',
+                        minHeight: { xs: 140, sm: 160, md: 180 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        bgcolor: 'background.paper',
+                        border: (theme) => `2px solid ${alpha(theme.palette[provision.color as 'primary' | 'warning' | 'info'].main, 0.3)}`,
+                        borderRadius: 2,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: (theme) => theme.palette.mode === 'dark' 
+                            ? '0 12px 40px rgba(0,0,0,0.5)' 
+                            : '0 12px 40px rgba(0,0,0,0.15)',
+                          borderColor: (theme) => theme.palette[provision.color as 'primary' | 'warning' | 'info'].main,
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, flex: 1 }}>
+                        <Chip
+                          label={index + 1}
+                          color={provision.color as 'primary' | 'warning' | 'info'}
+                          sx={{
+                            fontWeight: 'bold',
+                            minWidth: 40,
+                            height: 40,
+                            fontSize: '1rem',
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 600,
+                              mb: 1,
+                              color: 'text.primary',
+                              lineHeight: 1.5,
+                            }}
+                          >
+                            {t(`home.legalMandate.${provision.key}.title`)}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              lineHeight: 1.6,
+                              fontSize: { xs: '0.875rem', md: '0.9375rem' },
+                              flex: 1,
+                            }}
+                          >
+                            {t(`home.legalMandate.${provision.key}.description`)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </motion.div>
+                </Grid>
+              ))}
+            </Grid>
+          </motion.div>
+        </Container>
+      </Box>
+
       {/* CTA Section */}
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -748,10 +982,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-              Ready to Resolve?
+              {t('about.readyToResolve')}
             </Typography>
             <Typography variant="h6" sx={{ mb: 6, opacity: 0.8 }}>
-              Take the first step toward faster, stress-free resolution.
+              {t('about.readySubtitle')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
               <Button
@@ -762,7 +996,7 @@ export default function LandingPage() {
                 startIcon={<PersonAddIcon />}
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2 }}
               >
-                Book a Free Consultation
+                {t('about.bookConsultation')}
               </Button>
               <Button
                 variant="outlined"
@@ -772,7 +1006,7 @@ export default function LandingPage() {
                 startIcon={<ArrowForwardIcon />}
                 sx={{ py: 1.5, px: 4, fontSize: '1.1rem', borderRadius: 2, borderWidth: 2, '&:hover': { borderWidth: 2 } }}
               >
-                Start a Case on Arbitalk
+                {t('about.startCase')}
               </Button>
             </Stack>
           </motion.div>
@@ -817,60 +1051,60 @@ export default function LandingPage() {
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-              <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-              <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+              <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+              <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
                 {isAuthenticated ? (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Client Login
+                      {t('home.clientLogin')}
                     </Button>
                     <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>
-                      Advocate Login
+                      {t('home.advocateLogin')}
                     </Button>
                   </>
                 )}
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
                 {isAuthenticated ? (
                   <>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/dashboard' : user?.role === 'advocate' ? '/advocate/dashboard' : '/user/dashboard'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Dashboard
+                      {t('common.dashboard')}
                     </Button>
                     <Button color="inherit" component={Link} href={user?.role === 'admin' ? '/admin/profile' : user?.role === 'advocate' ? '/advocate/profile' : '/user/profile'} sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      My Profile
+                      {t('common.myProfile')}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button color="inherit" component={Link} href="/auth/user-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Client Login
+                      {t('home.clientLogin')}
                     </Button>
                     <Button color="inherit" component={Link} href="/auth/advocate-login" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>
-                      Advocate Login
+                      {t('home.advocateLogin')}
                     </Button>
                   </>
                 )}
@@ -879,7 +1113,7 @@ export default function LandingPage() {
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>

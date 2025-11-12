@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { useLanguage } from '@/components/LanguageProvider';
 import { io, Socket } from 'socket.io-client';
 
 interface ChatMessage {
@@ -63,6 +64,7 @@ interface Case {
 }
 
 export default function ChatPage({ params }: { params: Promise<{ caseId: string }> }) {
+  const { t } = useLanguage();
   const [caseId, setCaseId] = useState<string>('');
 
   useEffect(() => {
@@ -316,13 +318,13 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
                   {caseData?.case_number} - {caseData?.title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Status: {caseData?.status} | Advocate: {caseData?.advocate_name || 'Not Assigned'}
+                  {t('dashboard.status')}: {caseData?.status} | {t('dashboard.advocate')}: {caseData?.advocate_name || t('chat.notAssigned')}
                 </Typography>
               </Box>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
               <Chip
-                label={isConnected ? 'Connected' : 'Disconnected'}
+                label={isConnected ? t('chat.connected') : t('chat.disconnected')}
                 color={isConnected ? 'success' : 'error'}
                 size="small"
               />
@@ -337,10 +339,10 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           {messages.length === 0 ? (
             <Box textAlign="center" py={4}>
               <Typography variant="h6" color="text.secondary">
-                No messages yet
+                {t('chat.noMessagesYet')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Start the conversation by sending a message
+                {t('chat.startConversation')}
               </Typography>
             </Box>
           ) : (
@@ -434,7 +436,7 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           <Box display="flex" gap={1}>
             <TextField
               fullWidth
-              placeholder="Type your message..."
+              placeholder={t('chat.typeMessage')}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={(e) => {
@@ -463,7 +465,7 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
               disabled={!newMessage.trim() || !isConnected}
               startIcon={<SendIcon />}
             >
-              Send
+              {t('chat.send')}
             </Button>
           </Box>
         </Box>
@@ -471,7 +473,7 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
 
       {/* File Upload Dialog */}
       <Dialog open={fileDialogOpen} onClose={() => setFileDialogOpen(false)}>
-        <DialogTitle>Upload File</DialogTitle>
+        <DialogTitle>{t('chat.uploadFile')}</DialogTitle>
         <DialogContent>
           <input
             type="file"
@@ -481,19 +483,19 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           />
           {selectedFile && (
             <Typography variant="body2" color="text.secondary">
-              Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              {t('chat.selected')}: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
             </Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setFileDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setFileDialogOpen(false)}>{t('createCase.cancel')}</Button>
           <Button
             variant="contained"
             onClick={handleFileUpload}
             disabled={!selectedFile || uploading}
             startIcon={uploading ? <CircularProgress size={20} /> : <AttachFileIcon />}
           >
-            {uploading ? 'Uploading...' : 'Upload'}
+            {uploading ? t('chat.uploading') : t('chat.upload')}
           </Button>
         </DialogActions>
       </Dialog>

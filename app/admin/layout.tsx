@@ -18,6 +18,7 @@ export default function AdminLayout({
     if (pathname.includes('/users')) return 'Users';
     if (pathname.includes('/advocates')) return 'Advocates';
     if (pathname.includes('/cases')) return 'Cases';
+    if (pathname.includes('/notices')) return 'Notices';
     if (pathname.includes('/chat')) return 'Chats';
     if (pathname.includes('/assignments')) return 'Cases Assignments';
     if (pathname.includes('/profile')) return 'Profile';

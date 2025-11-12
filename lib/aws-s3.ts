@@ -34,16 +34,60 @@ export class S3FileUploader {
   }
 
   /**
+   * Check if bucket exists, create if it doesn't
+   */
+  async ensureBucketExists(): Promise<boolean> {
+    try {
+      // Check if bucket exists
+      await s3.headBucket({ Bucket: this.bucketName }).promise();
+      return true;
+    } catch (error: any) {
+      // If bucket doesn't exist (404), create it
+      if (error.statusCode === 404 || error.code === 'NotFound') {
+        try {
+          const region = process.env.AWS_REGION || 'us-east-1';
+          const createParams: any = {
+            Bucket: this.bucketName,
+          };
+          
+          // LocationConstraint is not needed for us-east-1
+          if (region !== 'us-east-1') {
+            createParams.CreateBucketConfiguration = {
+              LocationConstraint: region,
+            };
+          }
+          
+          await s3.createBucket(createParams).promise();
+          console.log(`Bucket ${this.bucketName} created successfully`);
+          return true;
+        } catch (createError) {
+          console.error('Error creating bucket:', createError);
+          return false;
+        }
+      }
+      console.error('Error checking bucket:', error);
+      return false;
+    }
+  }
+
+  /**
    * Upload file to S3 bucket
    */
   async uploadFile(params: UploadFileParams): Promise<S3UploadResult> {
     try {
       const { file, fileName, mimeType, folder = 'documents', caseId, userId } = params;
       
-      // Generate unique file key with new structure: <user_id_with_user>/<case_id_with_case>/file_name
-      const fileExtension = fileName.split('.').pop();
-      const uniqueFileName = `${uuidv4()}.${fileExtension}`;
-      const fileKey = `${userId ? `user-${userId}` : 'anonymous'}/${caseId ? `case-${caseId}` : 'general'}/${uniqueFileName}`;
+      // Use folder as prefix if provided, otherwise use default structure
+      let fileKey: string;
+      if (folder && folder !== 'documents') {
+        // For notices, use the folder (prefix) directly with the filename
+        fileKey = `${folder}${fileName}`;
+      } else {
+        // For other files, use the default structure
+        const fileExtension = fileName.split('.').pop();
+        const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+        fileKey = `${userId ? `user-${userId}` : 'anonymous'}/${caseId ? `case-${caseId}` : 'general'}/${uniqueFileName}`;
+      }
 
       const uploadParams = {
         Bucket: this.bucketName,

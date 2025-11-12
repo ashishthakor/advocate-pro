@@ -4,6 +4,7 @@ const User = require("./User")(sequelize, DataTypes);
 const Case = require("./Case")(sequelize, DataTypes);
 const ChatMessage = require("./ChatMessage")(sequelize, DataTypes);
 const Document = require("./Document")(sequelize, DataTypes);
+const Notice = require("./Notice")(sequelize, DataTypes);
 
 // Define associations
 
@@ -31,9 +32,14 @@ Document.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
 User.hasMany(Document, { as: 'uploadedDocuments', foreignKey: 'uploaded_by' });
 Document.belongsTo(User, { as: 'uploader', foreignKey: 'uploaded_by' });
 
+// Case-Notice Relations (Case can have many notices)
+Case.hasMany(Notice, { as: 'notices', foreignKey: 'case_id' });
+Notice.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
+
 module.exports = {
   User,
   Case,
   ChatMessage,
-  Document
+  Document,
+  Notice
 };

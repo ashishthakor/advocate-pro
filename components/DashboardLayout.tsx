@@ -31,6 +31,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import MessageIcon from '@mui/icons-material/Message';
+import DescriptionIcon from '@mui/icons-material/Description';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
@@ -98,28 +99,29 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
     switch (userType) {
       case 'admin':
         return [
-          { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
-          { text: 'Users', icon: <PeopleIcon />, path: '/admin/users' },
-          { text: 'Advocates', icon: <WorkIcon />, path: '/admin/advocates' },
-          { text: 'Cases', icon: <FolderIcon />, path: '/admin/cases' },
-          { text: 'Updates', icon: <MessageIcon />, path: '/admin/chat' },
-          { text: 'Assignments', icon: <AssignmentIcon />, path: '/admin/assignments' },
+          { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/admin/dashboard' },
+          { text: t('layout.users'), icon: <PeopleIcon />, path: '/admin/users' },
+          { text: t('layout.advocates'), icon: <WorkIcon />, path: '/admin/advocates' },
+          { text: t('layout.cases'), icon: <FolderIcon />, path: '/admin/cases' },
+          // { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/admin/notices' },
+          { text: t('layout.updates'), icon: <MessageIcon />, path: '/admin/chat' },
+          { text: t('layout.assignments'), icon: <AssignmentIcon />, path: '/admin/assignments' },
         ];
       case 'advocate':
         return [
-          { text: 'Dashboard', icon: <DashboardIcon />, path: '/advocate/dashboard' },
-          { text: 'Assigned Cases', icon: <FolderIcon />, path: '/advocate/cases' },
-          { text: 'Clients', icon: <PeopleIcon />, path: '/advocate/clients' },
-          { text: 'Updates', icon: <MessageIcon />, path: '/advocate/chat' },
-          { text: 'Profile', icon: <PersonIcon />, path: '/advocate/profile' },
+          { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/advocate/dashboard' },
+          { text: t('layout.assignedCases'), icon: <FolderIcon />, path: '/advocate/cases' },
+          { text: t('layout.clients'), icon: <PeopleIcon />, path: '/advocate/clients' },
+          { text: t('layout.updates'), icon: <MessageIcon />, path: '/advocate/chat' },
+          { text: t('common.profile'), icon: <PersonIcon />, path: '/advocate/profile' },
         ];
       case 'user':
         return [
-          { text: 'Dashboard', icon: <DashboardIcon />, path: '/user/dashboard' },
-          { text: 'My Cases', icon: <FolderIcon />, path: '/user/cases' },
-          { text: 'Create Case', icon: <AddBoxIcon />, path: '/user/create-case' },
-          { text: 'Updates', icon: <MessageIcon />, path: '/user/chat' },
-          { text: 'Profile', icon: <PersonIcon />, path: '/user/profile' },
+          { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/user/dashboard' },
+          { text: t('layout.myCases'), icon: <FolderIcon />, path: '/user/cases' },
+          { text: t('layout.createCase'), icon: <AddBoxIcon />, path: '/user/create-case' },
+          { text: t('layout.updates'), icon: <MessageIcon />, path: '/user/chat' },
+          { text: t('common.profile'), icon: <PersonIcon />, path: '/user/profile' },
         ];
       default:
         return [];
@@ -136,14 +138,14 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
               {userType.charAt(0).toUpperCase() + userType.slice(1)}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Panel
+              {t('common.panel')}
             </Typography>
           </Box>
         </Box>
       </Toolbar>
       <Box sx={{ px: 1.5, pb: 1 }}>
         <Typography variant="overline" color="text.secondary" sx={{ px: 1 }}>
-          Navigation
+          {t('common.navigation')}
         </Typography>
       </Box>
       <List sx={{ px: 1 }}>
@@ -230,12 +232,12 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <LanguageSelector />
-            <Tooltip title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+            <Tooltip title={darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}>
               <IconButton color="inherit" onClick={toggleDarkMode}>
                 {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
             </Tooltip>
-            <Tooltip title="Open settings">
+            <Tooltip title={t('common.openSettings')}>
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt={user?.name || user?.email} src="/static/images/avatar/2.jpg" />
               </IconButton>
@@ -251,10 +253,10 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
               onClose={handleCloseUserMenu}
             >
               <MenuItem onClick={handleCloseUserMenu} component={Link} href={`/${userType}/profile`}>
-                <Typography textAlign="center">Profile</Typography>
+                <Typography textAlign="center">{t('common.profile')}</Typography>
               </MenuItem>
               <MenuItem onClick={() => { handleCloseUserMenu(); logout(); }}>
-                <Typography textAlign="center">Logout</Typography>
+                <Typography textAlign="center">{t('common.logout')}</Typography>
               </MenuItem>
             </Menu>
           </Box>

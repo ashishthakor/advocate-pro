@@ -110,11 +110,11 @@ export default function UserDashboard() {
       if (response.success) {
         setStats(response.data);
       } else {
-        setError(response.message || 'Failed to fetch dashboard data');
+        setError(response.message || t('dashboard.fetchFailed'));
       }
     } catch (err) {
       console.error('Dashboard fetch error:', err);
-      setError('Failed to fetch dashboard data');
+      setError(t('dashboard.fetchFailed'));
     } finally {
       setLoading(false);
     }

@@ -44,6 +44,34 @@ export default function TermsConditionsPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+  // Helper function to render text with clickable email addresses
+  const renderTextWithEmailLinks = (text: string) => {
+    // Email regex pattern
+    const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g;
+    const parts = text.split(emailRegex);
+    
+    return parts.map((part, index) => {
+      // Check if part is an email address
+      const isEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(part);
+      if (isEmail) {
+        return (
+          <Link
+            key={index}
+            href={`mailto:${part}`}
+            style={{
+              color: 'inherit',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            {part}
+          </Link>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
   return (
     <Box>
       {/* Header */}
@@ -68,10 +96,10 @@ export default function TermsConditionsPage() {
           
           {/* Desktop Navigation */}
           <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
-            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>Home</Button>
-            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>Services</Button>
-            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>About</Button>
-            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>Contact</Button>
+            <Button color="inherit" component={Link} href="/" sx={{ fontSize: '0.9rem' }}>{t('nav.home')}</Button>
+            <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
+            <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
+            <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -90,7 +118,7 @@ export default function TermsConditionsPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Dashboard
+                  {t('common.dashboard')}
                 </Button>
                 <Button 
                   color="inherit" 
@@ -99,7 +127,7 @@ export default function TermsConditionsPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  My Profile
+                  {t('common.myProfile')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -108,7 +136,7 @@ export default function TermsConditionsPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Logout
+                  {t('common.logout')}
                 </Button>
               </>
             ) : (
@@ -120,7 +148,7 @@ export default function TermsConditionsPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Client
+                  {t('common.joinAsClient')}
                 </Button>
                 <Button 
                   color="secondary" 
@@ -129,7 +157,7 @@ export default function TermsConditionsPage() {
                   size="small"
                   sx={{ fontSize: '0.85rem', px: 1.5 }}
                 >
-                  Join as Advocate
+                  {t('common.joinAsAdvocate')}
                 </Button>
               </>
             )}
@@ -176,22 +204,22 @@ export default function TermsConditionsPage() {
         <List>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Home" />
+              <ListItemText primary={t('nav.home')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/services" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Services" />
+              <ListItemText primary={t('common.services')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/about" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="About" />
+              <ListItemText primary={t('nav.about')} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
-              <ListItemText primary="Contact" />
+              <ListItemText primary={t('nav.contact')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -208,7 +236,7 @@ export default function TermsConditionsPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Dashboard
+                {t('common.dashboard')}
               </Button>
               <Button
                 fullWidth
@@ -219,7 +247,7 @@ export default function TermsConditionsPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                My Profile
+                {t('common.myProfile')}
               </Button>
               <Button
                 fullWidth
@@ -231,7 +259,7 @@ export default function TermsConditionsPage() {
                   logout();
                 }}
               >
-                Logout
+                {t('common.logout')}
               </Button>
             </>
           ) : (
@@ -245,7 +273,7 @@ export default function TermsConditionsPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Join as Client
+                {t('common.joinAsClient')}
               </Button>
               <Button
                 fullWidth
@@ -255,7 +283,7 @@ export default function TermsConditionsPage() {
                 href="/auth/advocate-login"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Join as Advocate
+                {t('common.joinAsAdvocate')}
               </Button>
             </>
           )}
@@ -264,7 +292,7 @@ export default function TermsConditionsPage() {
 
       {/* Content */}
       <Box sx={{ bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)', py: { xs: 4, md: 6 } }}>
-        <Container maxWidth="md">
+        <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -276,207 +304,496 @@ export default function TermsConditionsPage() {
               gutterBottom
               sx={{ fontWeight: 'bold', mb: 4, textAlign: 'center' }}
             >
-              Terms and Conditions
+              {t('terms.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-              Last Updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {t('terms.lastUpdated')}: {new Date("11-09-2025").toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </Typography>
 
             <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, bgcolor: 'background.paper', borderRadius: 2 }}>
               <Stack spacing={4}>
-                {/* Section 1 */}
+                {/* Introduction Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    1. Acceptance of Terms
+                    {t('terms.introduction.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    By accessing and using Arbitalk, a digital dispute resolution platform operated by Gentlefolk Consulting Private Limited, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not use our services.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.introduction.description1')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    Arbitalk provides online mediation, conciliation, and arbitration services for business disputes, primarily serving MSMEs (Micro, Small, and Medium Enterprises) across India.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.introduction.description2')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.introduction.description3')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.introduction.description4')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.introduction.description5')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.introduction.description6')}
                   </Typography>
                 </Box>
 
-                {/* Section 2 */}
+                {/* Disclaimer Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    2. Services Description
+                    {t('terms.disclaimer.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    Arbitalk offers the following dispute resolution services:
-                  </Typography>
-                  <Box component="ul" sx={{ pl: 3, mb: 2 }}>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        <strong>Mediation:</strong> A voluntary, confidential process where a neutral mediator facilitates communication between parties to reach a mutually acceptable resolution.
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        <strong>Conciliation:</strong> A structured negotiation process with expert conciliators helping parties reach mutually acceptable solutions.
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        <strong>Arbitration:</strong> A binding dispute resolution process where neutral arbitrators make decisions that are legally enforceable.
-                      </Typography>
-                    </li>
-                  </Box>
-                  <Typography variant="body1" color="text.secondary">
-                    All services are provided through our digital platform, which includes case management, document sharing, and communication tools.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.disclaimer.description')}
                   </Typography>
                 </Box>
 
-                {/* Section 3 */}
+                {/* Eligibility Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    3. User Accounts and Registration
+                    {t('terms.eligibility.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    To use Arbitalk services, you must create an account and provide accurate, current, and complete information. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    You agree to:
-                  </Typography>
-                  <Box component="ul" sx={{ pl: 3, mb: 2 }}>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Provide accurate and truthful information during registration
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Keep your account information updated
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Notify us immediately of any unauthorized use of your account
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Accept responsibility for all activities under your account
-                      </Typography>
-                    </li>
-                  </Box>
-                </Box>
-
-                {/* Section 4 */}
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    4. Fees and Payment
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    Our fee structure is transparent and available on our Fees page. Fees vary based on the type of service (mediation, conciliation, or arbitration) and the dispute value. All fees are payable in advance or as per the payment schedule agreed upon.
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    Refund policies:
-                  </Typography>
-                  <Box component="ul" sx={{ pl: 3, mb: 2 }}>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Fees paid for services not yet commenced may be refundable, subject to administrative charges
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        Once services have commenced, refunds are at our sole discretion
-                      </Typography>
-                    </li>
-                    <li>
-                      <Typography variant="body1" color="text.secondary" component="span">
-                        All refund requests must be submitted in writing within 7 days of payment
-                      </Typography>
-                    </li>
-                  </Box>
-                </Box>
-
-                {/* Section 5 */}
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    5. Confidentiality and Privacy
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    All proceedings conducted through Arbitalk are confidential. Parties, mediators, conciliators, and arbitrators agree to maintain strict confidentiality regarding all information shared during the dispute resolution process.
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    We are committed to protecting your privacy. Our Privacy Policy, which forms part of these Terms, explains how we collect, use, and protect your personal information.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.eligibility.description')}
                   </Typography>
                 </Box>
 
-                {/* Section 6 */}
+                {/* Registration Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    6. Intellectual Property
+                    {t('terms.registration.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    All content on the Arbitalk platform, including but not limited to text, graphics, logos, software, and design, is the property of Gentlefolk Consulting Private Limited and is protected by Indian and international copyright and trademark laws.
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    You may not reproduce, distribute, modify, or create derivative works from any content on our platform without our express written permission.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {renderTextWithEmailLinks(t('terms.registration.description'))}
                   </Typography>
                 </Box>
 
-                {/* Section 7 */}
+                {/* User Account, Password and Security Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    7. Limitation of Liability
+                    {t('terms.accountSecurity.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    Arbitalk acts as a platform facilitating dispute resolution services. We do not guarantee specific outcomes or results from any mediation, conciliation, or arbitration process.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.accountSecurity.description1')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    To the maximum extent permitted by law, Gentlefolk Consulting Private Limited shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of our services.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {renderTextWithEmailLinks(t('terms.accountSecurity.description2'))}
                   </Typography>
                 </Box>
 
-                {/* Section 8 */}
+                {/* Communication Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    8. Dispute Resolution
+                    {t('terms.communication.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    Any disputes arising from these Terms and Conditions or your use of Arbitalk services shall be resolved through arbitration in accordance with the Arbitration and Conciliation Act, 2015 of India.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {renderTextWithEmailLinks(t('terms.communication.description1'))}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    The arbitration shall be conducted in English, and the seat of arbitration shall be in India.
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {(() => {
+                      const text = t('terms.communication.description2');
+                      const parts = text.split('Click here');
+                      if (parts.length === 2) {
+                        return (
+                          <>
+                            {parts[0]}
+                            <Link 
+                              href="/auth/user-login" 
+                              style={{ 
+                                color: 'inherit', 
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                fontWeight: 500
+                              }}
+                            >
+                              {t('terms.communication.clickHere')}
+                            </Link>
+                            {parts[1]}
+                          </>
+                        );
+                      }
+                      return text;
+                    })()}
                   </Typography>
                 </Box>
 
-                {/* Section 9 */}
+                {/* Payment Terms Section */}
                 <Box>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    9. Modifications to Terms
+                    {t('terms.payment.title')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    We reserve the right to modify these Terms and Conditions at any time. Changes will be effective immediately upon posting on our website. Your continued use of Arbitalk after such modifications constitutes your acceptance of the updated terms.
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    We recommend reviewing these Terms periodically to stay informed of any updates.
-                  </Typography>
-                </Box>
-
-                {/* Section 10 */}
-                <Box>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                    10. Contact Information
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    For questions or concerns regarding these Terms and Conditions, please contact us:
-                  </Typography>
-                  <Box sx={{ pl: 2 }}>
-                    <Typography variant="body1" color="text.secondary" paragraph>
-                      <strong>Email:</strong> support@arbitalk.com
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary" paragraph>
-                      <strong>Phone:</strong> +91-XXXXXXXXXX
+                  <Stack spacing={1.5}>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>1.</strong> {t('terms.payment.point1')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      <strong>Address:</strong> Gentlefolk Consulting Private Limited, India
+                      <strong>2.</strong> {t('terms.payment.point2')}
                     </Typography>
-                  </Box>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>3.</strong> {t('terms.payment.point3')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>4.</strong> {t('terms.payment.point4')}
+                    </Typography>
+                    <Box component="ul" sx={{ pl: 3, mb: 1 }}>
+                      <li><Typography variant="body1" color="text.secondary" component="span">{t('terms.payment.option1')}</Typography></li>
+                      <li><Typography variant="body1" color="text.secondary" component="span">{t('terms.payment.option2')}</Typography></li>
+                      <li><Typography variant="body1" color="text.secondary" component="span">{t('terms.payment.option3')}</Typography></li>
+                    </Box>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>5.</strong> {t('terms.payment.point5')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>6.</strong> {t('terms.payment.point6')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>7.</strong> {t('terms.payment.point7')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>8.</strong> {t('terms.payment.point8')}
+                    </Typography>
+                  </Stack>
                 </Box>
+
+                {/* Refund and Cancellation Policy Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.refund.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {renderTextWithEmailLinks(t('terms.refund.description'))}
+                  </Typography>
+                </Box>
+
+                {/* Privacy Policy Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.privacy.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.privacy.description')}
+                  </Typography>
+                </Box>
+
+                {/* Limited Use Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.limitedUse.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.limitedUse.description')}
+                  </Typography>
+                </Box>
+
+                {/* User Conduct and Rules Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.userConduct.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                    {t('terms.userConduct.description')}
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>1.</strong> {t('terms.userConduct.rule1')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>2.</strong> {t('terms.userConduct.rule2')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>3.</strong> {t('terms.userConduct.rule3')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>4.</strong> {t('terms.userConduct.rule4')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>5.</strong> {t('terms.userConduct.rule5')}
+                    </Typography>
+                  </Stack>
+                </Box>
+
+                {/* Prohibited Activity Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.prohibited.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+                    {t('terms.prohibited.description')}
+                  </Typography>
+                  <Stack spacing={1}>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>1.</strong> {t('terms.prohibited.item1')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>2.</strong> {t('terms.prohibited.item2')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>3.</strong> {t('terms.prohibited.item3')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>4.</strong> {t('terms.prohibited.item4')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>5.</strong> {t('terms.prohibited.item5')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>6.</strong> {t('terms.prohibited.item6')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>7.</strong> {t('terms.prohibited.item7')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>8.</strong> {t('terms.prohibited.item8')}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      <strong>9.</strong> {t('terms.prohibited.item9')}
+                    </Typography>
+                  </Stack>
+                </Box>
+
+                {/* Warranty and Representation Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.warranty.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.warranty.description1')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.warranty.description2')}
+                  </Typography>
+                </Box>
+
+                {/* No Agency or Partnership Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.noAgency.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.noAgency.description')}
+                  </Typography>
+                </Box>
+
+                {/* Limitation of Liability Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.limitation.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.limitation.description1')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.limitation.description2')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.limitation.description3')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {renderTextWithEmailLinks(t('terms.limitation.description4'))}
+                  </Typography>
+                </Box>
+
+                {/* Usage Terms Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.usage.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.usage.description')}
+                  </Typography>
+                </Box>
+
+                {/* Intellectual Property Rights Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.intellectualProperty.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    <strong>1.</strong> {t('terms.intellectualProperty.point1')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    <strong>2.</strong> {t('terms.intellectualProperty.point2')}
+                  </Typography>
+                </Box>
+
+                {/* Copyrighted Material Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.copyright.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.copyright.description')}
+                  </Typography>
+                </Box>
+
+                {/* Links to Third Party Sites Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.thirdParty.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.thirdParty.description')}
+                  </Typography>
+                </Box>
+
+                {/* No Guarantee Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.noGuarantee.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.noGuarantee.description')}
+                  </Typography>
+                </Box>
+
+                {/* Indemnity Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.indemnity.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.indemnity.description')}
+                  </Typography>
+                </Box>
+
+                {/* Notices Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.notices.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.notices.description')}
+                  </Typography>
+                </Box>
+
+                {/* Breach of Terms Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.breach.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.breach.description')}
+                  </Typography>
+                </Box>
+
+                {/* Confidentiality Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.confidentiality.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.confidentiality.description')}
+                  </Typography>
+                </Box>
+
+                {/* Termination of Access Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.termination.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.termination.description')}
+                  </Typography>
+                </Box>
+
+                {/* Entire Agreement Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.entireAgreement.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.entireAgreement.description')}
+                  </Typography>
+                </Box>
+
+                {/* Severability Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.severability.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.severability.description')}
+                  </Typography>
+                </Box>
+
+                {/* Waiver Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.waiver.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.waiver.description')}
+                  </Typography>
+                </Box>
+
+                {/* Force Majeure Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.forceMajeure.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.forceMajeure.description')}
+                  </Typography>
+                </Box>
+
+                {/* Dispute Resolution Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.disputeResolution.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.disputeResolution.description')}
+                  </Typography>
+                </Box>
+
+                {/* Governing Law and Jurisdiction Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.governingLaw.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.governingLaw.description')}
+                  </Typography>
+                </Box>
+
+                {/* Grievance Officer Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.grievance.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {renderTextWithEmailLinks(t('terms.grievance.description1'))}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.grievance.description2')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+                    {t('terms.grievance.description3')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.grievance.description4')}
+                  </Typography>
+                </Box>
+
+                {/* Section Headings Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.sectionHeadings.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {t('terms.sectionHeadings.description')}
+                  </Typography>
+                </Box>
+
+                {/* Contact Information Section */}
+                <Box>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                    {t('terms.contact.title')}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                    {renderTextWithEmailLinks(t('terms.contact.description'))}
+                  </Typography>
+                </Box>
+
               </Stack>
             </Paper>
           </motion.div>
@@ -492,39 +809,39 @@ export default function TermsConditionsPage() {
                 <Logo width={isMobile ? 100 : 120} height={isMobile ? 25 : 30} />
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: { xs: '0.8rem', md: '0.875rem' } }}>
-                Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles.
+                {t('footer.description')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                A product of Gentlefolk Consulting Private Limited
+                {t('about.productOf')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
               <Typography variant={isMobile ? 'subtitle1' : 'h6'} gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Quick Links
+                {t('footer.quickLinks')}
               </Typography>
               {/* Desktop: Grid Layout */}
               <Box sx={{ display: { xs: 'none', md: 'grid' }, gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
               </Box>
               {/* Mobile: Vertical List */}
               <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 0.5 }}>
-                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Home</Button>
-                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Services</Button>
-                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>About</Button>
-                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Contact</Button>
-                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Terms & Conditions</Button>
-                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Fees</Button>
+                <Button color="inherit" component={Link} href="/" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.home')}</Button>
+                <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
+                <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
+                <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
+                <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>
               </Box>
             </Grid>
           </Grid>
           <Box sx={{ borderTop: 1, borderColor: 'divider', mt: { xs: 3, md: 4 }, pt: 2, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
-              © {new Date().getFullYear()} ARBITALK. All rights reserved.
+              {t('footer.copyright')}
             </Typography>
           </Box>
         </Container>

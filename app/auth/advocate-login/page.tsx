@@ -73,10 +73,10 @@ export default function AdvocateLoginPage() {
         login(data.user, data.token);
         router.push('/advocate/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || t('auth.loginFailed'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('auth.errorOccurred'));
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ export default function AdvocateLoginPage() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <LanguageSelector />
           <Button onClick={toggleDarkMode} startIcon={darkMode ? <LightModeIcon /> : <DarkModeIcon />} color="inherit" sx={{ textTransform: 'none' }}>
-            {darkMode ? 'Light' : 'Dark'} mode
+            {darkMode ? t('common.switchToLightMode') : t('common.switchToDarkMode')}
           </Button>
         </Box>
         <Paper
@@ -129,10 +129,10 @@ export default function AdvocateLoginPage() {
           >
             <PersonIcon color="secondary" sx={{ fontSize: 48, mb: 1 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              Advocate Login
+              {t('auth.advocateLogin')}
             </Typography>
             <Typography variant="subtitle1" color="text.secondary">
-              Sign in to your advocate account
+              {t('auth.signInToAdvocate')}
             </Typography>
           </Box>
 
@@ -146,7 +146,7 @@ export default function AdvocateLoginPage() {
 
               <TextField
                 fullWidth
-                label="Email Address"
+                label={t('auth.email')}
                 name="email"
                 type="email"
                 value={formData.email}
@@ -162,7 +162,7 @@ export default function AdvocateLoginPage() {
 
               <TextField
                 fullWidth
-                label="Password"
+                label={t('auth.password')}
                 name="password"
                 type="password"
                 value={formData.password}
@@ -188,12 +188,12 @@ export default function AdvocateLoginPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In as Advocate'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signInAdvocate')}
               </Button>
 
               <Divider sx={{ my: 3 }}>
                 <Typography variant="body2" color="text.secondary">
-                  New advocate?
+                  {t('auth.newAdvocate')}
                 </Typography>
               </Divider>
 
@@ -203,7 +203,7 @@ export default function AdvocateLoginPage() {
                   underline="hover"
                   sx={{ fontWeight: 500 }}
                 >
-                  Register Here
+                  {t('auth.registerHere')}
                 </Link>
               </Box>
 
@@ -236,7 +236,7 @@ export default function AdvocateLoginPage() {
                   color="inherit"
                   sx={{ textTransform: 'none' }}
                 >
-                  Back to Home
+                  {t('auth.backToHome')}
                 </Button>
               </Box>
             </form>
