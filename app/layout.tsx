@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'ARBITALK', url: 'https://arbitalk.com' }],
   creator: 'ARBITALK',
   publisher: 'ARBITALK',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
   openGraph: {
     title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ADR Platform',
     description: 'ARBITALK is a leading ADR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',

@@ -536,10 +536,69 @@ export default function LandingPage() {
             <Typography variant={isMobile ? 'h4' : 'h3'} component="h2" textAlign="center" gutterBottom sx={{ mb: 2, fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}>
               {t('home.problemsTitle')}
             </Typography>
-            <Typography variant={isMobile ? 'body1' : 'h6'} textAlign="center" sx={{ mb: 6, opacity: 0.8, fontStyle: 'italic', fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
+            <Typography variant={isMobile ? 'body1' : 'h6'} textAlign="center" sx={{ mb: 4, opacity: 0.8, fontStyle: 'italic', fontSize: { xs: '0.95rem', md: '1.25rem' } }}>
               Justice delayed is growth denied.
             </Typography>
           </motion.div>
+          
+          {/* Niti Aayog Statistic */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <Paper
+              sx={{
+                p: { xs: 3, md: 4 },
+                mb: 6,
+                bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                borderRadius: 2,
+                position: 'relative',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                <Box
+                  sx={{
+                    minWidth: 4,
+                    height: '100%',
+                    bgcolor: 'primary.main',
+                    borderRadius: 1,
+                    mt: 0.5,
+                  }}
+                />
+                <Box sx={{ flex: 1 }}>
+                  <Typography
+                    variant={isMobile ? 'body1' : 'h6'}
+                    sx={{
+                      fontStyle: 'italic',
+                      lineHeight: 1.8,
+                      color: 'text.primary',
+                      fontSize: { xs: '0.95rem', md: '1.1rem' },
+                      mb: 1,
+                    }}
+                  >
+                    {t('home.nitiAayogStatistic')}
+                  </Typography>
+                  {/* <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                      fontStyle: 'normal',
+                      fontSize: { xs: '0.75rem', md: '0.875rem' },
+                      display: 'block',
+                      textAlign: 'right',
+                      mt: 1,
+                    }}
+                  >
+                    — Niti Aayog
+                  </Typography> */}
+                </Box>
+              </Box>
+            </Paper>
+          </motion.div>
+
           <Grid container spacing={3}>
             {problems.map((problem, index) => (
               <Grid item xs={12} sm={6} md={6} lg={6} key={index}>

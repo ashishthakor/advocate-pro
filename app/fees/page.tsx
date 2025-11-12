@@ -76,8 +76,7 @@ export default function FeesPage() {
 
   // Arbitration Fee Schedule based on claim amounts (INR)
   const arbitrationFees = [
-    { range: t('fees.arbitration.upTo50k'), fee: t('fees.arbitration.fee5k') },
-    { range: t('fees.arbitration.50kTo1L'), fee: t('fees.arbitration.fee10k') },
+    { range: t('fees.arbitration.upTo1l'), fee: t('fees.arbitration.fee5k') },
     { range: t('fees.arbitration.1LTo5L'), fee: t('fees.arbitration.fee20k') },
     { range: t('fees.arbitration.5LTo25L'), fee: t('fees.arbitration.fee20kPlus3') },
     { range: t('fees.arbitration.25LTo50L'), fee: t('fees.arbitration.fee80kPlus2') },

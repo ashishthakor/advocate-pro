@@ -657,9 +657,20 @@ export default function AboutPage() {
                       📞 {t('about.phone')}
                     </Typography>
                     <Typography variant="body1" color="primary.main" sx={{ mb: 2 }}>
-                      <a href="tel:+917990809141" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        +91 7990809141
+                      <a href="tel:+919081297775" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        +91 9081297775
                       </a>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        For Business and Normal inquiry
+                      </Typography>
+                    </Typography>
+                    <Typography variant="body1" color="primary.main">
+                      <a href="tel:+919081297778" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        +91 9081297778
+                      </a>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        For Support and query
+                      </Typography>
                     </Typography>
                   </CardContent>
                 </Card>

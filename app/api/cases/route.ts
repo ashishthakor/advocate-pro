@@ -77,27 +77,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Get cases with user and advocate information using Sequelize ORM
-    // Use attributes with col to directly select joined columns as flat fields
     const cases = await Case.findAll({
       where: whereConditions,
-      attributes: {
-        include: [
-          [col('user.name'), 'user_name'],
-          [col('user.email'), 'user_email'],
-          [col('advocate.name'), 'advocate_name'],
-          [col('advocate.email'), 'advocate_email']
-        ]
-      },
       include: [
         {
           model: User,
           as: 'user',
-          attributes: [] // Don't include nested user object
+          attributes: ['id', 'name', 'email', 'phone', 'address'] // Include user object
         },
         {
           model: User,
           as: 'advocate',
-          attributes: [], // Don't include nested advocate object
+          attributes: ['id', 'name', 'email', 'phone'], // Include advocate object
           required: false // LEFT JOIN for advocate (can be null)
         }
       ],

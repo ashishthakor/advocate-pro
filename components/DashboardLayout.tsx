@@ -31,6 +31,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import PersonIcon from '@mui/icons-material/Person';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import MessageIcon from '@mui/icons-material/Message';
+import DescriptionIcon from '@mui/icons-material/Description';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
@@ -102,6 +103,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: t('layout.users'), icon: <PeopleIcon />, path: '/admin/users' },
           { text: t('layout.advocates'), icon: <WorkIcon />, path: '/admin/advocates' },
           { text: t('layout.cases'), icon: <FolderIcon />, path: '/admin/cases' },
+          // { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/admin/notices' },
           { text: t('layout.updates'), icon: <MessageIcon />, path: '/admin/chat' },
           { text: t('layout.assignments'), icon: <AssignmentIcon />, path: '/admin/assignments' },
         ];
