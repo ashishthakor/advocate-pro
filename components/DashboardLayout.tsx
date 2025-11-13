@@ -103,7 +103,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: t('layout.users'), icon: <PeopleIcon />, path: '/admin/users' },
           { text: t('layout.advocates'), icon: <WorkIcon />, path: '/admin/advocates' },
           { text: t('layout.cases'), icon: <FolderIcon />, path: '/admin/cases' },
-          // { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/admin/notices' },
+          { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/admin/notices' },
           { text: t('layout.updates'), icon: <MessageIcon />, path: '/admin/chat' },
           { text: t('layout.assignments'), icon: <AssignmentIcon />, path: '/admin/assignments' },
         ];

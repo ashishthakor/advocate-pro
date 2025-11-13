@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Notice } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
-import { s3Uploader } from '@/lib/aws-s3';
+import { s3Uploader, parseBucketConfig } from '@/lib/aws-s3';
 import AWS from 'aws-sdk';
 
 export async function GET(
@@ -50,8 +50,9 @@ export async function GET(
     }
 
     // Get PDF from S3
-    const prefix = process.env.AWS_S3_NOTICES_PREFIX || 'notices/';
-    const s3Key = `${prefix}${notice.pdf_filename}`;
+    const { bucketName, pathPrefix } = parseBucketConfig();
+    const noticesPrefix = `${pathPrefix}notices/`;
+    const s3Key = `${noticesPrefix}${notice.pdf_filename}`;
     
     const s3 = new AWS.S3({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -61,7 +62,7 @@ export async function GET(
 
     try {
       const s3Object = await s3.getObject({
-        Bucket: process.env.AWS_S3_BUCKET_NAME || 'legal-case-management-files',
+        Bucket: bucketName,
         Key: s3Key,
       }).promise();
 

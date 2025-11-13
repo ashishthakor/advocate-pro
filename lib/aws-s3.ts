@@ -10,6 +10,20 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+/**
+ * Helper function to extract bucket name and path prefix from env variable
+ * Format: "bucketname/path/" or just "bucketname"
+ */
+export function parseBucketConfig(bucketConfig?: string): { bucketName: string; pathPrefix: string } {
+  const config = bucketConfig || process.env.AWS_S3_BUCKET_NAME || 'bucket-name';
+  const parts = config.split('/').filter(p => p);
+  
+  return {
+    bucketName: parts[0] || 'bucket-name',
+    pathPrefix: parts.length > 1 ? parts.slice(1).join('/') + '/' : ''
+  };
+}
+
 export interface UploadFileParams {
   file: Buffer;
   fileName: string;
@@ -28,9 +42,20 @@ export interface S3UploadResult {
 
 export class S3FileUploader {
   private bucketName: string;
+  private pathPrefix: string;
 
   constructor() {
-    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'legal-case-management-files';
+    // Extract bucket name and path prefix from env
+    const { bucketName, pathPrefix } = parseBucketConfig();
+    this.bucketName = bucketName;
+    this.pathPrefix = pathPrefix;
+  }
+
+  /**
+   * Get the full path prefix for notices
+   */
+  private getNoticesPrefix(): string {
+    return `${this.pathPrefix}notices/`;
   }
 
   /**
@@ -80,13 +105,13 @@ export class S3FileUploader {
       // Use folder as prefix if provided, otherwise use default structure
       let fileKey: string;
       if (folder && folder !== 'documents') {
-        // For notices, use the folder (prefix) directly with the filename
-        fileKey = `${folder}${fileName}`;
+        // For notices, use the notices prefix with the filename
+        fileKey = `${this.getNoticesPrefix()}${fileName}`;
       } else {
-        // For other files, use the default structure
+        // For other files, use the default structure with path prefix
         const fileExtension = fileName.split('.').pop();
         const uniqueFileName = `${uuidv4()}.${fileExtension}`;
-        fileKey = `${userId ? `user-${userId}` : 'anonymous'}/${caseId ? `case-${caseId}` : 'general'}/${uniqueFileName}`;
+        fileKey = `${this.pathPrefix}${userId ? `user-${userId}` : 'anonymous'}/${caseId ? `case-${caseId}` : 'general'}/${uniqueFileName}`;
       }
 
       const uploadParams = {

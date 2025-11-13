@@ -35,10 +35,10 @@ import {
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
-  Download as DownloadIcon,
   Email as EmailIcon,
   Delete as DeleteIcon,
   Description as DescriptionIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
 
@@ -120,6 +120,11 @@ export default function NoticesPage() {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [emailAddress, setEmailAddress] = useState('');
   const [emailLoading, setEmailLoading] = useState(false);
+
+  // Edit dialog states
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
+  const [editFormLoading, setEditFormLoading] = useState(false);
 
   useEffect(() => {
     fetchNotices();
@@ -289,6 +294,56 @@ export default function NoticesPage() {
       }
     } catch (err) {
       setError('Failed to download PDF');
+    }
+  };
+
+  const handleEditNotice = (notice: Notice) => {
+    setEditingNotice(notice);
+    setSelectedCaseId(notice.case_id);
+    setRespondentName(notice.respondent_name);
+    setRespondentAddress(notice.respondent_address);
+    setRespondentPincode(notice.respondent_pincode);
+    setContent(notice.content);
+    setRecipientEmail(notice.recipient_email || '');
+    setFormErrors({});
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateNotice = async () => {
+    if (!validateForm() || !editingNotice) {
+      return;
+    }
+
+    try {
+      setEditFormLoading(true);
+      setError('');
+      setFormErrors({});
+
+      const response = await apiFetch(`/api/notices/${editingNotice.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          case_id: selectedCaseId,
+          respondent_name: respondentName.trim(),
+          respondent_address: respondentAddress.trim(),
+          respondent_pincode: respondentPincode.trim(),
+          content: content.trim(),
+          recipient_email: recipientEmail.trim() || null,
+        }),
+      });
+
+      if (response.success) {
+        setSuccess('Notice updated successfully');
+        setEditDialogOpen(false);
+        setEditingNotice(null);
+        resetForm();
+        fetchNotices();
+      } else {
+        setError(response.message || 'Failed to update notice');
+      }
+    } catch (err) {
+      setError('Failed to update notice');
+    } finally {
+      setEditFormLoading(false);
     }
   };
 
@@ -467,12 +522,13 @@ export default function NoticesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title="Download PDF">
+                          <Tooltip title="Edit Notice">
                             <IconButton
                               size="small"
-                              onClick={() => handleDownloadPDF(notice)}
+                              color="primary"
+                              onClick={() => handleEditNotice(notice)}
                             >
-                              <DownloadIcon />
+                              <EditIcon />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Send Email">
@@ -522,7 +578,7 @@ export default function NoticesPage() {
       {/* Create Notice Dialog */}
       <Dialog 
         open={formOpen} 
-        onClose={handleCancelForm} 
+        onClose={formLoading ? undefined : handleCancelForm} 
         maxWidth="md" 
         fullWidth
         PaperProps={{
@@ -690,13 +746,202 @@ export default function NoticesPage() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelForm}>Cancel</Button>
+          <Button onClick={handleCancelForm} disabled={formLoading}>Cancel</Button>
           <Button
             onClick={handleCreateNotice}
             variant="contained"
             disabled={formLoading}
           >
             {formLoading ? <CircularProgress size={24} /> : 'Create Notice'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Notice Dialog */}
+      <Dialog 
+        open={editDialogOpen} 
+        onClose={() => {
+          setEditDialogOpen(false);
+          setEditingNotice(null);
+          resetForm();
+        }}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.paper',
+          }
+        }}
+      >
+        <DialogTitle>Edit Notice</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <FormControl fullWidth required error={!!formErrors.selectedCaseId}>
+                <InputLabel>Select Case</InputLabel>
+                <Select
+                  value={selectedCaseId}
+                  onChange={(e) => {
+                    setSelectedCaseId(e.target.value as number);
+                    if (formErrors.selectedCaseId) {
+                      setFormErrors({ ...formErrors, selectedCaseId: undefined });
+                    }
+                  }}
+                  label="Select Case"
+                  sx={{ bgcolor: 'background.paper' }}
+                >
+                  {cases.map((caseItem) => (
+                    <MenuItem key={caseItem.id} value={caseItem.id}>
+                      {caseItem.title} (#{caseItem.case_number})
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formErrors.selectedCaseId && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                    {formErrors.selectedCaseId}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+
+            {selectedCaseId && (
+              <Grid item xs={12}>
+                <Card sx={{ p: 2, bgcolor: 'background.default' }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Applicant Details (Auto-populated from Case)
+                  </Typography>
+                  {(() => {
+                    const selectedCase = cases.find(c => c.id === selectedCaseId);
+                    return selectedCase?.user ? (
+                      <>
+                        <Typography variant="body2">
+                          <strong>Name:</strong> {selectedCase.user.name || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Address:</strong> {selectedCase.user.address || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Email:</strong> {selectedCase.user.email || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Phone:</strong> {selectedCase.user.phone || 'N/A'}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Loading case details...
+                      </Typography>
+                    );
+                  })()}
+                </Card>
+              </Grid>
+            )}
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Respondent Name"
+                value={respondentName}
+                onChange={(e) => {
+                  setRespondentName(e.target.value);
+                  if (formErrors.respondentName) {
+                    setFormErrors({ ...formErrors, respondentName: undefined });
+                  }
+                }}
+                required
+                error={!!formErrors.respondentName}
+                helperText={formErrors.respondentName}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Respondent Pincode"
+                value={respondentPincode}
+                onChange={(e) => {
+                  setRespondentPincode(e.target.value);
+                  if (formErrors.respondentPincode) {
+                    setFormErrors({ ...formErrors, respondentPincode: undefined });
+                  }
+                }}
+                required
+                error={!!formErrors.respondentPincode}
+                helperText={formErrors.respondentPincode || 'Must be 6 digits'}
+                inputProps={{ maxLength: 6 }}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Respondent Address"
+                value={respondentAddress}
+                onChange={(e) => {
+                  setRespondentAddress(e.target.value);
+                  if (formErrors.respondentAddress) {
+                    setFormErrors({ ...formErrors, respondentAddress: undefined });
+                  }
+                }}
+                multiline
+                rows={2}
+                required
+                error={!!formErrors.respondentAddress}
+                helperText={formErrors.respondentAddress}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Recipient Email (Optional)"
+                value={recipientEmail}
+                onChange={(e) => {
+                  setRecipientEmail(e.target.value);
+                  if (formErrors.recipientEmail) {
+                    setFormErrors({ ...formErrors, recipientEmail: undefined });
+                  }
+                }}
+                type="email"
+                error={!!formErrors.recipientEmail}
+                helperText={formErrors.recipientEmail}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Content"
+                value={content}
+                onChange={(e) => {
+                  setContent(e.target.value);
+                  if (formErrors.content) {
+                    setFormErrors({ ...formErrors, content: undefined });
+                  }
+                }}
+                multiline
+                rows={6}
+                required
+                error={!!formErrors.content}
+                helperText={formErrors.content || 'This content will be included in the notice PDF'}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setEditDialogOpen(false);
+            setEditingNotice(null);
+            resetForm();
+          }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleUpdateNotice}
+            variant="contained"
+            disabled={editFormLoading}
+          >
+            {editFormLoading ? <CircularProgress size={24} /> : 'Update Notice'}
           </Button>
         </DialogActions>
       </Dialog>
