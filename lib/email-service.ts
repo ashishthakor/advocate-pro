@@ -55,7 +55,7 @@ export async function sendNoticeEmail(
       } catch (s3Error) {
         console.error('Error fetching PDF from S3:', s3Error);
         // Fallback to generating PDF if S3 fetch fails
-        pdfBuffer = generateNoticePDF({
+        pdfBuffer = await generateNoticePDF({
           applicantName: data.applicantName,
           applicantAddress: data.applicantAddress,
           applicantEmail: data.applicantEmail,
@@ -70,7 +70,7 @@ export async function sendNoticeEmail(
       }
     } else {
       // Generate PDF
-      pdfBuffer = generateNoticePDF({
+      pdfBuffer = await generateNoticePDF({
         applicantName: data.applicantName,
         applicantAddress: data.applicantAddress,
         applicantEmail: data.applicantEmail,

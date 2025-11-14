@@ -2,6 +2,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { sequelize } = require('./lib/database');
+const { ChatMessage, Case, User, Document } = require('./models/init-models');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const PORT = process.env.SOCKET_IO_PORT || 3001;
@@ -93,35 +94,45 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Save message to database
-      const [result] = await sequelize.query(`
-        INSERT INTO chat_messages (
-          case_id, user_id, message, message_type, file_url, file_name, file_size, file_type, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-      `, {
-        replacements: [
-          data.case_id,
-          socket.userId,
-          data.message,
-          data.message_type || 'text',
-          data.file_url || null,
-          data.file_name || null,
-          data.file_size || null,
-          data.file_type || null
-        ],
-        type: sequelize.QueryTypes.INSERT
+      // Save message to database using Sequelize ORM
+      const newMessage = await ChatMessage.create({
+        case_id: data.case_id,
+        user_id: socket.userId,
+        message: data.message,
+        message_type: data.message_type || 'text',
+        file_url: data.file_url || null,
+        file_name: data.file_name || null,
+        file_size: data.file_size || null,
+        file_type: data.file_type || null,
+        file_key: data.file_key || null
       });
 
-      const messageId = result[0];
+      const messageId = newMessage.id;
 
-      // Get user info for the message
-      const userInfo = await sequelize.query(`
-        SELECT name, email, role FROM users WHERE id = ?
-      `, {
-        replacements: [socket.userId],
-        type: sequelize.QueryTypes.SELECT
+      // Update document record to link it to this chat message if document_id is provided
+      if (data.document_id && data.file_key) {
+        try {
+          await Document.update(
+            { chat_message_id: messageId },
+            {
+              where: {
+                id: data.document_id,
+                case_id: data.case_id
+              }
+            }
+          );
+        } catch (updateError) {
+          console.error('Error linking document to chat message:', updateError);
+          // Continue even if update fails
+        }
+      }
+
+      // Get user info for the message using Sequelize ORM
+      const userInfo = await User.findByPk(socket.userId, {
+        attributes: ['name', 'email', 'role']
       });
 
+      // Build message object with user info
       const message = {
         id: messageId,
         case_id: data.case_id,
@@ -132,10 +143,11 @@ io.on('connection', (socket) => {
         file_name: data.file_name,
         file_size: data.file_size,
         file_type: data.file_type,
-        created_at: new Date(),
-        user_name: userInfo[0]?.name,
-        user_email: userInfo[0]?.email,
-        user_role: userInfo[0]?.role
+        file_key: data.file_key,
+        created_at: newMessage.created_at || new Date(),
+        user_name: userInfo?.name || 'Unknown',
+        user_email: userInfo?.email || '',
+        user_role: userInfo?.role || 'user'
       };
 
       // Broadcast to all users in the case room
@@ -143,7 +155,15 @@ io.on('connection', (socket) => {
 
     } catch (error) {
       console.error('Error sending message:', error);
-      socket.emit('error', { message: 'Failed to send message' });
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        code: error.code
+      });
+      socket.emit('error', { 
+        message: 'Failed to send message',
+        details: error.message 
+      });
     }
   });
 
@@ -175,18 +195,13 @@ io.on('connection', (socket) => {
 // Helper functions
 async function checkCaseAccess(userId, caseId, userRole) {
   try {
-    const cases = await sequelize.query(`
-      SELECT user_id, advocate_id FROM cases WHERE id = ?
-    `, {
-      replacements: [caseId],
-      type: sequelize.QueryTypes.SELECT
+    const caseData = await Case.findByPk(caseId, {
+      attributes: ['user_id', 'advocate_id']
     });
 
-    if (cases.length === 0) {
+    if (!caseData) {
       return false;
     }
-
-    const caseData = cases[0];
 
     // Admin can access all cases
     if (userRole === 'admin') {
@@ -212,22 +227,31 @@ async function checkCaseAccess(userId, caseId, userRole) {
 
 async function getChatHistory(caseId) {
   try {
-    const messages = await sequelize.query(`
-      SELECT 
-        cm.*,
-        u.name as user_name,
-        u.email as user_email,
-        u.role as user_role
-      FROM chat_messages cm
-      LEFT JOIN users u ON cm.user_id = u.id
-      WHERE cm.case_id = ?
-      ORDER BY cm.created_at ASC
-    `, {
-      replacements: [caseId],
-      type: sequelize.QueryTypes.SELECT
+    const messages = await ChatMessage.findAll({
+      where: { case_id: caseId },
+      include: [
+        {
+          model: User,
+          as: 'sender',
+          attributes: ['name', 'email', 'role'],
+          required: false
+        }
+      ],
+      order: [['created_at', 'ASC']],
+      raw: false
     });
 
-    return messages;
+    // Transform to match expected format with flat user fields
+    return messages.map(msg => {
+      const msgData = msg.toJSON ? msg.toJSON() : msg;
+      const { sender, ...rest } = msgData;
+      return {
+        ...rest,
+        user_name: sender?.name || 'Unknown',
+        user_email: sender?.email || '',
+        user_role: sender?.role || 'user'
+      };
+    });
   } catch (error) {
     console.error('Error getting chat history:', error);
     return [];

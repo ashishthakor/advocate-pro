@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate PDF
-    const pdfBuffer = generateNoticePDF({
+    const pdfBuffer = await generateNoticePDF({
       applicantName: caseData.user.name,
       applicantAddress: caseData.user.address || '',
       applicantEmail: caseData.user.email,

@@ -23,6 +23,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Grid,
+  Divider,
+  LinearProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -31,6 +35,14 @@ import {
   Download as DownloadIcon,
   ArrowBack as ArrowBackIcon,
   Message as MessageIcon,
+  Delete as DeleteIcon,
+  PictureAsPdf as PdfIcon,
+  Description as DocIcon,
+  TableChart as ExcelIcon,
+  Close as CloseIcon,
+  Visibility as VisibilityIcon,
+  CloudUpload as CloudUploadIcon,
+  InsertDriveFile as InsertDriveFileIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
@@ -47,10 +59,16 @@ interface ChatMessage {
   file_name?: string;
   file_size?: number;
   file_type?: string;
+  file_key?: string;
   created_at: string;
   user_name: string;
   user_email: string;
   user_role: string;
+}
+
+interface FileUpload {
+  file: File;
+  id: string;
 }
 
 interface Case {
@@ -78,8 +96,15 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [fileDialogOpen, setFileDialogOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<FileUpload[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { user } = useAuth();
@@ -102,6 +127,15 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Cleanup preview URL on unmount or when preview changes
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const fetchCaseData = async () => {
     try {
@@ -227,13 +261,111 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
     }
   };
 
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const validateAndAddFiles = (files: File[]) => {
+    const validFiles: FileUpload[] = [];
+
+    // Validate files
+    for (const file of files) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`${file.name} exceeds maximum size of 10MB`);
+        continue;
+      }
+
+      // Check file type
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'application/rtf',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        setError(`${file.name} is not a supported file type`);
+        continue;
+      }
+
+      validFiles.push({ file, id: Math.random().toString(36).substring(7) });
+    }
+
+    // Check max files limit
+    if (selectedFiles.length + validFiles.length > MAX_FILES) {
+      setError(`Maximum ${MAX_FILES} files allowed`);
+      return;
+    }
+
+    setSelectedFiles([...selectedFiles, ...validFiles]);
+    setError('');
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    validateAndAddFiles(files);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!uploading && selectedFiles.length < MAX_FILES) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (uploading || selectedFiles.length >= MAX_FILES) {
+      return;
+    }
+
+    const files = Array.from(e.dataTransfer.files);
+    validateAndAddFiles(files);
+  };
+
+  const removeFile = (id: string) => {
+    const fileToRemove = selectedFiles.find(f => f.id === id);
+    // If removing the file that's currently being previewed, close preview
+    if (fileToRemove && previewFile && fileToRemove.file === previewFile) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(null);
+      setPreviewFile(null);
+      setPreviewDialogOpen(false);
+    }
+    setSelectedFiles(selectedFiles.filter(f => f.id !== id));
+  };
+
   const handleFileUpload = async () => {
-    if (!selectedFile || !socket) return;
+    if (selectedFiles.length === 0 || !socket) return;
 
     setUploading(true);
+    setError('');
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      selectedFiles.forEach((fileUpload, index) => {
+        formData.append(`file-${index}`, fileUpload.file);
+      });
       formData.append('caseIdNum', caseIdNum.toString());
 
       const response = await fetch('/api/upload', {
@@ -246,27 +378,196 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
 
       const data = await response.json();
 
-      if (data.success) {
-        socket.emit('send_message', {
-          case_id: caseIdNum,
-          message: `Shared file: ${selectedFile.name}`,
-          message_type: selectedFile.type.startsWith('image/') ? 'image' : 'file',
-          file_url: data.data.url,
-          file_name: selectedFile.name,
-          file_size: selectedFile.size,
-          file_type: selectedFile.type
-        });
+      if (data.success && data.data) {
+        // Send a message for each uploaded file
+        for (const uploadResult of data.data) {
+          if (uploadResult.success) {
+            const isImage = uploadResult.isImage;
+            const messageData = {
+              case_id: caseIdNum,
+              message: `Shared file: ${uploadResult.fileName}`,
+              message_type: isImage ? 'image' : 'file',
+              file_url: uploadResult.url,
+              file_name: uploadResult.fileName,
+              file_size: uploadResult.fileSize,
+              file_type: uploadResult.mimeType,
+              file_key: uploadResult.key,
+              document_id: uploadResult.documentId || null
+            };
+            console.log('Sending message via socket with file_key:', messageData.file_key);
+            socket.emit('send_message', messageData);
+          }
+        }
 
+        // Cleanup preview URL if open
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+        }
+        setPreviewFile(null);
+        setPreviewDialogOpen(false);
         setFileDialogOpen(false);
-        setSelectedFile(null);
+        setSelectedFiles([]);
       } else {
-        setError(data.message || 'Failed to upload file');
+        setError(data.message || 'Failed to upload files');
       }
     } catch (err) {
-      setError('Failed to upload file');
+      setError('Failed to upload files');
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleDownloadFile = async (message: ChatMessage) => {
+    if (!message.file_key) {
+      setError('File key not found');
+      return;
+    }
+
+    try {
+      // Get presigned URL from API
+      const response = await fetch(`/api/download?key=${encodeURIComponent(message.file_key)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data.downloadUrl) {
+        // Create a temporary link and trigger download
+        const link = document.createElement('a');
+        link.href = data.data.downloadUrl;
+        link.download = message.file_name || 'file';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        setError('Failed to generate download URL');
+      }
+    } catch (err) {
+      setError('Failed to download file');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+
+    setDeletingMessageId(messageId);
+    try {
+      const response = await fetch(`/api/chat/${caseIdNum}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messageId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessages(messages.filter(m => m.id !== messageId));
+      } else {
+        setError(data.message || 'Failed to delete message');
+      }
+    } catch (err) {
+      setError('Failed to delete message');
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
+
+  const getFileIcon = (fileType?: string) => {
+    if (!fileType) return <AttachFileIcon />;
+    if (fileType.startsWith('image/')) return <ImageIcon />;
+    if (fileType === 'application/pdf') return <PdfIcon />;
+    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return <ExcelIcon />;
+    if (fileType.includes('word') || fileType.includes('document')) return <DocIcon />;
+    return <AttachFileIcon />;
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  const handlePreviewFile = (file: File) => {
+    // Revoke previous URL if exists
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setPreviewFile(file);
+    setPreviewDialogOpen(true);
+  };
+
+  const renderFilePreview = () => {
+    if (!previewFile || !previewUrl) return null;
+
+    const isImage = previewFile.type.startsWith('image/');
+    const isPdf = previewFile.type === 'application/pdf';
+
+    return (
+      <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {isImage ? (
+          <Box
+            component="img"
+            src={previewUrl}
+            alt={previewFile.name}
+            sx={{
+              maxWidth: '100%',
+              maxHeight: '70vh',
+              objectFit: 'contain',
+              margin: 'auto',
+            }}
+          />
+        ) : isPdf ? (
+          <Box sx={{ width: '100%', height: '70vh' }}>
+            <iframe
+              src={previewUrl}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              title={previewFile.name}
+            />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '70vh',
+              gap: 2,
+            }}
+          >
+            {getFileIcon(previewFile.type)}
+            <Typography variant="h6">{previewFile.name}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Preview not available for this file type
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={() => {
+                if (previewUrl && previewFile) {
+                  const link = document.createElement('a');
+                  link.href = previewUrl;
+                  link.download = previewFile.name;
+                  link.click();
+                }
+              }}
+            >
+              Download to View
+            </Button>
+          </Box>
+        )}
+      </Box>
+    );
   };
 
   const scrollToBottom = () => {
@@ -397,13 +698,49 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
                                 <Typography variant="body2" sx={{ mb: 1 }}>
                                   {message.message}
                                 </Typography>
-                                <Button
-                                  size="small"
-                                  startIcon={message.message_type === 'image' ? <ImageIcon /> : <DownloadIcon />}
-                                  onClick={() => window.open(message.file_url, '_blank')}
+                                <Paper
+                                  elevation={1}
+                                  sx={{
+                                    p: 1.5,
+                                    mb: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    bgcolor: isCurrentUser ? 'primary.light' : 'grey.100',
+                                    maxWidth: '300px'
+                                  }}
                                 >
-                                  {message.file_name}
-                                </Button>
+                                  {getFileIcon(message.file_type)}
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
+                                      {message.file_name}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                      {formatFileSize(message.file_size)}
+                                    </Typography>
+                                  </Box>
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleDownloadFile(message)}
+                                    sx={{ color: 'primary.main' }}
+                                  >
+                                    <DownloadIcon fontSize="small" />
+                                  </IconButton>
+                                  {isCurrentUser && (
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleDeleteMessage(message.id)}
+                                      disabled={deletingMessageId === message.id}
+                                      sx={{ color: 'error.main' }}
+                                    >
+                                      {deletingMessageId === message.id ? (
+                                        <CircularProgress size={16} />
+                                      ) : (
+                                        <DeleteIcon fontSize="small" />
+                                      )}
+                                    </IconButton>
+                                  )}
+                                </Paper>
                               </Box>
                             )}
                           </Box>
@@ -472,32 +809,260 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
       </Paper>
 
       {/* File Upload Dialog */}
-      <Dialog open={fileDialogOpen} onClose={() => setFileDialogOpen(false)}>
-        <DialogTitle>{t('chat.uploadFile')}</DialogTitle>
-        <DialogContent>
-          <input
-            type="file"
-            accept="image/*,.pdf,.doc,.docx,.txt,.rtf"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-            style={{ marginBottom: 16 }}
-          />
-          {selectedFile && (
-            <Typography variant="body2" color="text.secondary">
-              {t('chat.selected')}: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+      <Dialog 
+        open={fileDialogOpen} 
+        onClose={() => !uploading && setFileDialogOpen(false)} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { minHeight: '500px' }
+        }}
+      >
+        <DialogTitle>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6" component="div">
+                {t('chat.uploadFile')}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {selectedFiles.length} of {MAX_FILES} files selected
+              </Typography>
+            </Box>
+            <Chip 
+              label={`${selectedFiles.length}/${MAX_FILES}`} 
+              color={selectedFiles.length >= MAX_FILES ? 'error' : 'primary'}
+              size="small"
+            />
+          </Box>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 3 }}>
+          {/* File Input Area with Drag and Drop */}
+          <Paper
+            ref={dropZoneRef}
+            variant="outlined"
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            sx={{
+              p: 4,
+              textAlign: 'center',
+              border: '2px dashed',
+              borderColor: isDragging ? 'primary.main' : 'primary.light',
+              borderRadius: 2,
+              bgcolor: isDragging ? 'primary.light' : 'action.hover',
+              cursor: uploading || selectedFiles.length >= MAX_FILES ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease',
+              transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+              '&:hover': {
+                bgcolor: uploading || selectedFiles.length >= MAX_FILES ? 'action.hover' : 'action.selected',
+                borderColor: uploading || selectedFiles.length >= MAX_FILES ? 'primary.light' : 'primary.main',
+              },
+              mb: 3,
+            }}
+            onClick={() => {
+              if (!uploading && selectedFiles.length < MAX_FILES) {
+                fileInputRef.current?.click();
+              }
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.xls,.xlsx"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+              disabled={uploading || selectedFiles.length >= MAX_FILES}
+            />
+            <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              {isDragging ? 'Drop Files Here' : 'Click to Select Files or Drag & Drop'}
             </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Maximum {MAX_FILES} files, {MAX_FILE_SIZE / (1024 * 1024)}MB per file
+            </Typography>
+            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+              Supported: Images (JPEG, PNG, GIF, WebP), PDF, DOC, DOCX, TXT, RTF, XLS, XLSX
+            </Typography>
+          </Paper>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+
+          {/* Selected Files List */}
+          {selectedFiles.length > 0 && (
+            <Box>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="subtitle1" fontWeight="bold">
+                  Selected Files ({selectedFiles.length})
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={() => setSelectedFiles([])}
+                  disabled={uploading}
+                  startIcon={<CloseIcon />}
+                >
+                  Clear All
+                </Button>
+              </Box>
+              <Grid container spacing={2}>
+                {selectedFiles.map((fileUpload) => (
+                  <Grid item xs={12} sm={6} key={fileUpload.id}>
+                    <Card
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        '&:hover': {
+                          boxShadow: 2,
+                        },
+                      }}
+                    >
+                      <Box display="flex" alignItems="flex-start" gap={2}>
+                        <Box
+                          sx={{
+                            p: 1,
+                            borderRadius: 1,
+                            bgcolor: 'primary.light',
+                            color: 'primary.contrastText',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          {getFileIcon(fileUpload.file.type)}
+                        </Box>
+                        <Box 
+                          sx={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                          onClick={() => handlePreviewFile(fileUpload.file)}
+                        >
+                          <Tooltip title={fileUpload.file.name}>
+                            <Typography
+                              variant="body2"
+                              fontWeight="medium"
+                              noWrap
+                              sx={{ mb: 0.5, '&:hover': { textDecoration: 'underline' } }}
+                            >
+                              {fileUpload.file.name}
+                            </Typography>
+                          </Tooltip>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatFileSize(fileUpload.file.size)}
+                          </Typography>
+                        </Box>
+                        <Box display="flex" flexDirection="column" gap={0.5}>
+                          <Tooltip title="Preview">
+                            <IconButton
+                              size="small"
+                              onClick={() => handlePreviewFile(fileUpload.file)}
+                              disabled={uploading}
+                              color="primary"
+                            >
+                              <VisibilityIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Remove">
+                            <IconButton
+                              size="small"
+                              onClick={() => removeFile(fileUpload.id)}
+                              disabled={uploading}
+                              color="error"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
+
+          {uploading && (
+            <Box sx={{ mt: 2 }}>
+              <LinearProgress />
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
+                Uploading files...
+              </Typography>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setFileDialogOpen(false)}>{t('createCase.cancel')}</Button>
+        <Divider />
+        <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+          <Button
+            onClick={() => {
+              // Cleanup preview if open
+              if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                setPreviewUrl(null);
+              }
+              setPreviewFile(null);
+              setPreviewDialogOpen(false);
+              setFileDialogOpen(false);
+              setSelectedFiles([]);
+              setError('');
+            }}
+            disabled={uploading}
+          >
+            {t('createCase.cancel')}
+          </Button>
           <Button
             variant="contained"
             onClick={handleFileUpload}
-            disabled={!selectedFile || uploading}
-            startIcon={uploading ? <CircularProgress size={20} /> : <AttachFileIcon />}
+            disabled={selectedFiles.length === 0 || uploading}
+            startIcon={uploading ? <CircularProgress size={20} color="inherit" /> : <CloudUploadIcon />}
+            size="large"
           >
-            {uploading ? t('chat.uploading') : t('chat.upload')}
+            {uploading ? t('chat.uploading') : `Upload ${selectedFiles.length} File${selectedFiles.length !== 1 ? 's' : ''}`}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* File Preview Dialog */}
+      <Dialog
+        open={previewDialogOpen}
+        onClose={() => {
+          setPreviewDialogOpen(false);
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+          }
+          setPreviewFile(null);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { height: '80vh' }
+        }}
+      >
+        <DialogTitle>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              {previewFile?.name}
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setPreviewDialogOpen(false);
+                if (previewUrl) {
+                  URL.revokeObjectURL(previewUrl);
+                  setPreviewUrl(null);
+                }
+                setPreviewFile(null);
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 2, height: '100%', overflow: 'auto' }}>
+          {renderFilePreview()}
+        </DialogContent>
       </Dialog>
     </Box>
   );

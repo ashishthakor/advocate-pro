@@ -108,10 +108,25 @@ export class S3FileUploader {
         // For notices, use the notices prefix with the filename
         fileKey = `${this.getNoticesPrefix()}${fileName}`;
       } else {
-        // For other files, use the default structure with path prefix
-        const fileExtension = fileName.split('.').pop();
-        const uniqueFileName = `${uuidv4()}.${fileExtension}`;
-        fileKey = `${this.pathPrefix}${userId ? `user-${userId}` : 'anonymous'}/${caseId ? `case-${caseId}` : 'general'}/${uniqueFileName}`;
+        // For chat documents, use: {pathPrefix}chats/case-{caseId}/{File_name_user_id_unique_key}.{extension}
+        if (caseId) {
+          const fileExtension = fileName.split('.').pop() || '';
+          const baseFileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+          // Sanitize filename: remove special characters, keep only alphanumeric, spaces, hyphens, underscores
+          const sanitizedFileName = baseFileName
+            .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+            .replace(/\s+/g, '_')
+            .substring(0, 50); // Limit length
+          const uniqueKey = uuidv4().substring(0, 8); // Short unique key
+          const userIdStr = userId ? userId.toString() : 'anonymous';
+          const finalFileName = `${sanitizedFileName}_${userIdStr}_${uniqueKey}.${fileExtension}`;
+          fileKey = `${this.pathPrefix}chats/case-${caseId}/${finalFileName}`;
+        } else {
+          // For other files without caseId, use the old structure
+          const fileExtension = fileName.split('.').pop();
+          const uniqueFileName = `${uuidv4()}.${fileExtension}`;
+          fileKey = `${this.pathPrefix}${userId ? `user-${userId}` : 'anonymous'}/general/${uniqueFileName}`;
+        }
       }
 
       const uploadParams = {
@@ -251,8 +266,11 @@ export class FileValidator {
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain',
     'application/rtf',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ];
   static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  static readonly MAX_FILES = 5; // Maximum number of files per upload
 
   static validateFile(file: Buffer, fileName: string, mimeType: string): { valid: boolean; error?: string } {
     // Check file size
@@ -268,13 +286,13 @@ export class FileValidator {
     if (!allowedTypes.includes(mimeType)) {
       return {
         valid: false,
-        error: 'File type not allowed. Please upload images (JPEG, PNG, GIF, WebP) or documents (PDF, DOC, DOCX, TXT, RTF)',
+        error: 'File type not allowed. Please upload images (JPEG, PNG, GIF, WebP), documents (PDF, DOC, DOCX, TXT, RTF), or spreadsheets (XLS, XLSX)',
       };
     }
 
     // Check file extension
     const fileExtension = fileName.split('.').pop()?.toLowerCase();
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'txt', 'rtf'];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'txt', 'rtf', 'xls', 'xlsx'];
     if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
       return {
         valid: false,
@@ -291,6 +309,11 @@ export class FileValidator {
 
   static isDocument(mimeType: string): boolean {
     return this.ALLOWED_DOCUMENT_TYPES.includes(mimeType);
+  }
+
+  static isExcel(mimeType: string): boolean {
+    return mimeType === 'application/vnd.ms-excel' || 
+           mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
   }
 }
 
