@@ -1,6 +1,7 @@
 import sgMail from '@sendgrid/mail';
 import { generateNoticePDF } from './pdf-generator';
 import AWS from 'aws-sdk';
+import { parseBucketConfig } from './aws-s3';
 
 // Initialize SendGrid
 if (process.env.SENDGRID_API_KEY) {
@@ -35,8 +36,9 @@ export async function sendNoticeEmail(
     
     // If pdfFilename is provided, get PDF from S3, otherwise generate new one
     if (pdfFilename) {
-      const prefix = process.env.AWS_S3_NOTICES_PREFIX || 'notices/';
-      const s3Key = `${prefix}${pdfFilename}`;
+      const { bucketName, pathPrefix } = parseBucketConfig();
+      const noticesPrefix = `${pathPrefix}notices/`;
+      const s3Key = `${noticesPrefix}${pdfFilename}`;
       
       const s3 = new AWS.S3({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -46,14 +48,14 @@ export async function sendNoticeEmail(
 
       try {
         const s3Object = await s3.getObject({
-          Bucket: process.env.AWS_S3_BUCKET_NAME || 'legal-case-management-files',
+          Bucket: bucketName,
           Key: s3Key,
         }).promise();
         pdfBuffer = Buffer.from(s3Object.Body as any);
       } catch (s3Error) {
         console.error('Error fetching PDF from S3:', s3Error);
         // Fallback to generating PDF if S3 fetch fails
-        pdfBuffer = generateNoticePDF({
+        pdfBuffer = await generateNoticePDF({
           applicantName: data.applicantName,
           applicantAddress: data.applicantAddress,
           applicantEmail: data.applicantEmail,
@@ -68,7 +70,7 @@ export async function sendNoticeEmail(
       }
     } else {
       // Generate PDF
-      pdfBuffer = generateNoticePDF({
+      pdfBuffer = await generateNoticePDF({
         applicantName: data.applicantName,
         applicantAddress: data.applicantAddress,
         applicantEmail: data.applicantEmail,

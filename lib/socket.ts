@@ -22,6 +22,7 @@ interface ChatMessage {
   file_name?: string;
   file_size?: number;
   file_type?: string;
+  file_key?: string;
   created_at?: Date;
 }
 
@@ -146,8 +147,8 @@ export class SocketManager {
       // Save message to database
       const [result] = await sequelize.query(`
         INSERT INTO chat_messages (
-          case_id, user_id, message, message_type, file_url, file_name, file_size, file_type, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+          case_id, user_id, message, message_type, file_url, file_name, file_size, file_type, file_key, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
       `, {
         replacements: [
           data.case_id,
@@ -157,12 +158,30 @@ export class SocketManager {
           data.file_url || null,
           data.file_name || null,
           data.file_size || null,
-          data.file_type || null
+          data.file_type || null,
+          data.file_key || null
         ],
         type: QueryTypes.INSERT
       });
 
       const messageId = (result as any)[0];
+
+      // Update document record to link it to this chat message if document_id is provided
+      if ((data as any).document_id && data.file_key) {
+        try {
+          await sequelize.query(`
+            UPDATE documents 
+            SET chat_message_id = ?, updated_at = NOW()
+            WHERE id = ? AND case_id = ?
+          `, {
+            replacements: [messageId, (data as any).document_id, data.case_id],
+            type: QueryTypes.UPDATE
+          });
+        } catch (updateError) {
+          console.error('Error linking document to chat message:', updateError);
+          // Continue even if update fails
+        }
+      }
 
       // Get user info for the message
       const userInfo = await sequelize.query(`
@@ -182,6 +201,7 @@ export class SocketManager {
         file_name: data.file_name,
         file_size: data.file_size,
         file_type: data.file_type,
+        file_key: data.file_key,
         created_at: new Date(),
         user_name: (userInfo[0] as any)?.name,
         user_email: (userInfo[0] as any)?.email,

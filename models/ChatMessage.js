@@ -48,6 +48,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(100),
       allowNull: true
     },
+    file_key: {
+      type: DataTypes.STRING(500),
+      allowNull: true
+    },
     is_read: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

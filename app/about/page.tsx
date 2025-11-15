@@ -53,10 +53,11 @@ export default function AboutPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const stats = [
-    { number: '500+', label: t('about.stats.activeAdvocates') },
-    { number: '10K+', label: t('about.stats.casesManaged') },
-    { number: '99%', label: t('about.stats.clientSatisfaction') },
-    { number: '15+', label: t('about.stats.yearsExperience') }
+    { number: '30+', label: t('home.stat1') },
+    { number: '₹50+ Lakhs', label: t('home.stat2') },
+    { number: '15+', label: t('home.stat3') },
+    { number: '8+ Years', label: t('home.stat4') },
+    { number: '50+', label: t('home.stat5') }
   ];
 
   const team = [
@@ -368,36 +369,44 @@ export default function AboutPage() {
       </Box>
 
       {/* Stats Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Grid container spacing={4}>
-          {stats.map((stat, index) => (
-            <Grid item xs={6} md={3} key={index}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Paper
-                  sx={{
-                    p: 3,
-                    textAlign: 'center',
-                    bgcolor: 'background.paper',
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                  }}
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4} justifyContent="center">
+            {stats.map((stat, index) => (
+              <Grid item xs={6} sm={4} md={2.4} key={index} sx={{ display: 'flex' }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
                 >
-                  <Typography variant="h3" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
-                    {stat.number}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.label}
-                  </Typography>
-                </Paper>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+                  <Paper
+                    sx={{
+                      p: 3,
+                      textAlign: 'center',
+                      bgcolor: 'background.paper',
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      minHeight: '100%',
+                    }}
+                  >
+                    <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                      {stat.number}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {stat.label}
+                    </Typography>
+                  </Paper>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
 
       {/* Mission & Vision */}
       <Box sx={{ bgcolor: (t) => (t.palette.mode === 'dark' ? 'background.default' : 'grey.50'), py: 8 }}>

@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate PDF
-    const pdfBuffer = generateNoticePDF({
+    const pdfBuffer = await generateNoticePDF({
       applicantName: caseData.user.name,
       applicantAddress: caseData.user.address || '',
       applicantEmail: caseData.user.email,
@@ -151,15 +151,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload PDF to S3
-    const prefix = process.env.AWS_S3_NOTICES_PREFIX || 'notices/';
     const fileName = `notice_${Date.now()}_${case_id}.pdf`;
-    const s3Key = `${prefix}${fileName}`;
 
     const uploadResult = await s3Uploader.uploadFile({
       file: pdfBuffer,
       fileName: fileName,
       mimeType: 'application/pdf',
-      folder: prefix,
+      folder: 'notices', // This will use the notices prefix
       caseId: case_id,
       userId: caseData.user_id,
     });

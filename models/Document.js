@@ -73,6 +73,14 @@ module.exports = function(sequelize, DataTypes) {
     last_accessed_at: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    chat_message_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: 'chat_messages',
+        key: 'id'
+      }
     }
   }, {
     sequelize,
