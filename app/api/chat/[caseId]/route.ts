@@ -204,6 +204,7 @@ export async function DELETE(
   { params }: { params: Promise<{ caseId: string }> }
 ) {
   try {
+    // 1. Authentication
     const authResult = await verifyTokenFromRequest(request);
     if (!authResult.success || !authResult.user) {
       return NextResponse.json(
@@ -223,9 +224,12 @@ export async function DELETE(
       );
     }
 
-    // Get message to check access and get file_key
+    // 2. Get message with case information
     const messages = await sequelize.query(`
-      SELECT cm.*, c.user_id as case_user_id, c.advocate_id
+      SELECT 
+        cm.*, 
+        c.user_id as case_user_id, 
+        c.advocate_id
       FROM chat_messages cm
       JOIN cases c ON cm.case_id = c.id
       WHERE cm.id = ? AND cm.case_id = ?
@@ -243,31 +247,26 @@ export async function DELETE(
 
     const message = messages[0] as any;
 
-    // Check access - user can delete their own messages or admin can delete any
-    const hasAccess = 
+    // 3. Authorization check - user can delete their own messages, admin can delete any
+    const canDelete = 
       authResult.user.role === 'admin' ||
       message.user_id === authResult.user.userId;
 
-    if (!hasAccess) {
+    if (!canDelete) {
       return NextResponse.json(
-        { success: false, message: 'Access denied' },
+        { success: false, message: 'Access denied. You can only delete your own messages.' },
         { status: 403 }
       );
     }
 
-    // Delete file from S3 if file_key exists
-    if (message.file_key) {
-      const { s3Uploader } = await import('@/lib/aws-s3');
-      await s3Uploader.deleteFile(message.file_key);
-    }
-
-    // Delete associated document record if it exists
+    // 4. Delete associated document record first (before deleting message)
     if (message.file_key) {
       try {
         await sequelize.query(`
-          DELETE FROM documents WHERE s3_key = ? AND chat_message_id = ?
+          DELETE FROM documents 
+          WHERE chat_message_id = ? OR (s3_key = ? AND case_id = ?)
         `, {
-          replacements: [message.file_key, messageId],
+          replacements: [messageId, message.file_key, caseId],
           type: QueryTypes.DELETE
         });
       } catch (docError) {
@@ -276,7 +275,18 @@ export async function DELETE(
       }
     }
 
-    // Delete message from database
+    // 5. Delete file from S3 if file_key exists
+    if (message.file_key) {
+      try {
+        const { s3Uploader } = await import('@/lib/aws-s3');
+        await s3Uploader.deleteFile(message.file_key);
+      } catch (s3Error) {
+        console.error('Error deleting file from S3:', s3Error);
+        // Continue even if S3 deletion fails - we still want to delete the message
+      }
+    }
+
+    // 6. Delete message from database
     await sequelize.query(`
       DELETE FROM chat_messages WHERE id = ?
     `, {
@@ -284,15 +294,28 @@ export async function DELETE(
       type: QueryTypes.DELETE
     });
 
+    // 7. Note: Socket event will be emitted by frontend after successful API response
+    // The socket server is a separate process and cannot be directly accessed from API routes
+    // Frontend will emit 'delete_message' socket event which the socket server will handle
+    
+    console.log(`[API] Message ${messageId} deleted successfully. Frontend will emit socket event.`);
+
     return NextResponse.json({
       success: true,
       message: 'Message deleted successfully',
+      data: {
+        message_id: messageId,
+        case_id: caseId
+      }
     });
 
-  } catch (error) {
-    console.error('Delete message error:', error);
+  } catch (error: any) {
+    console.error('[API] Delete message error:', error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { 
+        success: false, 
+        message: error.message || 'Internal server error' 
+      },
       { status: 500 }
     );
   }

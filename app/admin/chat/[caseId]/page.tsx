@@ -102,6 +102,8 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
   const [selectedFiles, setSelectedFiles] = useState<FileUpload[]>([]);
   const [uploading, setUploading] = useState(false);
   const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -195,9 +197,10 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
       const newSocket = io(url, options);
 
       newSocket.on('connect', () => {
-        console.log('Connected to chat server');
+        console.log('[Frontend] Connected to chat server, joining case:', caseIdNum);
         setIsConnected(true);
         newSocket.emit('join_case', caseIdNum);
+        console.log('[Frontend] Emitted join_case event for case:', caseIdNum);
       });
 
       newSocket.on('disconnect', () => {
@@ -211,6 +214,20 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
 
       newSocket.on('new_message', (message: ChatMessage) => {
         setMessages((prev) => [...prev, message]);
+      });
+
+      newSocket.on('message_deleted', (data: { message_id: number; case_id: number }) => {
+        console.log('[Frontend] Received message_deleted event:', data, 'Current case:', caseIdNum);
+        if (data.case_id === caseIdNum) {
+          console.log(`[Frontend] Removing message ${data.message_id} from chat`);
+          setMessages((prev) => {
+            const filtered = prev.filter(m => m.id !== data.message_id);
+            console.log(`[Frontend] Messages before: ${prev.length}, after: ${filtered.length}`);
+            return filtered;
+          });
+        } else {
+          console.log(`[Frontend] Ignoring message_deleted for different case: ${data.case_id} (current: ${caseIdNum})`);
+        }
       });
 
       newSocket.on('error', (error: any) => {
@@ -429,31 +446,89 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
     }
   };
 
-  const handleDeleteMessage = async (messageId: number) => {
-    if (!confirm('Are you sure you want to delete this message?')) return;
+  const handleDeleteMessage = (messageId: number) => {
+    setMessageToDelete(messageId);
+    setDeleteDialogOpen(true);
+  };
 
-    setDeletingMessageId(messageId);
+  const confirmDeleteMessage = async () => {
+    if (!messageToDelete) return;
+
+    const messageIdToDelete = messageToDelete;
+    setDeletingMessageId(messageIdToDelete);
+    setDeleteDialogOpen(false);
+    
+    console.log(`[Frontend] Starting delete process for message ${messageIdToDelete} in case ${caseIdNum}`);
+    
     try {
+      // 1. Call API to delete message
+      console.log(`[Frontend] Calling API DELETE for message ${messageIdToDelete}`);
       const response = await fetch(`/api/chat/${caseIdNum}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messageId }),
+        body: JSON.stringify({ messageId: messageIdToDelete }),
       });
 
       const data = await response.json();
+      console.log(`[Frontend] API response:`, data);
 
       if (data.success) {
-        setMessages(messages.filter(m => m.id !== messageId));
+        // 2. Remove message from local state immediately (optimistic update)
+        console.log(`[Frontend] Removing message ${messageIdToDelete} from local state`);
+        setMessages((prev) => prev.filter(m => m.id !== messageIdToDelete));
+        
+        // 3. ALWAYS emit socket event to notify other users
+        // This ensures real-time sync - socket server will handle if message already deleted
+        if (socket && isConnected) {
+          console.log(`[Frontend] Emitting delete_message socket event for case ${caseIdNum}, message ${messageIdToDelete}`);
+          socket.emit('delete_message', {
+            case_id: caseIdNum,
+            message_id: messageIdToDelete
+          }, (response: any) => {
+            if (response && response.error) {
+              console.error('[Frontend] Socket delete_message error:', response.error);
+            } else {
+              console.log('[Frontend] Socket delete_message acknowledged');
+            }
+          });
+        } else {
+          console.warn(`[Frontend] Cannot emit socket event - socket: ${!!socket}, connected: ${isConnected}`);
+        }
       } else {
-        setError(data.message || 'Failed to delete message');
+        // Handle API errors
+        console.error(`[Frontend] API delete failed:`, data.message);
+        if (data.message && !data.message.toLowerCase().includes('not found')) {
+          setError(data.message || 'Failed to delete message');
+        } else {
+          // Message was already deleted, just remove from local state and emit socket event
+          console.log(`[Frontend] Message already deleted, removing from local state and emitting socket event`);
+          setMessages((prev) => prev.filter(m => m.id !== messageIdToDelete));
+          
+          // Still emit socket event to ensure sync
+          if (socket && isConnected) {
+            socket.emit('delete_message', {
+              case_id: caseIdNum,
+              message_id: messageIdToDelete
+            });
+          }
+        }
       }
-    } catch (err) {
-      setError('Failed to delete message');
+    } catch (err: any) {
+      // Handle network errors
+      console.error('[Frontend] Error deleting message:', err);
+      setMessages((prev) => {
+        const exists = prev.some(m => m.id === messageIdToDelete);
+        if (exists) {
+          setError('Failed to delete message. Please refresh the page.');
+        }
+        return prev.filter(m => m.id !== messageIdToDelete);
+      });
     } finally {
       setDeletingMessageId(null);
+      setMessageToDelete(null);
     }
   };
 
@@ -714,18 +789,26 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
                                 <Typography variant="body2" sx={{ mb: 1 }}>
                                   {message.message}
                                 </Typography>
-                                <Paper
-                                  elevation={1}
-                                  sx={{
-                                    p: 1.5,
-                                    mb: 1,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                    bgcolor: isCurrentUser ? 'primary.light' : 'grey.100',
-                                    maxWidth: '300px'
-                                  }}
-                                >
+                                <Box sx={{ display: 'flex', justifyContent: isCurrentUser ? 'flex-end' : 'flex-start' }}>
+                                  <Paper
+                                    elevation={0}
+                                    variant="outlined"
+                                    sx={{
+                                      p: 1.5,
+                                      mb: 1,
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: 1.5,
+                                      bgcolor:  'rgba(25, 118, 210, 0.08)',
+                                      borderColor: 'rgba(25, 118, 210, 0.2)',
+                                      maxWidth: '300px',
+                                      transition: 'all 0.2s ease',
+                                      '&:hover': {
+                                        bgcolor: 'rgba(25, 118, 210, 0.12)',
+                                        borderColor: 'rgba(25, 118, 210, 0.3)',
+                                      }
+                                    }}
+                                  >
                                   {getFileIcon(message.file_type)}
                                   <Box sx={{ flex: 1, minWidth: 0 }}>
                                     <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>
@@ -738,7 +821,12 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
                                   <IconButton
                                     size="small"
                                     onClick={() => handleDownloadFile(message)}
-                                    sx={{ color: 'primary.main' }}
+                                    sx={{ 
+                                      color: 'primary.main',
+                                      '&:hover': {
+                                        bgcolor: 'rgba(25, 118, 210, 0.08)'
+                                      }
+                                    }}
                                   >
                                     <DownloadIcon fontSize="small" />
                                   </IconButton>
@@ -747,7 +835,12 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
                                       size="small"
                                       onClick={() => handleDeleteMessage(message.id)}
                                       disabled={deletingMessageId === message.id}
-                                      sx={{ color: 'error.main' }}
+                                      sx={{ 
+                                        color: 'error.main',
+                                        '&:hover': {
+                                          bgcolor: 'rgba(211, 47, 47, 0.08)'
+                                        }
+                                      }}
                                     >
                                       {deletingMessageId === message.id ? (
                                         <CircularProgress size={16} />
@@ -756,7 +849,8 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
                                       )}
                                     </IconButton>
                                   )}
-                                </Paper>
+                                  </Paper>
+                                </Box>
                               </Box>
                             )}
                           </Box>
@@ -1078,6 +1172,51 @@ export default function AdminChatPage({ params }: { params: Promise<{ caseId: st
         <DialogContent sx={{ p: 2, height: '100%', overflow: 'auto' }}>
           {renderFilePreview()}
         </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setMessageToDelete(null);
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={1}>
+            <DeleteIcon color="error" />
+            <Typography variant="h6">Delete File</Typography>
+          </Box>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Are you sure you want to delete this file? This action cannot be undone and the file will be permanently removed from the chat.
+          </Typography>
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              setMessageToDelete(null);
+            }}
+            disabled={deletingMessageId !== null}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={confirmDeleteMessage}
+            disabled={deletingMessageId !== null}
+            startIcon={deletingMessageId !== null ? <CircularProgress size={16} /> : <DeleteIcon />}
+          >
+            {deletingMessageId !== null ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
