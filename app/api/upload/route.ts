@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
             replacements: [
               parseInt(caseId),
               authResult.user?.userId,
-              uploadResult.key.split('/').pop() || fileName, // Use S3 key filename
+              uploadResult?.key?.split('/').pop() || fileName, // Use S3 key filename
               fileName, // Original filename
               uploadResult.url, // Full URL as file_path
               uploadResult.key, // S3 key
