@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 const { User } = require('@/models/init-models');
+import { logUserRegistration } from '@/lib/activity-logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +49,9 @@ export async function POST(request: NextRequest) {
     });
 
     const userId = newUser.id;
+
+    // Log activity
+    await logUserRegistration(newUser.toJSON ? newUser.toJSON() : newUser, role);
 
     return NextResponse.json({
       success: true,

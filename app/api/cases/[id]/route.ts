@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
+import { logCaseAssigned, logCaseStatusChanged } from '@/lib/activity-logger';
 import { col } from 'sequelize';
 
 export async function GET(
@@ -122,6 +123,10 @@ export async function PUT(
       );
     }
 
+    // Store old values for activity logging
+    const oldStatus = existingCase.status;
+    const oldAdvocateId = existingCase.advocate_id;
+
     // Check permissions - Admin can update any case
     if (authResult.user.role === 'user' && existingCase.user_id !== authResult.user.userId) {
       return NextResponse.json(
@@ -164,6 +169,34 @@ export async function PUT(
     }
 
     await existingCase.update(updateData_filtered);
+
+    // Log activities for status changes and assignments
+    if (updateData_filtered.status && updateData_filtered.status !== oldStatus) {
+      await logCaseStatusChanged(
+        existingCase.toJSON ? existingCase.toJSON() : existingCase,
+        oldStatus,
+        updateData_filtered.status,
+        authResult.user.userId
+      );
+    }
+
+    if (updateData_filtered.hasOwnProperty('advocate_id') && updateData_filtered.advocate_id !== oldAdvocateId) {
+      if (updateData_filtered.advocate_id) {
+        // Case assigned
+        const advocate = await User.findOne({
+          where: { id: updateData_filtered.advocate_id },
+          attributes: ['name']
+        });
+        if (advocate) {
+          await logCaseAssigned(
+            existingCase.toJSON ? existingCase.toJSON() : existingCase,
+            updateData_filtered.advocate_id,
+            advocate.name
+          );
+        }
+      }
+      // Note: Unassignment could be logged here if needed
+    }
 
     // Fetch the updated case with user and advocate information
     // Use attributes with col to directly select joined columns as flat fields

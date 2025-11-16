@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sequelize } from '@/lib/database';
 import { QueryTypes } from 'sequelize';
 import { verifyTokenFromRequest } from '@/lib/auth';
+import { logAdvocateApproval } from '@/lib/activity-logger';
 
 export async function GET(
   request: NextRequest,
@@ -117,6 +118,11 @@ export async function PUT(
 
     replacements.push(userId);
 
+    // Check if is_approved is being changed (for activity logging)
+    const oldUser = existingUsers[0] as any;
+    const isApprovalChange = updateData.hasOwnProperty('is_approved') && 
+                             updateData.is_approved !== oldUser.is_approved;
+
     await sequelize.query(`
       UPDATE users 
       SET ${updateFields.join(', ')}, updated_at = NOW()
@@ -125,6 +131,20 @@ export async function PUT(
       replacements,
         type: QueryTypes.UPDATE
     });
+
+    // Log activity if advocate approval status changed
+    if (isApprovalChange && oldUser.role === 'advocate') {
+      const updatedUser = await sequelize.query(
+        'SELECT * FROM users WHERE id = ?',
+        {
+          replacements: [userId],
+          type: QueryTypes.SELECT
+        }
+      );
+      if (updatedUser && Array.isArray(updatedUser) && updatedUser.length > 0) {
+        await logAdvocateApproval(updatedUser[0] as any, authResult.user.userId);
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -46,6 +46,7 @@ import {
   ArrowBack as ArrowBackIcon,
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
+  AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
@@ -53,6 +54,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { apiFetch } from '@/lib/api-client';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
+import DocumentsModal from '@/components/DocumentsModal';
 
 interface Case {
   id: number;
@@ -94,6 +96,10 @@ export default function AdvocateCasesPage() {
   
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [caseDetailsModalOpen, setCaseDetailsModalOpen] = useState(false);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [selectedCaseForDocuments, setSelectedCaseForDocuments] = useState<Case | null>(null);
+  const [caseDocuments, setCaseDocuments] = useState<any[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -223,6 +229,31 @@ export default function AdvocateCasesPage() {
   const handleCloseCaseDetails = () => {
     setCaseDetailsModalOpen(false);
     setSelectedCase(null);
+  };
+
+  const handleViewAttachments = async (caseId: number) => {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    setSelectedCaseForDocuments(case_);
+    setLoadingDocuments(true);
+    setDocumentsModalOpen(true);
+    try {
+      const data = await apiFetch(`/api/documents/${caseId}`);
+      if (data.success) {
+        setCaseDocuments(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+      setCaseDocuments([]);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const handleCloseDocumentsModal = () => {
+    setDocumentsModalOpen(false);
+    setSelectedCaseForDocuments(null);
+    setCaseDocuments([]);
   };
 
   return (
@@ -424,6 +455,15 @@ export default function AdvocateCasesPage() {
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
+                          <Tooltip title="View Attachments">
+                            <IconButton 
+                              size="small" 
+                              color="secondary"
+                              onClick={() => handleViewAttachments(c.id)}
+                            >
+                              <AttachFileIcon />
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title="Chat">
                             <IconButton 
                               size="small" 
@@ -474,6 +514,17 @@ export default function AdvocateCasesPage() {
           open={caseDetailsModalOpen}
           onClose={handleCloseCaseDetails}
           caseDetails={selectedCase as any}
+        />
+      )}
+
+      {/* Documents Modal */}
+      {selectedCaseForDocuments && (
+        <DocumentsModal
+          open={documentsModalOpen}
+          onClose={handleCloseDocumentsModal}
+          documents={caseDocuments}
+          caseId={selectedCaseForDocuments.id}
+          loading={loadingDocuments}
         />
       )}
     </Box>

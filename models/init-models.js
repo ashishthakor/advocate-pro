@@ -5,6 +5,7 @@ const Case = require("./Case")(sequelize, DataTypes);
 const ChatMessage = require("./ChatMessage")(sequelize, DataTypes);
 const Document = require("./Document")(sequelize, DataTypes);
 const Notice = require("./Notice")(sequelize, DataTypes);
+const RecentActivity = require("./RecentActivity")(sequelize, DataTypes);
 
 // Define associations
 
@@ -36,10 +37,15 @@ Document.belongsTo(User, { as: 'uploader', foreignKey: 'uploaded_by' });
 Case.hasMany(Notice, { as: 'notices', foreignKey: 'case_id' });
 Notice.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
 
+// User-RecentActivity Relations (User can have many activities)
+User.hasMany(RecentActivity, { as: 'activities', foreignKey: 'user_id' });
+RecentActivity.belongsTo(User, { as: 'user', foreignKey: 'user_id' });
+
 module.exports = {
   User,
   Case,
   ChatMessage,
   Document,
-  Notice
+  Notice,
+  RecentActivity
 };

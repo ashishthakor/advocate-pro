@@ -48,6 +48,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import { io, Socket } from 'socket.io-client';
+import DocumentsModal from '@/components/DocumentsModal';
 
 interface ChatMessage {
   id: number;
@@ -105,6 +106,9 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -116,6 +120,7 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
     if (caseId) {
       fetchCaseData();
       fetchMessages();
+      fetchDocuments();
       initializeSocket();
     }
 
@@ -181,6 +186,27 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
     }
   };
 
+  const fetchDocuments = async () => {
+    setLoadingDocuments(true);
+    try {
+      const response = await fetch(`/api/documents/${caseIdNum}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setDocuments(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
   const initializeSocket = () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -219,6 +245,10 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
 
       newSocket.on('new_message', (message: ChatMessage) => {
         setMessages((prev) => [...prev, message]);
+        // If the message contains a file, refresh documents list
+        if (message.message_type === 'file' || message.message_type === 'image') {
+          fetchDocuments();
+        }
       });
 
       newSocket.on('message_deleted', (data: { message_id: number; case_id: number }) => {
@@ -226,8 +256,13 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
         if (data.case_id === caseIdNum) {
           console.log(`[Frontend] Removing message ${data.message_id} from chat`);
           setMessages((prev) => {
+            const messageToDelete = prev.find(m => m.id === data.message_id);
             const filtered = prev.filter(m => m.id !== data.message_id);
             console.log(`[Frontend] Messages before: ${prev.length}, after: ${filtered.length}`);
+            // If deleted message had a file, refresh documents
+            if (messageToDelete && (messageToDelete.message_type === 'file' || messageToDelete.message_type === 'image')) {
+              fetchDocuments();
+            }
             return filtered;
           });
         } else {
@@ -416,6 +451,9 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           }
         }
 
+        // Refresh documents list after upload
+        await fetchDocuments();
+
         // Cleanup preview URL if open
         if (previewUrl) {
           URL.revokeObjectURL(previewUrl);
@@ -498,9 +536,18 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
       console.log(`[Frontend] API response:`, data);
 
       if (data.success) {
-        // 2. Remove message from local state immediately (optimistic update)
+        // 2. Check if deleted message had a file before removing
+        const messageToDelete = messages.find(m => m.id === messageIdToDelete);
+        const hadFile = messageToDelete && (messageToDelete.message_type === 'file' || messageToDelete.message_type === 'image');
+        
+        // Remove message from local state immediately (optimistic update)
         console.log(`[Frontend] Removing message ${messageIdToDelete} from local state`);
         setMessages((prev) => prev.filter(m => m.id !== messageIdToDelete));
+        
+        // Refresh documents if deleted message had a file
+        if (hadFile) {
+          fetchDocuments();
+        }
         
         // 3. ALWAYS emit socket event to notify other users
         // This ensures real-time sync - socket server will handle if message already deleted
@@ -527,7 +574,12 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
         } else {
           // Message was already deleted, just remove from local state and emit socket event
           console.log(`[Frontend] Message already deleted, removing from local state and emitting socket event`);
+          const messageToDelete = messages.find(m => m.id === messageIdToDelete);
+          const hadFile = messageToDelete && (messageToDelete.message_type === 'file' || messageToDelete.message_type === 'image');
           setMessages((prev) => prev.filter(m => m.id !== messageIdToDelete));
+          if (hadFile) {
+            fetchDocuments();
+          }
           
           // Still emit socket event to ensure sync
           if (socket && isConnected) {
@@ -708,6 +760,26 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           </Box>
         </CardContent>
       </Card>
+
+      {/* Documents Chip */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Chip
+          icon={<AttachFileIcon />}
+          label={`Attachments (${documents.length})`}
+          onClick={() => setDocumentsModalOpen(true)}
+          color="primary"
+          variant={documents.length > 0 ? "outlined" : "outlined"}
+          disabled={documents.length === 0}
+          sx={{
+            cursor: documents.length > 0 ? 'pointer' : 'default',
+            opacity: documents.length > 0 ? 1 : 0.6,
+            '&:hover': documents.length > 0 ? {
+              bgcolor: 'primary.light',
+              color: 'primary.contrastText',
+            } : {},
+          }}
+        />
+      </Box>
 
       {/* Messages */}
       <Paper sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -1204,6 +1276,15 @@ export default function ChatPage({ params }: { params: Promise<{ caseId: string 
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Documents Modal */}
+      <DocumentsModal
+        open={documentsModalOpen}
+        onClose={() => setDocumentsModalOpen(false)}
+        documents={documents}
+        caseId={caseIdNum}
+        loading={loadingDocuments}
+      />
     </Box>
   );
 }

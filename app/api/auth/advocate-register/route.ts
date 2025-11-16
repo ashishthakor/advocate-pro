@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { QueryTypes } from 'sequelize';
 import { sequelize } from '@/lib/database';
+import { logUserRegistration } from '@/lib/activity-logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -86,6 +87,20 @@ export async function POST(request: NextRequest) {
 
     const insertResult = result as any;
     const userId = insertResult[0];
+
+    // Fetch the created user to log activity
+    const newUser = await sequelize.query(
+      'SELECT * FROM users WHERE id = ?',
+      {
+        replacements: [userId],
+        type: QueryTypes.SELECT
+      }
+    );
+
+    if (newUser && Array.isArray(newUser) && newUser.length > 0) {
+      // Log activity
+      await logUserRegistration(newUser[0] as any, 'advocate');
+    }
 
     return NextResponse.json({
       success: true,
