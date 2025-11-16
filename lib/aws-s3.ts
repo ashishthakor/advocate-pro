@@ -104,9 +104,22 @@ export class S3FileUploader {
       
       // Use folder as prefix if provided, otherwise use default structure
       let fileKey: string;
-      if (folder && folder !== 'documents') {
+      if (folder && folder !== 'documents' && folder !== 'cases') {
         // For notices, use the notices prefix with the filename
         fileKey = `${this.getNoticesPrefix()}${fileName}`;
+      } else if (folder === 'cases' && caseId) {
+        // For case documents uploaded during case creation, use: arbitalk/dev/cases/case-{caseId}/{File_name_user_id_unique_key}.{extension}
+        const fileExtension = fileName.split('.').pop() || '';
+        const baseFileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        // Sanitize filename: remove special characters, keep only alphanumeric, spaces, hyphens, underscores
+        const sanitizedFileName = baseFileName
+          .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+          .replace(/\s+/g, '_')
+          .substring(0, 50); // Limit length
+        const uniqueKey = uuidv4().substring(0, 8); // Short unique key
+        const userIdStr = userId ? userId.toString() : 'anonymous';
+        const finalFileName = `${sanitizedFileName}_${userIdStr}_${uniqueKey}.${fileExtension}`;
+        fileKey = `${this.pathPrefix}cases/case-${caseId}/${finalFileName}`;
       } else {
         // For chat documents, use: {pathPrefix}chats/case-{caseId}/{File_name_user_id_unique_key}.{extension}
         if (caseId) {

@@ -40,12 +40,14 @@ import {
   Schedule as ScheduleIcon,
   Message as MessageIcon,
   Edit as EditIcon,
+  AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 import StatusUpdateModal from '@/components/StatusUpdateModal';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
+import DocumentsModal from '@/components/DocumentsModal';
 
 interface Case {
   id: number;
@@ -128,6 +130,10 @@ export default function CasesPage() {
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [caseDetailsModalOpen, setCaseDetailsModalOpen] = useState(false);
   const [selectedCaseForDetails, setSelectedCaseForDetails] = useState<Case | null>(null);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [selectedCaseForDocuments, setSelectedCaseForDocuments] = useState<Case | null>(null);
+  const [caseDocuments, setCaseDocuments] = useState<any[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
 
   // Debounced search term
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -210,6 +216,29 @@ export default function CasesPage() {
   const handleCloseCaseDetailsModal = () => {
     setCaseDetailsModalOpen(false);
     setSelectedCaseForDetails(null);
+  };
+
+  const handleViewAttachments = async (case_: Case) => {
+    setSelectedCaseForDocuments(case_);
+    setLoadingDocuments(true);
+    setDocumentsModalOpen(true);
+    try {
+      const data = await apiFetch(`/api/documents/${case_.id}`);
+      if (data.success) {
+        setCaseDocuments(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+      setCaseDocuments([]);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+
+  const handleCloseDocumentsModal = () => {
+    setDocumentsModalOpen(false);
+    setSelectedCaseForDocuments(null);
+    setCaseDocuments([]);
   };
 
   const handleStatusUpdated = () => {
@@ -534,6 +563,15 @@ export default function CasesPage() {
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
+                          <Tooltip title="View Attachments">
+                            <IconButton 
+                              size="small" 
+                              color="secondary"
+                              onClick={() => handleViewAttachments(case_)}
+                            >
+                              <AttachFileIcon />
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title="Update Status">
                             <IconButton 
                               size="small" 
@@ -606,6 +644,17 @@ export default function CasesPage() {
           open={caseDetailsModalOpen}
           onClose={handleCloseCaseDetailsModal}
           caseDetails={selectedCaseForDetails as any}
+        />
+      )}
+
+      {/* Documents Modal */}
+      {selectedCaseForDocuments && (
+        <DocumentsModal
+          open={documentsModalOpen}
+          onClose={handleCloseDocumentsModal}
+          documents={caseDocuments}
+          caseId={selectedCaseForDocuments.id}
+          loading={loadingDocuments}
         />
       )}
     </>

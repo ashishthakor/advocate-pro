@@ -18,8 +18,21 @@ import {
   IconButton,
   Snackbar,
   Paper,
+  Tooltip,
 } from '@mui/material';
-import { Close as CloseIcon, Delete as DeleteIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import {
+  Close as CloseIcon,
+  Delete as DeleteIcon,
+  ArrowBack as ArrowBackIcon,
+  CloudUpload as CloudUploadIcon,
+  PictureAsPdf as PdfIcon,
+  Description as DocIcon,
+  TableChart as ExcelIcon,
+  Image as ImageIcon,
+  AttachFile as AttachFileIcon,
+  InsertDriveFile as InsertDriveFileIcon,
+  Visibility as VisibilityIcon,
+} from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { RadioGroup, FormControlLabel, Radio, FormGroup, Checkbox, InputLabel } from '@mui/material';
@@ -84,7 +97,7 @@ export default function CreateCasePage() {
   const router = useRouter();
   const { t } = useLanguage();
   const MAX_FILES = 5;
-  const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
+  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
   const [form, setForm] = useState<CreateCaseForm>({
     title: '',
     description: '',
@@ -124,6 +137,12 @@ export default function CreateCasePage() {
   const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const dropZoneRef = React.useRef<HTMLDivElement>(null);
 
   const isEmail = (v: string) => /.+@.+\..+/.test(v);
   const isRequiredFilled = (
@@ -138,37 +157,98 @@ export default function CreateCasePage() {
     form.brief_description_of_dispute
   );
 
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <ImageIcon />;
+    if (fileType === 'application/pdf') return <PdfIcon />;
+    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return <ExcelIcon />;
+    if (fileType.includes('word') || fileType.includes('document')) return <DocIcon />;
+    return <AttachFileIcon />;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  const validateAndAddFiles = (newFiles: File[]) => {
+    const validFiles: File[] = [];
+    let nextError = '';
+
+    for (const file of newFiles) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        nextError = nextError || `${file.name} exceeds maximum size of 10MB`;
+        continue;
+      }
+
+      // Check file type
+      const allowedTypes = [
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain',
+        'application/rtf',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        nextError = nextError || `${file.name} is not a supported file type`;
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    // Check max files limit
+    if (files.length + validFiles.length > MAX_FILES) {
+      nextError = nextError || `Maximum ${MAX_FILES} files allowed`;
+      if (nextError) setError(nextError);
+      return;
+    }
+
+    setFiles([...files, ...validFiles]);
+    if (nextError) setError(nextError);
+  };
+
   const handleChange = (field: keyof CreateCaseForm) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const uploadAttachments = async (): Promise<Array<{ url: string; name: string; size: number; type: string }>> => {
+  const uploadAttachments = async (caseId: number): Promise<Array<{ url: string; name: string; size: number; type: string }>> => {
     if (!files.length) return [];
     const uploaded: Array<{ url: string; name: string; size: number; type: string }> = [];
-    for (const f of files) {
-      if (f.size > MAX_FILE_SIZE_BYTES) {
-        // skip oversized files for safety
-        continue;
-      }
-      const formData = new FormData();
-      formData.append('file', f);
-      try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: formData,
+    
+    const formData = new FormData();
+    files.forEach((f, index) => {
+      formData.append(`file-${index}`, f);
+    });
+    formData.append('caseId', caseId.toString());
+    formData.append('folder', 'cases'); // Use 'cases' folder to trigger case folder structure
+    
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (data?.success && data?.data) {
+        // data.data is an array of upload results
+        data.data.forEach((result: any) => {
+          if (result.success) {
+            uploaded.push({ url: result.url, name: result.fileName, size: result.fileSize, type: result.mimeType });
+          }
         });
-        const data = await response.json();
-        if (data?.success && data?.data?.url) {
-          uploaded.push({ url: data.data.url, name: f.name, size: f.size, type: f.type });
-        }
-      } catch (e) {
-        // ignore single file failure; continue
       }
+    } catch (e) {
+      console.error('Upload error:', e);
     }
     return uploaded;
   };
@@ -178,11 +258,11 @@ export default function CreateCasePage() {
     setError('');
     setSubmitting(true);
     try {
-      const attachments = await uploadAttachments();
+      // First create the case
       const payload: any = {
         ...form,
         sought_other: form.sought_other ? form.sought_other_text : '',
-        attachments_json: attachments.length ? JSON.stringify(attachments) : null,
+        attachments_json: null, // We'll upload files after case creation
       };
       const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
         '/api/cases',
@@ -192,6 +272,10 @@ export default function CreateCasePage() {
       if (res && (res as any).success && (res as any).data) {
         const created = (res as any).data;
         if (created.id) {
+          // Upload documents after case is created
+          if (files.length > 0) {
+            await uploadAttachments(created.id);
+          }
           setSuccessOpen(true);
           setTimeout(() => router.push(`/user/chat/${created.id}`), 600);
           return;
@@ -480,50 +564,154 @@ export default function CreateCasePage() {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <InputLabel shrink>Supporting Documents (optional)</InputLabel>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*,.pdf,.doc,.docx,.txt,.rtf"
-                  onChange={(e) => {
-                    const picked = Array.from(e.target.files || []);
-                    if (!picked.length) {
-                      setFiles([]);
-                      return;
+                <Paper
+                  ref={dropZoneRef}
+                  variant="outlined"
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (files.length < MAX_FILES) {
+                      setIsDragging(true);
                     }
-                    let nextError = '';
-                    let selected = picked.slice(0, MAX_FILES);
-                    if (picked.length > MAX_FILES) {
-                      nextError = `You can upload a maximum of ${MAX_FILES} files.`;
-                    }
-                    const valid = selected.filter((f) => {
-                      const ok = f.size <= MAX_FILE_SIZE_BYTES;
-                      if (!ok) {
-                        nextError = nextError || 'One or more files exceed the 20MB limit.';
-                      }
-                      return ok;
-                    });
-                    setFiles(valid);
-                    if (nextError) setError(nextError);
                   }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  Max 5 files, up to 20MB each.
-                </Typography>
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsDragging(false);
+                    if (files.length >= MAX_FILES) return;
+                    const droppedFiles = Array.from(e.dataTransfer.files);
+                    validateAndAddFiles(droppedFiles);
+                  }}
+                  sx={{
+                    p: 4,
+                    textAlign: 'center',
+                    border: '2px dashed',
+                    borderColor: isDragging ? 'primary.main' : 'primary.light',
+                    borderRadius: 2,
+                    bgcolor: isDragging ? 'primary.light' : 'action.hover',
+                    cursor: files.length >= MAX_FILES ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.3s ease',
+                    transform: isDragging ? 'scale(1.02)' : 'scale(1)',
+                    '&:hover': {
+                      bgcolor: files.length >= MAX_FILES ? 'action.hover' : 'action.selected',
+                      borderColor: files.length >= MAX_FILES ? 'primary.light' : 'primary.main',
+                    },
+                    mb: 2,
+                  }}
+                  onClick={() => {
+                    if (files.length < MAX_FILES) {
+                      fileInputRef.current?.click();
+                    }
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.txt,.rtf,.xls,.xlsx"
+                    onChange={(e) => {
+                      const picked = Array.from(e.target.files || []);
+                      if (picked.length) {
+                        validateAndAddFiles(picked);
+                      }
+                    }}
+                    style={{ display: 'none' }}
+                    disabled={files.length >= MAX_FILES}
+                  />
+                  <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    {isDragging ? 'Drop Files Here' : 'Click to Select Files or Drag & Drop'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Maximum {MAX_FILES} files, {MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB per file
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                    Supported: Images (JPEG, PNG, GIF, WebP), PDF, DOC, DOCX, TXT, RTF, XLS, XLSX
+                  </Typography>
+                </Paper>
+
+                {error && (
+                  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+                    {error}
+                  </Alert>
+                )}
+
                 {files.length > 0 && (
-                  <Paper variant="outlined" sx={{ mt: 1, p: 1 }}>
-                    <Stack spacing={1}>
+                  <Box>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        Selected Files ({files.length}/{MAX_FILES})
+                      </Typography>
+                      <Button
+                        size="small"
+                        onClick={() => setFiles([])}
+                        startIcon={<CloseIcon />}
+                      >
+                        Clear All
+                      </Button>
+                    </Box>
+                    <Grid container spacing={2}>
                       {files.map((f, idx) => (
-                        <Stack key={`${f.name}-${idx}`} direction="row" alignItems="center" justifyContent="space-between">
-                          <Typography variant="body2" color="text.secondary">
-                            {f.name} — {(f.size / 1024 / 1024).toFixed(2)} MB
-                          </Typography>
-                          <IconButton size="small" onClick={() => setFiles((prev) => prev.filter((_, i) => i !== idx))}>
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
+                        <Grid item xs={12} sm={6} key={`${f.name}-${idx}`}>
+                          <Card
+                            variant="outlined"
+                            sx={{
+                              p: 2,
+                              '&:hover': {
+                                boxShadow: 2,
+                              },
+                            }}
+                          >
+                            <Box display="flex" alignItems="flex-start" gap={2}>
+                              <Box
+                                sx={{
+                                  p: 1,
+                                  borderRadius: 1,
+                                  bgcolor: 'primary.light',
+                                  color: 'primary.contrastText',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                }}
+                              >
+                                {getFileIcon(f.type)}
+                              </Box>
+                              <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Tooltip title={f.name}>
+                                  <Typography
+                                    variant="body2"
+                                    fontWeight="medium"
+                                    noWrap
+                                    sx={{ mb: 0.5 }}
+                                  >
+                                    {f.name}
+                                  </Typography>
+                                </Tooltip>
+                                <Typography variant="caption" color="text.secondary">
+                                  {formatFileSize(f.size)}
+                                </Typography>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                onClick={() => setFiles((prev) => prev.filter((_, i) => i !== idx))}
+                                color="error"
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Card>
+                        </Grid>
                       ))}
-                    </Stack>
-                  </Paper>
+                    </Grid>
+                  </Box>
                 )}
               </Grid>
             </Grid>

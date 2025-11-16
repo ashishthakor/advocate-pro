@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,15 +14,18 @@ import {
   Chip,
   Paper,
   IconButton,
+  CircularProgress,
 } from '@mui/material';
 import {
   Close as CloseIcon,
   Person as PersonIcon,
   Description as DescriptionIcon,
   Business as BusinessIcon,
+  AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
 import { getCapitalizedString, getStatusConfig } from '@/lib/utils';
+import DocumentsModal from '@/components/DocumentsModal';
 
 interface CaseDetails {
   id: number;
@@ -76,6 +79,35 @@ interface CaseDetailsModalProps {
 
 export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDetailsModalProps) {
   const { t } = useLanguage();
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (open && caseDetails?.id) {
+      fetchDocuments();
+    }
+  }, [open, caseDetails?.id]);
+
+  const fetchDocuments = async () => {
+    if (!caseDetails?.id) return;
+    setLoadingDocuments(true);
+    try {
+      const response = await fetch(`/api/documents/${caseDetails.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setDocuments(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching documents:', err);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
 
   if (!caseDetails) {
     return null;
@@ -752,30 +784,49 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
             ? '0 4px 20px rgba(0,0,0,0.3)'
             : '0 4px 20px rgba(0,0,0,0.08)',
         }}>
-          <Typography variant="h6" gutterBottom sx={{ 
-            color: (theme) => theme.palette.mode === 'dark' ? '#ff9800' : '#f57c00',
-            fontWeight: 'bold',
-          }}>
-            {t('caseDetails.attachments')}
-          </Typography>
-          <Typography variant="body1" sx={{ 
-            color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
-            lineHeight: 1.6,
-          }}>
-            {caseDetails.attachments_json ? 
-              (() => {
-                try {
-                  const attachments = JSON.parse(caseDetails.attachments_json);
-                    return attachments.length > 0 ? 
-                      attachments.map((att: any, index: number) => `${att.name} (${(att.size / 1024 / 1024).toFixed(2)} MB)`).join(', ') :
-                      t('caseDetails.noAttachments');
-                } catch {
-                  return 'Invalid attachment data';
-                }
-              })() : 
-              t('caseDetails.noAttachments')
-            }
-          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" sx={{ 
+              color: (theme) => theme.palette.mode === 'dark' ? '#ff9800' : '#f57c00',
+              fontWeight: 'bold',
+            }}>
+              {t('caseDetails.attachments')}
+            </Typography>
+            {documents.length > 0 && (
+              <Chip
+                icon={<AttachFileIcon />}
+                label={`${documents.length} Document${documents.length > 1 ? 's' : ''}`}
+                onClick={() => setDocumentsModalOpen(true)}
+                color="primary"
+                variant="outlined"
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                  },
+                }}
+              />
+            )}
+          </Box>
+          {loadingDocuments ? (
+            <Box display="flex" justifyContent="center" py={2}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : documents.length === 0 ? (
+            <Typography variant="body1" sx={{ 
+              color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+              lineHeight: 1.6,
+            }}>
+              {t('caseDetails.noAttachments')}
+            </Typography>
+          ) : (
+            <Typography variant="body2" sx={{ 
+              color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+              lineHeight: 1.6,
+            }}>
+              Click the chip above to view and download all {documents.length} document{documents.length > 1 ? 's' : ''}.
+            </Typography>
+          )}
         </Paper>
       </DialogContent>
       
@@ -834,6 +885,17 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 {t('caseDetails.chatWithAdvocate')}
         </Button> */}
       </DialogActions>
+
+      {/* Documents Modal */}
+      {caseDetails && (
+        <DocumentsModal
+          open={documentsModalOpen}
+          onClose={() => setDocumentsModalOpen(false)}
+          documents={documents}
+          caseId={caseDetails.id}
+          loading={loadingDocuments}
+        />
+      )}
     </Dialog>
   );
 }
