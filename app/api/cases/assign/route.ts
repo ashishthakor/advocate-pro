@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest, hasRole } from '@/lib/auth';
+import { logCaseAssigned } from '@/lib/activity-logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,6 +68,9 @@ export async function POST(request: NextRequest) {
         where: { id: caseId } 
       }
     );
+
+    // Log activity
+    await logCaseAssigned(caseData.toJSON ? caseData.toJSON() : caseData, advocateId, advocate.name);
 
     return NextResponse.json({
       success: true,

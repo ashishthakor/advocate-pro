@@ -104,34 +104,19 @@ export default function AdminDashboard() {
         });
         setRecentCases(data.recentCases || []);
         
-        // Generate recent activity from recent cases
-        const activityFromCases = (data.recentCases || []).map((case_: any, index: number) => ({
-          id: `case_${case_.id}`,
-          type: 'case_created',
-          message: `New case "${case_.title}" created by ${case_.user_name || 'Unknown User'}`,
-          timestamp: new Date(case_.created_at).toLocaleString(),
-          status: 'info' as const,
-        }));
-        
-        // Add some mock system activities
-        const mockActivities = [
-          {
-            id: 'system_1',
-            type: 'system_update',
-            message: 'System updated with new case statuses',
-            timestamp: '1 hour ago',
-            status: 'success' as const,
-          },
-          {
-            id: 'system_2',
-            type: 'user_registration',
-            message: 'New advocate registration pending approval',
-            timestamp: '3 hours ago',
-            status: 'warning' as const,
-          },
-        ];
-        
-        setRecentActivity([...activityFromCases, ...mockActivities].slice(0, 5));
+        // Use real recent activities from database
+        if (data.recentActivities && Array.isArray(data.recentActivities)) {
+          const activities = data.recentActivities.map((activity: any) => ({
+            id: activity.id.toString(),
+            type: activity.type,
+            message: activity.message,
+            timestamp: new Date(activity.created_at).toLocaleString(),
+            status: activity.status as 'success' | 'warning' | 'error' | 'info',
+          }));
+          setRecentActivity(activities);
+        } else {
+          setRecentActivity([]);
+        }
       } else {
         setError(dashboardResponse.message || 'Failed to load dashboard data');
       }
@@ -160,6 +145,9 @@ export default function AdminDashboard() {
       case 'advocate_approval': return <WorkIcon />;
       case 'case_created': return <FolderIcon />;
       case 'case_assigned': return <AssignmentIcon />;
+      case 'case_status_changed': return <TrendingUpIcon />;
+      case 'document_uploaded': return <AssignmentIcon />;
+      case 'system_update': return <ScheduleIcon />;
       default: return <ScheduleIcon />;
     }
   };
@@ -347,24 +335,30 @@ export default function AdminDashboard() {
             <Typography variant="h6" gutterBottom>
               Recent Activity
             </Typography>
-            <List>
-              {recentActivity.map((activity) => (
-                <ListItem key={activity.id} sx={{ px: 0 }}>
-                  <ListItemIcon>
-                    {getActivityIcon(activity.type)}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={activity.message}
-                    secondary={activity.timestamp}
-                  />
-                  <Chip
-                    label={activity.status}
-                    color={getStatusColor(activity.status) as any}
-                    size="small"
-                  />
-                </ListItem>
-              ))}
-            </List>
+            {recentActivity.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                No recent activity to display
+              </Typography>
+            ) : (
+              <List>
+                {recentActivity.map((activity) => (
+                  <ListItem key={activity.id} sx={{ px: 0 }}>
+                    <ListItemIcon>
+                      {getActivityIcon(activity.type)}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={activity.message}
+                      secondary={activity.timestamp}
+                    />
+                    <Chip
+                      label={activity.status}
+                      color={getStatusColor(activity.status) as any}
+                      size="small"
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            )}
           </Paper>
         </Grid>
 

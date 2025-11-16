@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User } = require('@/models/init-models');
+const { Case, User, RecentActivity } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -88,6 +88,23 @@ export async function GET(request: NextRequest) {
       limit: 5
     });
 
+    // Get recent activities - only show to admin users
+    let recentActivities: any[] = [];
+    if (userRole === 'admin') {
+      recentActivities = await RecentActivity.findAll({
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['name', 'email'],
+            required: false
+          }
+        ],
+        order: [['created_at', 'DESC']],
+        limit: 10
+      });
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -96,6 +113,7 @@ export async function GET(request: NextRequest) {
         closedCases: (Number(stats.closed_no_consent_cases) || 0) + (Number(stats.close_no_settlement_cases) || 0) + (Number(stats.settled_cases) || 0) + (Number(stats.withdrawn_cases) || 0),
         pendingCases: (Number(stats.temporary_non_starter_cases) || 0) + (Number(stats.hold_cases) || 0),
         recentCases: recentCases,
+        recentActivities: recentActivities,
         statusBreakdown: {
           waiting_for_action: Number(stats.waiting_for_action_cases) || 0,
           neutrals_needs_to_be_assigned: Number(stats.neutrals_needs_to_be_assigned_cases) || 0,

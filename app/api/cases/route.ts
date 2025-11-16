@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
+import { logCaseCreated } from '@/lib/activity-logger';
 import { Op, col } from 'sequelize';
 
 export async function GET(request: NextRequest) {
@@ -77,18 +78,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Get cases with user and advocate information using Sequelize ORM
+    // Use attributes with col to directly select joined columns as flat fields
     const cases = await Case.findAll({
       where: whereConditions,
+      attributes: {
+        include: [
+          [col('user.name'), 'user_name'],
+          [col('user.email'), 'user_email'],
+          [col('user.phone'), 'user_phone'],
+          [col('advocate.name'), 'advocate_name'],
+          [col('advocate.email'), 'advocate_email'],
+          [col('advocate.phone'), 'advocate_phone']
+        ]
+      },
       include: [
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'phone', 'address'] // Include user object
+          attributes: [] // Don't include nested user object
         },
         {
           model: User,
           as: 'advocate',
-          attributes: ['id', 'name', 'email', 'phone'], // Include advocate object
+          attributes: [], // Don't include nested advocate object
           required: false // LEFT JOIN for advocate (can be null)
         }
       ],
@@ -117,13 +129,20 @@ export async function GET(request: NextRequest) {
     
     const totalPages = Math.ceil(total / limit);
 
-    // Cases already have flat fields from attributes literal, just convert to JSON
+    // Cases already have flat fields from attributes col, just convert to JSON
     const transformedCases = cases.map((case_: any) => {
       const caseData = case_.toJSON ? case_.toJSON() : case_;
       return {
         ...caseData,
         // Ensure advocate_id is properly set (could be null)
         advocate_id: caseData.advocate_id || null,
+        // Ensure flat fields are set (they should already be there from col())
+        user_name: caseData.user_name || null,
+        user_email: caseData.user_email || null,
+        user_phone: caseData.user_phone || null,
+        advocate_name: caseData.advocate_name || null,
+        advocate_email: caseData.advocate_email || null,
+        advocate_phone: caseData.advocate_phone || null,
       };
     });
 
@@ -286,6 +305,9 @@ export async function POST(request: NextRequest) {
       ...caseData,
       advocate_id: caseData?.advocate_id || null,
     };
+
+    // Log activity
+    await logCaseCreated(transformedCase, authResult.user.userId);
 
     return NextResponse.json({
       success: true,
