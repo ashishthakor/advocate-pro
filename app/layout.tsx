@@ -6,6 +6,7 @@ import LanguageUpdater from '@/components/LanguageUpdater';
 import { AuthProvider } from '@/components/AuthProvider';
 import ReduxProvider from '@/components/ReduxProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ClientPolyfill from '@/components/ClientPolyfill';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -47,6 +48,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
             <ErrorBoundary>
+              <ClientPolyfill />
               <ThemeProvider>
                 <LanguageProvider>
                   <LanguageUpdater />

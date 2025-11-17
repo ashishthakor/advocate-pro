@@ -10,6 +10,7 @@ interface NoticeData {
   respondentName: string;
   respondentAddress: string;
   respondentPincode: string;
+  subject: string;
   content: string;
   caseNumber?: string;
   caseTitle?: string;
@@ -86,292 +87,164 @@ export async function generateNoticePDF(data: NoticeData): Promise<Buffer> {
     year: 'numeric'
   });
 
-  // Generate HTML template using table structure like reference
-  const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Legal Notice</title>
-  <style>
-    @page {
-      size: A4;
-      margin: 1cm;
+  // Read the temp.html template
+  const templatePath = join(process.cwd(), 'lib', 'temp.html');
+  let htmlTemplate = readFileSync(templatePath, 'utf-8');
+
+  // Replace logo src with base64
+  if (logoBase64) {
+    htmlTemplate = htmlTemplate.replace(
+      'src="/public/arbitalk-logo.png"',
+      `src="${logoBase64}"`
+    );
+  }
+
+  // Replace To section - format recipient address properly
+  // Handle both single-line and multi-line addresses
+  let toAddressLines: string[] = [];
+  if (data.respondentAddress) {
+    // Split by newlines first
+    const lines = data.respondentAddress.split('\n').filter(line => line.trim());
+    if (lines.length > 0) {
+      toAddressLines = lines;
+    } else {
+      // If no newlines, use the whole address as one line
+      toAddressLines = [data.respondentAddress.trim()];
     }
-    
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 11pt;
-      line-height: 1.6;
-      color: #000;
-      padding: 0;
-      margin: 0;
-      background: white;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    thead {
-      display: table-header-group;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-      border-bottom: 1.5px solid #000;
-      padding-bottom: 12px;
-    }
-    
-    .logo {
-      margin-bottom: 6px;
-    }
-    
-    .logo img {
-      height: 28px;
-      width: auto;
-      max-width: 100px;
-      object-fit: contain;
-    }
-    
-    .tagline {
-      font-size: 10pt;
-      color: #333;
-      margin: 4px 0;
-    }
-    
-    .contact {
-      font-size: 9pt;
-      margin: 4px 0;
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-    }
-    
-    .content {
-      padding-top: 20px;
-    }
-    
-    .document-title {
-      text-align: center;
-      font-size: 18pt;
-      font-weight: bold;
-      margin: 20px 0 15px 0;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    
-    .date-section {
-      text-align: right;
-      font-size: 11pt;
-      margin-bottom: 20px;
-    }
-    
-    .separator {
-      border-top: 1px solid #000;
-      margin: 20px 0;
-    }
-    
-    .address-section {
-      margin: 20px 0;
-    }
-    
-    .address-label {
-      font-weight: bold;
-      font-size: 12pt;
-      margin-bottom: 8px;
-    }
-    
-    .address-name {
-      font-weight: bold;
-      font-size: 11.5pt;
-      margin-bottom: 5px;
-      line-height: 1.5;
-    }
-    
-    .address-details {
-      font-size: 11pt;
-      line-height: 1.7;
-      margin-bottom: 3px;
-    }
-    
-    .subject-section {
-      font-weight: bold;
-      font-size: 12pt;
-      margin: 20px 0;
-      line-height: 1.6;
-    }
-    
-    .greeting {
-      margin: 20px 0 15px 0;
-      font-size: 11pt;
-    }
-    
-    .fixed-content {
-      margin: 15px 0;
-      font-size: 11pt;
-      line-height: 1.8;
-      text-align: justify;
-    }
-    
-    .fixed-content p {
-      margin-bottom: 10px;
-      line-height: 1.8;
-      text-align: justify;
-    }
-    
-    .fixed-content strong {
-      font-weight: bold;
-      color: #000;
-    }
-    
-    .fixed-content h3 {
-      font-size: 12.5pt;
-      font-weight: bold;
-      margin: 20px 0 10px 0;
-      color: #000;
-      text-align: left;
-    }
-    
-    .fixed-content h3:first-child {
-      margin-top: 0;
-    }
-    
-    .fixed-content ul {
-      margin: 8px 0 10px 20px;
-      padding-left: 0;
-      list-style-type: none;
-    }
-    
-    .fixed-content li {
-      margin-bottom: 6px;
-      line-height: 1.7;
-      position: relative;
-      padding-left: 18px;
-      text-align: justify;
-    }
-    
-    .fixed-content li:before {
-      content: "●";
-      position: absolute;
-      left: 0;
-      font-weight: bold;
-      font-size: 10pt;
-    }
-    
-    .custom-content {
-      margin: 15px 0;
-      font-size: 11pt;
-      line-height: 1.8;
-      text-align: justify;
-      white-space: pre-line;
-    }
-    
-    .closing-section {
-      margin-top: 30px;
-    }
-    
-    .closing-text {
-      font-size: 11pt;
-      margin-bottom: 20px;
-    }
-    
-    .signature-name {
-      font-weight: bold;
-      font-size: 11.5pt;
-      margin-bottom: 5px;
-    }
-    
-    .signature-title {
-      font-size: 10.5pt;
-    }
-  </style>
-</head>
-<body>
-  <table>
-    <thead>
-      <tr>
-        <td>
-          <div class="header">
-            ${logoBase64 ? `<div class="logo"><img src="${logoBase64}" alt="ARBITALK Logo"></div>` : ''}
-            <div class="tagline">We Believe in Talk | Dispute Resolution Institution</div>
-            <div class="contact">
-              <span>arbitalk.com</span>
-              <span>+91 77780 70439</span>
-              <span>info@arbitalk.com</span>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="content">
-          <!-- Document Title -->
-          <div class="document-title">NOTICE</div>
-          
-          <!-- Date -->
-          <div class="date-section">
-            <strong>Date:</strong> ${currentDate}
-          </div>
-          
-          <!-- Separator -->
-          <div class="separator"></div>
-          
-          <!-- To Section -->
-          <div class="address-section">
+  }
+  
+  // Generate HTML for address lines
+  const toAddressHtml = toAddressLines.length > 0
+    ? toAddressLines.map(line => 
+        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+      ).join('\n')
+    : '<div class="address-details"></div>';
+  
+  // Replace the To section in template
+  // Find the comment marker and replace the entire section
+  const toCommentIndex = htmlTemplate.indexOf('<!-- To -->');
+  if (toCommentIndex !== -1) {
+    // Find the start of the address-section div after the comment
+    const sectionStart = htmlTemplate.indexOf('<div class="address-section">', toCommentIndex);
+    if (sectionStart !== -1) {
+      // Find the matching closing div by counting depth
+      let depth = 0;
+      let pos = sectionStart;
+      let sectionEnd = -1;
+      
+      while (pos < htmlTemplate.length) {
+        if (htmlTemplate.substring(pos, pos + 4) === '<div') {
+          depth++;
+          pos += 4;
+        } else if (htmlTemplate.substring(pos, pos + 6) === '</div>') {
+          depth--;
+          if (depth === 0) {
+            sectionEnd = pos + 6;
+            break;
+          }
+          pos += 6;
+        } else {
+          pos++;
+        }
+      }
+      
+      if (sectionEnd !== -1) {
+        const toSectionReplacement = `          <div class="address-section">
             <div class="address-label">To,</div>
             <div class="address-name">${escapeHtml(data.respondentName)}</div>
-            <div class="address-details">${escapeHtml(data.respondentAddress)}</div>
+${toAddressHtml}
             <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
-          </div>
-          
-          <!-- From Section -->
-          <div class="address-section">
+          </div>`;
+        
+        htmlTemplate = htmlTemplate.substring(0, sectionStart) + 
+                       toSectionReplacement + 
+                       htmlTemplate.substring(sectionEnd);
+      }
+    }
+  }
+  
+  // Fallback: if comment-based replacement failed, use regex
+  if (htmlTemplate.includes('PNIB APPAREL PRIVATE LIMITED')) {
+    htmlTemplate = htmlTemplate.replace(
+      /<div class="address-section">[\s\S]*?<div class="address-label">To,<\/div>[\s\S]*?<div class="address-name">PNIB APPAREL PRIVATE LIMITED<\/div>[\s\S]*?<div class="address-details">PIN: [^<]*<\/div>[\s\S]*?<\/div>/,
+      `          <div class="address-section">
+            <div class="address-label">To,</div>
+            <div class="address-name">${escapeHtml(data.respondentName)}</div>
+${toAddressHtml}
+            <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
+          </div>`
+    );
+  }
+
+  // Replace From section - format applicant address properly
+  let fromAddressLines: string[] = [];
+  if (data.applicantAddress) {
+    // Split by newlines first
+    const lines = data.applicantAddress.split('\n').filter(line => line.trim());
+    if (lines.length > 0) {
+      fromAddressLines = lines;
+    } else {
+      // If no newlines, use the whole address as one line
+      fromAddressLines = [data.applicantAddress.trim()];
+    }
+  }
+  
+  // Generate HTML for address lines
+  const fromAddressHtml = fromAddressLines.length > 0
+    ? fromAddressLines.map(line => 
+        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+      ).join('\n')
+    : '<div class="address-details"></div>';
+  
+  // Build the From section
+  let fromSection = `<div class="address-section">
             <div class="address-label">From,</div>
             <div class="address-name">${escapeHtml(data.applicantName)}</div>
-            <div class="address-details">${escapeHtml(data.applicantAddress)}</div>
-            ${data.applicantEmail ? `<div class="address-details">Email: ${escapeHtml(data.applicantEmail)}</div>` : ''}
-            ${data.applicantPhone ? `<div class="address-details">Phone: ${escapeHtml(data.applicantPhone)}</div>` : ''}
-          </div>
-          
-          <!-- Subject Section -->
-          ${data.caseNumber || data.caseTitle ? `
-          <div class="subject-section">
-            Subject: ${escapeHtml(data.caseTitle || 'Legal Notice')}${data.caseNumber ? ` (Case No: ${escapeHtml(data.caseNumber)})` : ''}
-          </div>
-          ` : ''}
-          
-          <!-- Separator -->
-          <div class="separator"></div>
-          
-          <!-- Greeting -->
-          <div class="greeting">Sir/Madam,</div>
-          
-          <!-- Custom Content -->
-          ${data.content && data.content.trim() ? `
-          <div class="custom-content">${escapeHtml(data.content.trim())}</div>
-          ` : ''}
+${fromAddressHtml}`;
+  if (data.applicantEmail) {
+    fromSection += `\n            <div class="address-details">Email: ${escapeHtml(data.applicantEmail)}</div>`;
+  }
+  if (data.applicantPhone) {
+    fromSection += `\n            <div class="address-details">Phone: ${escapeHtml(data.applicantPhone)}</div>`;
+  }
+  fromSection += '\n          </div>';
+  
+  htmlTemplate = htmlTemplate.replace(
+    /<div class="address-section">[\s\S]*?<div class="address-label">From,<\/div>[\s\S]*?<div class="address-name">Ravindrabhai Om Panwala<\/div>[\s\S]*?<div class="address-details">Phone: [^<]*<\/div>[\s\S]*?<\/div>/,
+    fromSection
+  );
 
-          <!-- Fixed Content -->
-          <div class="fixed-content">${FIXED_NOTICE_CONTENT.trim()}</div>
-          
-          <!-- Closing -->
-          <div class="closing-section">
-            <div class="closing-text">Thanking you,</div>
-            <div class="signature-name">${escapeHtml(data.applicantName)}</div>
-            <div class="signature-title">Applicant</div>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</body>
-</html>
-  `;
+  // Replace Subject section
+  htmlTemplate = htmlTemplate.replace(
+    /Subject: Legal Notice for Outstanding Payments and Invocation of Arbitration Clause under the Agreement/,
+    `Subject: ${escapeHtml(data.subject)}`
+  );
+
+  // Replace content in fixed-content div
+  htmlTemplate = htmlTemplate.replace(
+    /<div class="fixed-content"><\/div>/,
+    `<div class="fixed-content">${data.content}</div>`
+  );
+
+  // Replace signature section
+  htmlTemplate = htmlTemplate.replace(
+    /<div class="signature-name">Ravindrabhai Om Panwala<\/div>\s*<div class="signature-title">Proprietor, Ecomfirst Ventures<\/div>/,
+    `<div class="signature-name">${escapeHtml(data.applicantName)}</div>
+            <div class="signature-title">Applicant</div>`
+  );
+
+  // Add date section before the To section
+  if (!htmlTemplate.includes('Date:')) {
+    htmlTemplate = htmlTemplate.replace(
+      /<td class="content">/,
+      `<td class="content">
+          <div class="date-section">
+            <strong>Date:</strong> ${currentDate}
+          </div>`
+    );
+  }
+
+  const html = htmlTemplate;
 
   // Launch Puppeteer and generate PDF
   const browser = await puppeteer.launch({
