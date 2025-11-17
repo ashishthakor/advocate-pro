@@ -31,6 +31,7 @@ import {
   Chip,
   Snackbar,
   Pagination,
+  useTheme,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -88,6 +89,8 @@ interface PaginationInfo {
 }
 
 export default function NoticesPage() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [notices, setNotices] = useState<Notice[]>([]);
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
@@ -619,7 +622,16 @@ export default function NoticesPage() {
       {/* Create Notice Dialog */}
       <Dialog 
         open={formOpen} 
-        onClose={formLoading ? undefined : handleCancelForm} 
+        onClose={(event, reason) => {
+          // Prevent closing when loading or when clicking backdrop during API call
+          if (formLoading) {
+            return;
+          }
+          if (reason === 'backdropClick' && formLoading) {
+            return;
+          }
+          handleCancelForm();
+        }} 
         maxWidth="md" 
         fullWidth
         PaperProps={{
@@ -648,7 +660,16 @@ export default function NoticesPage() {
                     }
                   }}
                   sx={{
-                    bgcolor: 'background.paper',
+                    bgcolor: isDarkMode ? '#383838' : 'background.paper',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.primary.main : undefined,
+                    },
                   }}
                 >
                   {cases.map((case_) => (
@@ -818,7 +839,14 @@ export default function NoticesPage() {
       {/* Edit Notice Dialog */}
       <Dialog 
         open={editDialogOpen} 
-        onClose={() => {
+        onClose={(event, reason) => {
+          // Prevent closing when loading or when clicking backdrop during API call
+          if (editFormLoading) {
+            return;
+          }
+          if (reason === 'backdropClick' && editFormLoading) {
+            return;
+          }
           setEditDialogOpen(false);
           setEditingNotice(null);
           resetForm();
@@ -846,7 +874,18 @@ export default function NoticesPage() {
                     }
                   }}
                   label="Select Case"
-                  sx={{ bgcolor: 'background.paper' }}
+                  sx={{
+                    bgcolor: isDarkMode ? '#383838' : 'background.paper',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.primary.main : undefined,
+                    },
+                  }}
                 >
                   {cases.map((caseItem) => (
                     <MenuItem key={caseItem.id} value={caseItem.id}>
@@ -1032,11 +1071,16 @@ export default function NoticesPage() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setEditDialogOpen(false);
-            setEditingNotice(null);
-            resetForm();
-          }}>
+          <Button 
+            onClick={() => {
+              if (!editFormLoading) {
+                setEditDialogOpen(false);
+                setEditingNotice(null);
+                resetForm();
+              }
+            }}
+            disabled={editFormLoading}
+          >
             Cancel
           </Button>
           <Button

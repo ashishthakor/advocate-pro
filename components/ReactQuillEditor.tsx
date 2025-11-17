@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import ReactQuillPolyfill from './ReactQuillPolyfill';
 
 // Dynamically import ReactQuill with no SSR
@@ -49,6 +49,8 @@ export default function ReactQuillEditor({
   readOnly = false,
 }: ReactQuillEditorProps) {
   const [mounted, setMounted] = useState(false);
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   useEffect(() => {
     setMounted(true);
@@ -130,16 +132,63 @@ export default function ReactQuillEditor({
             fontFamily: 'inherit',
             borderBottomLeftRadius: '4px',
             borderBottomRightRadius: '4px',
+            backgroundColor: isDarkMode ? '#383838' : '#fff',
             ...(error && {
               borderColor: 'error.main',
+            }),
+            ...(isDarkMode && {
+              color: theme.palette.text.primary,
             }),
           },
           '& .ql-editor': {
             minHeight: '200px',
+            ...(isDarkMode && {
+              color: theme.palette.text.primary,
+            }),
           },
           '& .ql-toolbar': {
             borderTopLeftRadius: '4px',
             borderTopRightRadius: '4px',
+            backgroundColor: isDarkMode ? '#383838' : '#fff',
+            ...(isDarkMode && {
+              borderColor: theme.palette.divider,
+              '& .ql-stroke': {
+                stroke: theme.palette.text.primary,
+              },
+              '& .ql-fill': {
+                fill: theme.palette.text.primary,
+              },
+              '& .ql-picker-label': {
+                color: theme.palette.text.primary,
+                '&::before': {
+                  color: theme.palette.text.primary,
+                },
+              },
+              '& .ql-picker-options': {
+                backgroundColor: theme.palette.background.paper,
+                borderColor: theme.palette.divider,
+                '& .ql-picker-item': {
+                  color: theme.palette.text.primary,
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                },
+              },
+              '& button': {
+                color: theme.palette.text.primary,
+                '&:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                },
+                '&.ql-active': {
+                  backgroundColor: theme.palette.action.selected,
+                },
+              },
+              '& .ql-formats': {
+                '& button': {
+                  color: theme.palette.text.primary,
+                },
+              },
+            }),
           },
         }}
       >
