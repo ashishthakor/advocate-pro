@@ -69,6 +69,356 @@ const FIXED_NOTICE_CONTENT = `
 <p style="text-align: center; margin-top: 20px; font-weight: bold;"><strong>Settle Smart. Settle Online. Settle with Arbitalk.</strong></p>
 `;
 
+// Generate the complete HTML template with all data
+function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate: string): string {
+  // Format To address lines
+  let toAddressLines: string[] = [];
+  if (data.respondentAddress) {
+    const lines = data.respondentAddress.split('\n').filter(line => line.trim());
+    if (lines.length > 0) {
+      toAddressLines = lines;
+    } else {
+      toAddressLines = [data.respondentAddress.trim()];
+    }
+  }
+  
+  const toAddressHtml = toAddressLines.length > 0
+    ? toAddressLines.map(line => 
+        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+      ).join('\n')
+    : '';
+
+  // Format From address lines
+  let fromAddressLines: string[] = [];
+  if (data.applicantAddress) {
+    const lines = data.applicantAddress.split('\n').filter(line => line.trim());
+    if (lines.length > 0) {
+      fromAddressLines = lines;
+    } else {
+      fromAddressLines = [data.applicantAddress.trim()];
+    }
+  }
+  
+  const fromAddressHtml = fromAddressLines.length > 0
+    ? fromAddressLines.map(line => 
+        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+      ).join('\n')
+    : '';
+
+  // Build From section with optional email and phone
+  let fromSectionHtml = fromAddressHtml;
+  if (data.applicantEmail) {
+    fromSectionHtml += `\n            <div class="address-details">Email: ${escapeHtml(data.applicantEmail)}</div>`;
+  }
+  if (data.applicantPhone) {
+    fromSectionHtml += `\n            <div class="address-details">Phone: ${escapeHtml(data.applicantPhone)}</div>`;
+  }
+
+  // Build the complete HTML
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Notice - Arbitalk</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1cm;
+    }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+      line-height: 1.6;
+      color: #000;
+      padding: 0;
+      margin: 0;
+      background: white;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { display: table-header-group; }
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 1.5px solid #000;
+      padding-bottom: 12px;
+    }
+    .logo img {
+      height: 32px;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      font-size: 10.5pt;
+      color: #333;
+      margin: 6px 0;
+      font-weight: 500;
+    }
+    .contact {
+      font-size: 9.5pt;
+      margin: 8px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      color: #222;
+    }
+    .contact span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .content { padding-top: 20px; }
+    .document-title {
+      text-align: center;
+      font-size: 20pt;
+      font-weight: bold;
+      margin: 30px 0 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+    .date-section {
+      text-align: right;
+      font-size: 11pt;
+      margin-bottom: 25px;
+    }
+    .separator {
+      border-top: 1px solid #000;
+      margin: 25px 0;
+    }
+    .address-section { margin: 20px 0; }
+    .address-label {
+      font-weight: bold;
+      font-size: 12pt;
+      margin-bottom: 8px;
+    }
+    .address-name {
+      font-weight: bold;
+      font-size: 11.8pt;
+      margin-bottom: 6px;
+    }
+    .address-details {
+      font-size: 11pt;
+      line-height: 1.7;
+    }
+    .subject-section {
+      font-weight: bold;
+      font-size: 12.5pt;
+      margin: 25px 0 20px 0;
+    }
+    .greeting { margin: 20px 0 15px 0; }
+    .fixed-content {
+      margin: 15px 0;
+      font-size: 11pt;
+      line-height: 1.8;
+      text-align: justify;
+    }
+    /* Support React Quill alignment classes */
+    .fixed-content .ql-align-center {
+      text-align: center;
+    }
+    .fixed-content .ql-align-right {
+      text-align: right;
+    }
+    .fixed-content .ql-align-left {
+      text-align: left;
+    }
+    .fixed-content .ql-align-justify {
+      text-align: justify;
+    }
+    /* Support inline style alignments from React Quill */
+    .fixed-content p[style*="text-align: center"],
+    .fixed-content div[style*="text-align: center"] {
+      text-align: center !important;
+    }
+    .fixed-content p[style*="text-align: right"],
+    .fixed-content div[style*="text-align: right"] {
+      text-align: right !important;
+    }
+    .fixed-content p[style*="text-align: left"],
+    .fixed-content div[style*="text-align: left"] {
+      text-align: left !important;
+    }
+    .fixed-content p { margin-bottom: 12px; }
+    .fixed-content ul {
+      margin: 12px 0 15px 20px;
+      padding-left: 0;
+      list-style-type: none;
+    }
+    .fixed-content li {
+      margin-bottom: 10px;
+      line-height: 1.8;
+      position: relative;
+      padding-left: 22px;
+      text-align: justify;
+    }
+    .fixed-content li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+      color: #000;
+      font-size: 14pt;
+      top: -4px;
+    }
+    .closing-section { margin-top: 40px; }
+    .closing-text { margin-bottom: 25px; }
+    .signature-name {
+      font-weight: bold;
+      font-size: 12pt;
+    }
+    .signature-title { font-size: 11pt; color: #333; }
+  </style>
+</head>
+<body>
+  <table>
+    <thead>
+      <tr>
+        <td>
+          <div class="header">
+            <div class="logo">
+              <img src="${logoBase64 || '/public/arbitalk-logo.png'}" alt="ARBITALK Logo">
+            </div>
+            <div class="tagline">We Believe in Talk | Dispute Resolution Institution</div>
+            <div class="contact">
+              <span>🌐 arbitalk.com</span>
+              <span>✉️ info@arbitalk.com</span>
+              <span>📞 +91 77780 70439</span>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="content">
+          <div class="date-section">
+            <strong>Date:</strong> ${currentDate}
+          </div>
+
+          <!-- To -->
+          <div class="address-section">
+            <div class="address-label">To,</div>
+            <div class="address-name">${escapeHtml(data.respondentName)}</div>
+${toAddressHtml}
+            <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
+          </div>
+
+          <!-- From -->
+          <div class="address-section">
+            <div class="address-label">From,</div>
+            <div class="address-name">${escapeHtml(data.applicantName)}</div>
+${fromSectionHtml}
+          </div>
+
+          <!-- Subject -->
+          <div class="subject-section">
+            Subject: ${escapeHtml(data.subject)}
+          </div>
+
+          <div class="separator"></div>
+
+          <!-- Greeting -->
+          <div class="greeting">Sir/Madam,</div>
+
+          <!-- Main Content -->
+          <div class="fixed-content">${data.content}</div>
+
+          <!-- Closing -->
+          <div class="closing-section">
+            <div class="closing-text">Thanking you,</div>
+            <br><br>
+            <div class="signature-name">${escapeHtml(data.applicantName)}</div>
+            <div class="signature-title">${escapeHtml(data.applicantAddress.split('\n')[0] || '')}</div>
+          </div>
+
+          <!-- Static Conciliation Information - Page 1 -->
+          <div style="page-break-before: always; margin-top: 40px;">
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 20px;">What is Conciliation?</h3>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              Conciliation is a <strong>voluntary and confidential process</strong> where both parties work together, with the assistance of a <strong>neutral expert called a Conciliator</strong>, to find a mutually agreeable solution. Once both parties reach an agreement, the Conciliator issues a <strong>Conciliation Settlement Agreement</strong>, which is <strong>legally binding and enforceable</strong> just like a court decree (under <strong>Section 74 of the Arbitration and Conciliation Act, 1996</strong>).
+            </p>
+
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Who is a Conciliator?</h3>
+            <p style="margin-bottom: 12px; line-height: 1.8;">
+              A Conciliator is an <strong>independent, impartial, and trained dispute resolution professional</strong>. Their role is to:
+            </p>
+            <ul style="margin: 12px 0 15px 20px; padding-left: 0; list-style-type: none;">
+              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+                Help both parties communicate clearly,
+              </li>
+              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+                Suggest practical and fair solutions, and
+              </li>
+              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+                Guide towards an amicable settlement.
+              </li>
+            </ul>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              All Arbitalk Conciliators are <strong>verified professionals with legal and subject-matter expertise</strong>. They <strong>remain neutral at all times and do not represent any party</strong>.
+            </p>
+
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">How Your Conciliator is Appointed</h3>
+            <p style="margin-bottom: 12px; line-height: 1.8;">
+              Arbitalk appoints a Conciliator from its <strong>registered panel of experts</strong> based on the nature of your case. Every conciliator follows a strict code of <strong>neutrality, fairness, and confidentiality</strong> to ensure a transparent process.
+            </p>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              If, at any point, you are uncomfortable with your assigned Conciliator, you may write to the <strong>Arbitalk Review Committee</strong>. Upon review, we may assign a new conciliator if deemed appropriate.
+            </p>
+            <p style="margin-bottom: 5px; line-height: 1.8;">
+              <strong>support@arbitalk.com</strong><br>
+              <strong>+91 93557 55793</strong>
+            </p>
+          </div>
+
+          <!-- Static Conciliation Information - Page 2 -->
+          <div style="page-break-before: always; margin-top: 40px;">
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 20px;">If You Choose Not to Participate</h3>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              If you decide <strong>not to participate</strong> in this conciliation process, you may <strong>lose the opportunity</strong> to <strong>resolve the matter amicably and conveniently</strong> through Arbitalk.
+            </p>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              In such cases, the other party may choose to proceed with <strong>formal legal action</strong> before the appropriate Courts, Tribunals, or Arbitration forums — which could be more <strong>time-consuming and expensive</strong>.
+            </p>
+            <p style="margin-bottom: 25px; line-height: 1.8;">
+              We encourage you to <strong>engage actively</strong> and make use of this opportunity to reach a fair and mutually beneficial settlement.
+            </p>
+
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Need Assistance or Have Questions?</h3>
+            <p style="margin-bottom: 12px; line-height: 1.8;">
+              If you have any queries about the process, feel free to reach out:
+            </p>
+            <p style="margin-bottom: 5px; line-height: 1.8;">
+              <strong>support@arbitalk.com</strong><br>
+              <strong>+91 90812 97778</strong>
+            </p>
+            <p style="margin-bottom: 25px; line-height: 1.8;">
+              Our team will be happy to assist you and clarify any process-related doubts.
+            </p>
+
+            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Disclaimer</h3>
+            <p style="margin-bottom: 15px; line-height: 1.8;">
+              <strong>Arbitalk is a neutral and independent online dispute resolution institution.</strong> We are <strong>not representatives of any party</strong> involved in the dispute.
+            </p>
+            <p style="margin-bottom: 20px; line-height: 1.8;">
+              Our role is limited to providing <strong>administrative and technical support</strong> to facilitate an impartial and lawful settlement process, in line with the agreement between the parties.
+            </p>
+            <p style="text-align: center; margin-top: 20px; font-weight: bold; font-size: 12pt;">
+              <strong>Settle Smart. Settle Online. Settle with Arbitalk.</strong>
+            </p>
+          </div>
+
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+  return html;
+}
+
 export async function generateNoticePDF(data: NoticeData): Promise<Buffer> {
   // Get logo as base64
   let logoBase64 = '';
@@ -87,164 +437,8 @@ export async function generateNoticePDF(data: NoticeData): Promise<Buffer> {
     year: 'numeric'
   });
 
-  // Read the temp.html template
-  const templatePath = join(process.cwd(), 'lib', 'temp.html');
-  let htmlTemplate = readFileSync(templatePath, 'utf-8');
-
-  // Replace logo src with base64
-  if (logoBase64) {
-    htmlTemplate = htmlTemplate.replace(
-      'src="/public/arbitalk-logo.png"',
-      `src="${logoBase64}"`
-    );
-  }
-
-  // Replace To section - format recipient address properly
-  // Handle both single-line and multi-line addresses
-  let toAddressLines: string[] = [];
-  if (data.respondentAddress) {
-    // Split by newlines first
-    const lines = data.respondentAddress.split('\n').filter(line => line.trim());
-    if (lines.length > 0) {
-      toAddressLines = lines;
-    } else {
-      // If no newlines, use the whole address as one line
-      toAddressLines = [data.respondentAddress.trim()];
-    }
-  }
-  
-  // Generate HTML for address lines
-  const toAddressHtml = toAddressLines.length > 0
-    ? toAddressLines.map(line => 
-        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
-      ).join('\n')
-    : '<div class="address-details"></div>';
-  
-  // Replace the To section in template
-  // Find the comment marker and replace the entire section
-  const toCommentIndex = htmlTemplate.indexOf('<!-- To -->');
-  if (toCommentIndex !== -1) {
-    // Find the start of the address-section div after the comment
-    const sectionStart = htmlTemplate.indexOf('<div class="address-section">', toCommentIndex);
-    if (sectionStart !== -1) {
-      // Find the matching closing div by counting depth
-      let depth = 0;
-      let pos = sectionStart;
-      let sectionEnd = -1;
-      
-      while (pos < htmlTemplate.length) {
-        if (htmlTemplate.substring(pos, pos + 4) === '<div') {
-          depth++;
-          pos += 4;
-        } else if (htmlTemplate.substring(pos, pos + 6) === '</div>') {
-          depth--;
-          if (depth === 0) {
-            sectionEnd = pos + 6;
-            break;
-          }
-          pos += 6;
-        } else {
-          pos++;
-        }
-      }
-      
-      if (sectionEnd !== -1) {
-        const toSectionReplacement = `          <div class="address-section">
-            <div class="address-label">To,</div>
-            <div class="address-name">${escapeHtml(data.respondentName)}</div>
-${toAddressHtml}
-            <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
-          </div>`;
-        
-        htmlTemplate = htmlTemplate.substring(0, sectionStart) + 
-                       toSectionReplacement + 
-                       htmlTemplate.substring(sectionEnd);
-      }
-    }
-  }
-  
-  // Fallback: if comment-based replacement failed, use regex
-  if (htmlTemplate.includes('PNIB APPAREL PRIVATE LIMITED')) {
-    htmlTemplate = htmlTemplate.replace(
-      /<div class="address-section">[\s\S]*?<div class="address-label">To,<\/div>[\s\S]*?<div class="address-name">PNIB APPAREL PRIVATE LIMITED<\/div>[\s\S]*?<div class="address-details">PIN: [^<]*<\/div>[\s\S]*?<\/div>/,
-      `          <div class="address-section">
-            <div class="address-label">To,</div>
-            <div class="address-name">${escapeHtml(data.respondentName)}</div>
-${toAddressHtml}
-            <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
-          </div>`
-    );
-  }
-
-  // Replace From section - format applicant address properly
-  let fromAddressLines: string[] = [];
-  if (data.applicantAddress) {
-    // Split by newlines first
-    const lines = data.applicantAddress.split('\n').filter(line => line.trim());
-    if (lines.length > 0) {
-      fromAddressLines = lines;
-    } else {
-      // If no newlines, use the whole address as one line
-      fromAddressLines = [data.applicantAddress.trim()];
-    }
-  }
-  
-  // Generate HTML for address lines
-  const fromAddressHtml = fromAddressLines.length > 0
-    ? fromAddressLines.map(line => 
-        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
-      ).join('\n')
-    : '<div class="address-details"></div>';
-  
-  // Build the From section
-  let fromSection = `<div class="address-section">
-            <div class="address-label">From,</div>
-            <div class="address-name">${escapeHtml(data.applicantName)}</div>
-${fromAddressHtml}`;
-  if (data.applicantEmail) {
-    fromSection += `\n            <div class="address-details">Email: ${escapeHtml(data.applicantEmail)}</div>`;
-  }
-  if (data.applicantPhone) {
-    fromSection += `\n            <div class="address-details">Phone: ${escapeHtml(data.applicantPhone)}</div>`;
-  }
-  fromSection += '\n          </div>';
-  
-  htmlTemplate = htmlTemplate.replace(
-    /<div class="address-section">[\s\S]*?<div class="address-label">From,<\/div>[\s\S]*?<div class="address-name">Ravindrabhai Om Panwala<\/div>[\s\S]*?<div class="address-details">Phone: [^<]*<\/div>[\s\S]*?<\/div>/,
-    fromSection
-  );
-
-  // Replace Subject section
-  htmlTemplate = htmlTemplate.replace(
-    /Subject: Legal Notice for Outstanding Payments and Invocation of Arbitration Clause under the Agreement/,
-    `Subject: ${escapeHtml(data.subject)}`
-  );
-
-  // Replace content in fixed-content div
-  htmlTemplate = htmlTemplate.replace(
-    /<div class="fixed-content"><\/div>/,
-    `<div class="fixed-content">${data.content}</div>`
-  );
-
-  // Replace signature section
-  htmlTemplate = htmlTemplate.replace(
-    /<div class="signature-name">Ravindrabhai Om Panwala<\/div>\s*<div class="signature-title">Proprietor, Ecomfirst Ventures<\/div>/,
-    `<div class="signature-name">${escapeHtml(data.applicantName)}</div>
-            <div class="signature-title">Applicant</div>`
-  );
-
-  // Add date section before the To section
-  if (!htmlTemplate.includes('Date:')) {
-    htmlTemplate = htmlTemplate.replace(
-      /<td class="content">/,
-      `<td class="content">
-          <div class="date-section">
-            <strong>Date:</strong> ${currentDate}
-          </div>`
-    );
-  }
-
-  const html = htmlTemplate;
+  // Generate the complete HTML template with all data already inserted
+  const html = generateHTMLTemplate(data, logoBase64, currentDate);
 
   // Launch Puppeteer and generate PDF
   const browser = await puppeteer.launch({
