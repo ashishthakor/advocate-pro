@@ -86,6 +86,7 @@ export async function GET(request: NextRequest) {
           [col('user.name'), 'user_name'],
           [col('user.email'), 'user_email'],
           [col('user.phone'), 'user_phone'],
+          [col('user.address'), 'user_address'],
           [col('advocate.name'), 'advocate_name'],
           [col('advocate.email'), 'advocate_email'],
           [col('advocate.phone'), 'advocate_phone']
@@ -140,6 +141,7 @@ export async function GET(request: NextRequest) {
         user_name: caseData.user_name || null,
         user_email: caseData.user_email || null,
         user_phone: caseData.user_phone || null,
+        user_address: caseData.user_address || null,
         advocate_name: caseData.advocate_name || null,
         advocate_email: caseData.advocate_email || null,
         advocate_phone: caseData.advocate_phone || null,

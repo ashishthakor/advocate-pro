@@ -31,6 +31,7 @@ import {
   Chip,
   Snackbar,
   Pagination,
+  useTheme,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -41,6 +42,7 @@ import {
   Edit as EditIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
+import ReactQuillEditor from '@/components/ReactQuillEditor';
 
 interface Case {
   id: number;
@@ -53,6 +55,11 @@ interface Case {
     phone: string;
     address: string;
   };
+  // Flat fields from API
+  user_name?: string;
+  user_email?: string;
+  user_phone?: string;
+  user_address?: string;
 }
 
 interface Notice {
@@ -61,6 +68,7 @@ interface Notice {
   respondent_name: string;
   respondent_address: string;
   respondent_pincode: string;
+  subject: string | null;
   content: string;
   pdf_filename: string;
   email_sent: boolean;
@@ -81,6 +89,8 @@ interface PaginationInfo {
 }
 
 export default function NoticesPage() {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const [notices, setNotices] = useState<Notice[]>([]);
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
@@ -102,6 +112,7 @@ export default function NoticesPage() {
   const [respondentName, setRespondentName] = useState('');
   const [respondentAddress, setRespondentAddress] = useState('');
   const [respondentPincode, setRespondentPincode] = useState('');
+  const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   
@@ -111,6 +122,7 @@ export default function NoticesPage() {
     respondentName?: string;
     respondentAddress?: string;
     respondentPincode?: string;
+    subject?: string;
     content?: string;
     recipientEmail?: string;
   }>({});
@@ -125,6 +137,9 @@ export default function NoticesPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const [editFormLoading, setEditFormLoading] = useState(false);
+  
+  // Track dialog open state for ReactQuill key
+  const [createDialogKey, setCreateDialogKey] = useState(0);
 
   useEffect(() => {
     fetchNotices();
@@ -183,10 +198,24 @@ export default function NoticesPage() {
       errors.respondentPincode = 'Pincode must be 6 digits';
     }
     
-    if (!content || content.trim() === '') {
+    if (!subject || subject.trim() === '') {
+      errors.subject = 'Subject is required';
+    }
+    
+    // Check if content is empty - React Quill returns '<p><br></p>' for empty content
+    const isEmptyContent = !content || 
+      content.trim() === '' || 
+      content.trim() === '<p><br></p>' ||
+      content.trim() === '<p></p>';
+    
+    if (isEmptyContent) {
       errors.content = 'Content is required';
-    } else if (content.trim().length < 10) {
-      errors.content = 'Content must be at least 10 characters';
+    } else {
+      // Strip HTML tags to check actual content length (but don't modify the original content)
+      const textContent = content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+      if (textContent.length < 10) {
+        errors.content = 'Content must be at least 10 characters';
+      }
     }
     
     if (recipientEmail && recipientEmail.trim() !== '') {
@@ -217,7 +246,8 @@ export default function NoticesPage() {
           respondent_name: respondentName.trim(),
           respondent_address: respondentAddress.trim(),
           respondent_pincode: respondentPincode.trim(),
-          content: content.trim(),
+          subject: subject.trim(),
+          content: content, // Don't trim HTML content - it may contain meaningful whitespace
           recipient_email: recipientEmail.trim() || null,
         }),
       });
@@ -226,6 +256,8 @@ export default function NoticesPage() {
         setSuccess('Notice created successfully');
         setFormOpen(false);
         resetForm();
+        // Increment key when dialog closes to force fresh mount on next open
+        setCreateDialogKey(prev => prev + 1);
         fetchNotices();
       } else {
         setError(response.message || 'Failed to create notice');
@@ -297,13 +329,24 @@ export default function NoticesPage() {
     }
   };
 
-  const handleEditNotice = (notice: Notice) => {
+  const handleEditNotice = async (notice: Notice) => {
+    // Reset form first to clear any previous data
+    resetForm();
+    
+    // Ensure cases are loaded
+    if (cases.length === 0) {
+      await fetchCases();
+    }
+    
+    // Set form values
     setEditingNotice(notice);
     setSelectedCaseId(notice.case_id);
     setRespondentName(notice.respondent_name);
     setRespondentAddress(notice.respondent_address);
     setRespondentPincode(notice.respondent_pincode);
-    setContent(notice.content);
+    setSubject(notice.subject || '');
+    // Set content directly - ReactQuill will handle it properly
+    setContent(notice.content || '');
     setRecipientEmail(notice.recipient_email || '');
     setFormErrors({});
     setEditDialogOpen(true);
@@ -326,7 +369,8 @@ export default function NoticesPage() {
           respondent_name: respondentName.trim(),
           respondent_address: respondentAddress.trim(),
           respondent_pincode: respondentPincode.trim(),
-          content: content.trim(),
+          subject: subject.trim(),
+          content: content, // Don't trim HTML content - it may contain meaningful whitespace
           recipient_email: recipientEmail.trim() || null,
         }),
       });
@@ -373,6 +417,7 @@ export default function NoticesPage() {
     setRespondentName('');
     setRespondentAddress('');
     setRespondentPincode('');
+    setSubject('');
     setContent('');
     setRecipientEmail('');
     setFormErrors({});
@@ -381,6 +426,8 @@ export default function NoticesPage() {
   const handleCancelForm = () => {
     resetForm();
     setFormOpen(false);
+    // Increment key when dialog closes to force fresh mount on next open
+    setCreateDialogKey(prev => prev + 1);
   };
 
   const selectedCase = cases.find(c => c.id === selectedCaseId);
@@ -575,7 +622,16 @@ export default function NoticesPage() {
       {/* Create Notice Dialog */}
       <Dialog 
         open={formOpen} 
-        onClose={formLoading ? undefined : handleCancelForm} 
+        onClose={(event, reason) => {
+          // Prevent closing when loading or when clicking backdrop during API call
+          if (formLoading) {
+            return;
+          }
+          if (reason === 'backdropClick' && formLoading) {
+            return;
+          }
+          handleCancelForm();
+        }} 
         maxWidth="md" 
         fullWidth
         PaperProps={{
@@ -604,7 +660,16 @@ export default function NoticesPage() {
                     }
                   }}
                   sx={{
-                    bgcolor: 'background.paper',
+                    bgcolor: isDarkMode ? '#383838' : 'background.paper',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.primary.main : undefined,
+                    },
                   }}
                 >
                   {cases.map((case_) => (
@@ -636,16 +701,16 @@ export default function NoticesPage() {
                     Applicant Details (Auto-populated from Case)
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Name:</strong> {selectedCase.user?.name || 'N/A'}
+                    <strong>Name:</strong> {selectedCase.user?.name || selectedCase.user_name || 'N/A'}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Address:</strong> {selectedCase.user?.address || 'N/A'}
+                    <strong>Address:</strong> {selectedCase.user?.address || selectedCase.user_address || 'N/A'}
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Email:</strong> {selectedCase.user?.email || 'N/A'}
+                    <strong>Email:</strong> {selectedCase.user?.email || selectedCase.user_email || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Phone:</strong> {selectedCase.user?.phone || 'N/A'}
+                    <strong>Phone:</strong> {selectedCase.user?.phone || selectedCase.user_phone || 'N/A'}
                   </Typography>
                 </Card>
               </Grid>
@@ -705,6 +770,23 @@ export default function NoticesPage() {
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Subject"
+                value={subject}
+                onChange={(e) => {
+                  setSubject(e.target.value);
+                  if (formErrors.subject) {
+                    setFormErrors({ ...formErrors, subject: undefined });
+                  }
+                }}
+                required
+                error={!!formErrors.subject}
+                helperText={formErrors.subject || 'Subject line for the notice'}
+              />
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -723,19 +805,19 @@ export default function NoticesPage() {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Content"
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                Content <span style={{ color: 'red' }}>*</span>
+              </Typography>
+              <ReactQuillEditor
+                key={`create-${createDialogKey}`} // Stable key that only changes when dialog opens/closes
                 value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
+                onChange={(value) => {
+                  setContent(value);
                   if (formErrors.content) {
                     setFormErrors({ ...formErrors, content: undefined });
                   }
                 }}
-                multiline
-                rows={6}
-                required
+                placeholder="Enter notice content..."
                 error={!!formErrors.content}
                 helperText={formErrors.content || 'This content will be included in the notice PDF'}
               />
@@ -757,7 +839,14 @@ export default function NoticesPage() {
       {/* Edit Notice Dialog */}
       <Dialog 
         open={editDialogOpen} 
-        onClose={() => {
+        onClose={(event, reason) => {
+          // Prevent closing when loading or when clicking backdrop during API call
+          if (editFormLoading) {
+            return;
+          }
+          if (reason === 'backdropClick' && editFormLoading) {
+            return;
+          }
           setEditDialogOpen(false);
           setEditingNotice(null);
           resetForm();
@@ -785,7 +874,18 @@ export default function NoticesPage() {
                     }
                   }}
                   label="Select Case"
-                  sx={{ bgcolor: 'background.paper' }}
+                  sx={{
+                    bgcolor: isDarkMode ? '#383838' : 'background.paper',
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.divider : undefined,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: isDarkMode ? theme.palette.primary.main : undefined,
+                    },
+                  }}
                 >
                   {cases.map((caseItem) => (
                     <MenuItem key={caseItem.id} value={caseItem.id}>
@@ -809,26 +909,54 @@ export default function NoticesPage() {
                   </Typography>
                   {(() => {
                     const selectedCase = cases.find(c => c.id === selectedCaseId);
-                    return selectedCase?.user ? (
-                      <>
-                        <Typography variant="body2">
-                          <strong>Name:</strong> {selectedCase.user.name || 'N/A'}
+                    const userName = selectedCase?.user?.name || selectedCase?.user_name;
+                    const userAddress = selectedCase?.user?.address || selectedCase?.user_address;
+                    const userEmail = selectedCase?.user?.email || selectedCase?.user_email;
+                    const userPhone = selectedCase?.user?.phone || selectedCase?.user_phone;
+                    
+                    if (userName) {
+                      return (
+                        <>
+                          <Typography variant="body2">
+                            <strong>Name:</strong> {userName}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Address:</strong> {userAddress || 'N/A'}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Email:</strong> {userEmail || 'N/A'}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Phone:</strong> {userPhone || 'N/A'}
+                          </Typography>
+                        </>
+                      );
+                    } else if (editingNotice?.case?.user) {
+                      // Fallback: use case data from notice if available
+                      const caseUser = editingNotice.case.user;
+                      return (
+                        <>
+                          <Typography variant="body2">
+                            <strong>Name:</strong> {caseUser.name || 'N/A'}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Address:</strong> {caseUser.address || 'N/A'}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Email:</strong> {caseUser.email || 'N/A'}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Phone:</strong> {caseUser.phone || 'N/A'}
+                          </Typography>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <Typography variant="body2" color="text.secondary">
+                          Loading case details...
                         </Typography>
-                        <Typography variant="body2">
-                          <strong>Address:</strong> {selectedCase.user.address || 'N/A'}
-                        </Typography>
-                        <Typography variant="body2">
-                          <strong>Email:</strong> {selectedCase.user.email || 'N/A'}
-                        </Typography>
-                        <Typography variant="body2">
-                          <strong>Phone:</strong> {selectedCase.user.phone || 'N/A'}
-                        </Typography>
-                      </>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        Loading case details...
-                      </Typography>
-                    );
+                      );
+                    }
                   })()}
                 </Card>
               </Grid>
@@ -888,6 +1016,23 @@ export default function NoticesPage() {
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Subject"
+                value={subject}
+                onChange={(e) => {
+                  setSubject(e.target.value);
+                  if (formErrors.subject) {
+                    setFormErrors({ ...formErrors, subject: undefined });
+                  }
+                }}
+                required
+                error={!!formErrors.subject}
+                helperText={formErrors.subject || 'Subject line for the notice'}
+              />
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -906,19 +1051,19 @@ export default function NoticesPage() {
             </Grid>
 
             <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Content"
+              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                Content <span style={{ color: 'red' }}>*</span>
+              </Typography>
+              <ReactQuillEditor
+                key={editingNotice?.id || 'edit'} // Force re-render when editing different notices
                 value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
+                onChange={(value) => {
+                  setContent(value);
                   if (formErrors.content) {
                     setFormErrors({ ...formErrors, content: undefined });
                   }
                 }}
-                multiline
-                rows={6}
-                required
+                placeholder="Enter notice content..."
                 error={!!formErrors.content}
                 helperText={formErrors.content || 'This content will be included in the notice PDF'}
               />
@@ -926,11 +1071,16 @@ export default function NoticesPage() {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setEditDialogOpen(false);
-            setEditingNotice(null);
-            resetForm();
-          }}>
+          <Button 
+            onClick={() => {
+              if (!editFormLoading) {
+                setEditDialogOpen(false);
+                setEditingNotice(null);
+                resetForm();
+              }
+            }}
+            disabled={editFormLoading}
+          >
             Cancel
           </Button>
           <Button

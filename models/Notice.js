@@ -27,6 +27,10 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(10),
       allowNull: false
     },
+    subject: {
+      type: DataTypes.STRING(500),
+      allowNull: true
+    },
     content: {
       type: DataTypes.TEXT,
       allowNull: false

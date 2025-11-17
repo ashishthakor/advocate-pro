@@ -98,10 +98,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, content, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, recipient_email } = body;
 
     // Validation
-    if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !content) {
+    if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
@@ -136,6 +136,7 @@ export async function POST(request: NextRequest) {
       respondentName: respondent_name,
       respondentAddress: respondent_address,
       respondentPincode: respondent_pincode,
+      subject: subject,
       content: content,
       caseNumber: caseData.case_number,
       caseTitle: caseData.title,
@@ -175,6 +176,7 @@ export async function POST(request: NextRequest) {
       respondent_name,
       respondent_address,
       respondent_pincode,
+      subject,
       content,
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
