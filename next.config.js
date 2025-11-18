@@ -35,30 +35,9 @@ const nextConfig = {
         tls: false,
       };
       
-      // Suppress webpack warnings for react-dom-polyfill
-      config.ignoreWarnings.push(
-        {
-          module: /lib\/react-dom-polyfill\.js/,
-          message: /Critical dependency: the request of a dependency is an expression/,
-        }
-      );
-      
-      // Patch react-dom at build time using a webpack plugin
-      // This avoids circular dependency issues
-      const webpack = require('webpack');
-      const path = require('path');
-      
-      config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /^react-dom$/,
-          function(resource) {
-            // Only replace for client-side builds and when imported by react-quill
-            if (!isServer && resource.context && resource.context.includes('react-quill')) {
-              resource.request = path.resolve(__dirname, 'lib/react-dom-polyfill.js');
-            }
-          }
-        )
-      );
+      // Note: We don't use webpack plugin for react-dom polyfill anymore
+      // Instead, we rely on the runtime polyfill (ReactQuillPolyfill component)
+      // which patches ReactDOM.findDOMNode at runtime. This avoids build issues.
     }
     
     return config;
