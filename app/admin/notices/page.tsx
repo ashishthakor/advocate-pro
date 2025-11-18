@@ -480,8 +480,8 @@ export default function NoticesPage() {
                   <TableCell>Applicant</TableCell>
                   <TableCell>Respondent</TableCell>
                   <TableCell>File Name</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Email Count</TableCell>
+                  {/* <TableCell>Status</TableCell> */}
+                  {/* <TableCell>Email Count</TableCell> */}
                   <TableCell>Created</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
@@ -549,18 +549,18 @@ export default function NoticesPage() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <Chip
                           label={notice.email_sent ? 'Email Sent' : 'Draft'}
                           color={notice.email_sent ? 'success' : 'default'}
                           size="small"
                         />
-                      </TableCell>
-                      <TableCell>
+                      </TableCell> */}
+                      {/* <TableCell>
                         <Typography variant="body2">
                           {notice.email_sent_count || 0}
                         </Typography>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         {new Date(notice.created_at).toLocaleDateString()}
                       </TableCell>
@@ -575,7 +575,7 @@ export default function NoticesPage() {
                               <EditIcon />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Send Email">
+                          {/* <Tooltip title="Send Email">
                             <IconButton
                               size="small"
                               color="primary"
@@ -587,7 +587,7 @@ export default function NoticesPage() {
                             >
                               <EmailIcon />
                             </IconButton>
-                          </Tooltip>
+                          </Tooltip> */}
                           <Tooltip title="Delete">
                             <IconButton
                               size="small"
