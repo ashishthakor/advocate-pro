@@ -81,11 +81,11 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
       toAddressLines = [data.respondentAddress.trim()];
     }
   }
-  
+
   const toAddressHtml = toAddressLines.length > 0
-    ? toAddressLines.map(line => 
-        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
-      ).join('\n')
+    ? toAddressLines.map(line =>
+      `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+    ).join('\n')
     : '';
 
   // Format From address lines
@@ -98,11 +98,11 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
       fromAddressLines = [data.applicantAddress.trim()];
     }
   }
-  
+
   const fromAddressHtml = fromAddressLines.length > 0
-    ? fromAddressLines.map(line => 
-        `            <div class="address-details">${escapeHtml(line.trim())}</div>`
-      ).join('\n')
+    ? fromAddressLines.map(line =>
+      `            <div class="address-details">${escapeHtml(line.trim())}</div>`
+    ).join('\n')
     : '';
 
   // Build From section with optional email and phone
@@ -121,19 +121,37 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Legal Notice - Arbitalk</title>
+
+  <!-- Force Georgia font with 100% reliability in Puppeteer -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Georgia:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     @page {
       size: A4;
       margin: 1cm;
     }
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      font-size: 11pt;
-      line-height: 1.6;
-      color: #000;
+    * {
+      font-family: 'Georgia', serif !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-size: 14pt !important;
+      line-height: 1.8 !important;
+      color: #222;
       padding: 0;
       margin: 0;
       background: white;
+    }
+    body {
+      font-family: 'Georgia', serif !important;
+      font-size: 14pt !important;
+      line-height: 1.8 !important;
+      color: #222 !important;
+      text-align: justify !important;
+      text-justify: inter-word !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
     table { width: 100%; border-collapse: collapse; }
     thead { display: table-header-group; }
@@ -148,37 +166,43 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
       margin-bottom: 8px;
     }
     .tagline {
-      font-size: 10.5pt;
+      
       color: #333;
       margin: 6px 0;
       font-weight: 500;
     }
+
     .contact {
-      font-size: 9.5pt;
       margin: 8px 0;
       display: flex;
       justify-content: center;
       gap: 20px;
       color: #222;
     }
-    .contact span {
+    .contact-link {
+      font-family: 'Georgia', serif !important;
       display: flex;
       align-items: center;
       gap: 6px;
+      color: #222;
+      text-decoration: none;
     }
-    .content { padding-top: 20px; }
+    .contact-text {
+      font-weight: 500;
+    }
+    .phone, .pincode {
+      font-family: 'Times New Roman', Times, serif !important;
+    }
     .document-title {
       text-align: center;
-      font-size: 20pt;
-      font-weight: bold;
+            font-weight: bold;
       margin: 30px 0 20px 0;
       text-transform: uppercase;
       letter-spacing: 3px;
     }
     .date-section {
       text-align: right;
-      font-size: 11pt;
-      margin-bottom: 25px;
+            margin-bottom: 25px;
     }
     .separator {
       border-top: 1px solid #000;
@@ -186,29 +210,18 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
     }
     .address-section { margin: 20px 0; }
     .address-label {
-      font-weight: bold;
-      font-size: 12pt;
-      margin-bottom: 8px;
-    }
+          }
     .address-name {
-      font-weight: bold;
-      font-size: 11.8pt;
-      margin-bottom: 6px;
+            margin-bottom: 10px;
     }
     .address-details {
-      font-size: 11pt;
-      line-height: 1.7;
     }
     .subject-section {
-      font-weight: bold;
-      font-size: 12.5pt;
-      margin: 25px 0 20px 0;
+            margin: 25px 0 20px 0;
     }
     .greeting { margin: 20px 0 15px 0; }
     .fixed-content {
-      margin: 15px 0;
-      font-size: 11pt;
-      line-height: 1.8;
+      margin: 15px 0 0 0;
       text-align: justify;
     }
     /* Support React Quill alignment classes */
@@ -237,7 +250,6 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
     .fixed-content div[style*="text-align: left"] {
       text-align: left !important;
     }
-    .fixed-content p { margin-bottom: 12px; }
     .fixed-content ul {
       margin: 12px 0 15px 20px;
       padding-left: 0;
@@ -245,7 +257,6 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
     }
     .fixed-content li {
       margin-bottom: 10px;
-      line-height: 1.8;
       position: relative;
       padding-left: 22px;
       text-align: justify;
@@ -255,17 +266,14 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
       position: absolute;
       left: 0;
       font-weight: bold;
-      color: #000;
-      font-size: 14pt;
-      top: -4px;
+      color: #222;
+            top: -4px;
     }
-    .closing-section { margin-top: 40px; }
-    .closing-text { margin-bottom: 25px; }
+    .closing-section { margin: 20px 0; }
     .signature-name {
       font-weight: bold;
-      font-size: 12pt;
-    }
-    .signature-title { font-size: 11pt; color: #333; }
+          }
+    .signature-title { color: #222; }
   </style>
 </head>
 <body>
@@ -279,9 +287,9 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
             </div>
             <div class="tagline">We Believe in Talk | Dispute Resolution Institution</div>
             <div class="contact">
-              <span>🌐 arbitalk.com</span>
-              <span>✉️ info@arbitalk.com</span>
-              <span>📞 +91 77780 70439</span>
+              <a target="_blank" href="https://arbitalk.com" class="contact-link">🌐 arbitalk.com</a>
+              <a target="_blank" href="mailto:info@arbitalk.com" class="contact-link">✉️ info@arbitalk.com</a>
+              <a href="tel:+91 77780 70439" class="contact-link phone">📞 +91 77780 70439</a>
             </div>
           </div>
         </td>
@@ -290,34 +298,22 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
     <tbody>
       <tr>
         <td class="content">
-          <div class="date-section">
-            <strong>Date:</strong> ${currentDate}
-          </div>
 
           <!-- To -->
           <div class="address-section">
             <div class="address-label">To,</div>
             <div class="address-name">${escapeHtml(data.respondentName)}</div>
-${toAddressHtml}
-            <div class="address-details">PIN: ${escapeHtml(data.respondentPincode)}</div>
-          </div>
 
-          <!-- From -->
-          <div class="address-section">
-            <div class="address-label">From,</div>
-            <div class="address-name">${escapeHtml(data.applicantName)}</div>
-${fromSectionHtml}
+            <div class="address-details">Address: ${data.respondentAddress} - <span class="pincode">${data.respondentPincode}</span></div>
           </div>
 
           <!-- Subject -->
           <div class="subject-section">
-            Subject: ${escapeHtml(data.subject)}
+            <b>Subject:</b> ${escapeHtml(data.subject)}
           </div>
 
-          <div class="separator"></div>
-
           <!-- Greeting -->
-          <div class="greeting">Sir/Madam,</div>
+          <div class="greeting">Dear Sir/Madam,</div>
 
           <!-- Main Content -->
           <div class="fixed-content">${data.content}</div>
@@ -325,86 +321,86 @@ ${fromSectionHtml}
           <!-- Closing -->
           <div class="closing-section">
             <div class="closing-text">Thanking you,</div>
-            <br><br>
             <div class="signature-name">${escapeHtml(data.applicantName)}</div>
             <div class="signature-title">${escapeHtml(data.applicantAddress.split('\n')[0] || '')}</div>
           </div>
 
           <!-- Static Conciliation Information - Page 1 -->
           <div style="page-break-before: always; margin-top: 40px;">
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 20px;">What is Conciliation?</h3>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+            <h3 style="font-weight: bold; margin-bottom: 15px;">What is Conciliation?</h3>
+            <p style="margin-bottom: 15px;">
               Conciliation is a <strong>voluntary and confidential process</strong> where both parties work together, with the assistance of a <strong>neutral expert called a Conciliator</strong>, to find a mutually agreeable solution. Once both parties reach an agreement, the Conciliator issues a <strong>Conciliation Settlement Agreement</strong>, which is <strong>legally binding and enforceable</strong> just like a court decree (under <strong>Section 74 of the Arbitration and Conciliation Act, 1996</strong>).
             </p>
 
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Who is a Conciliator?</h3>
-            <p style="margin-bottom: 12px; line-height: 1.8;">
+            <h3 style="font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Who is a Conciliator?</h3>
+            <p style="margin-bottom: 12px;">
               A Conciliator is an <strong>independent, impartial, and trained dispute resolution professional</strong>. Their role is to:
             </p>
             <ul style="margin: 12px 0 15px 20px; padding-left: 0; list-style-type: none;">
-              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
-                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+              <li style="margin-bottom: 10px; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #222; top: -4px;">•</span>
                 Help both parties communicate clearly,
               </li>
-              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
-                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+              <li style="margin-bottom: 10px; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #222; top: -4px;">•</span>
                 Suggest practical and fair solutions, and
               </li>
-              <li style="margin-bottom: 10px; line-height: 1.8; position: relative; padding-left: 22px; text-align: justify;">
-                <span style="position: absolute; left: 0; font-weight: bold; color: #000; font-size: 14pt; top: -4px;">•</span>
+              <li style="margin-bottom: 10px; position: relative; padding-left: 22px; text-align: justify;">
+                <span style="position: absolute; left: 0; font-weight: bold; color: #222; top: -4px;">•</span>
                 Guide towards an amicable settlement.
               </li>
             </ul>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+            <p style="margin-bottom: 15px;">
               All Arbitalk Conciliators are <strong>verified professionals with legal and subject-matter expertise</strong>. They <strong>remain neutral at all times and do not represent any party</strong>.
             </p>
 
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">How Your Conciliator is Appointed</h3>
-            <p style="margin-bottom: 12px; line-height: 1.8;">
+            <h3 style="font-weight: bold; margin-bottom: 15px; margin-top: 25px;">How Your Conciliator is Appointed</h3>
+            <p style="margin-bottom: 12px;">
               Arbitalk appoints a Conciliator from its <strong>registered panel of experts</strong> based on the nature of your case. Every conciliator follows a strict code of <strong>neutrality, fairness, and confidentiality</strong> to ensure a transparent process.
             </p>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+            <p style="margin-bottom: 15px;">
               If, at any point, you are uncomfortable with your assigned Conciliator, you may write to the <strong>Arbitalk Review Committee</strong>. Upon review, we may assign a new conciliator if deemed appropriate.
             </p>
-            <p style="margin-bottom: 5px; line-height: 1.8;">
+            <p style="margin-bottom: 5px;">
               <strong>support@arbitalk.com</strong><br>
-              <strong>+91 93557 55793</strong>
+              <strong class="phone">+91 93557 55793</strong>
             </p>
           </div>
 
           <!-- Static Conciliation Information - Page 2 -->
-          <div style="page-break-before: always; margin-top: 40px;">
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 20px;">If You Choose Not to Participate</h3>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+          <!-- <div style="page-break-before: always; margin-top: 40px;"> -->
+          <div style="margin-top: 40px;">
+            <h3 style="font-weight: bold; margin-bottom: 15px; margin-top: 20px;">If You Choose Not to Participate</h3>
+            <p style="margin-bottom: 15px;">
               If you decide <strong>not to participate</strong> in this conciliation process, you may <strong>lose the opportunity</strong> to <strong>resolve the matter amicably and conveniently</strong> through Arbitalk.
             </p>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+            <p style="margin-bottom: 15px;">
               In such cases, the other party may choose to proceed with <strong>formal legal action</strong> before the appropriate Courts, Tribunals, or Arbitration forums — which could be more <strong>time-consuming and expensive</strong>.
             </p>
-            <p style="margin-bottom: 25px; line-height: 1.8;">
+            <p style="margin-bottom: 25px;">
               We encourage you to <strong>engage actively</strong> and make use of this opportunity to reach a fair and mutually beneficial settlement.
             </p>
 
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Need Assistance or Have Questions?</h3>
-            <p style="margin-bottom: 12px; line-height: 1.8;">
+            <h3 style="font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Need Assistance or Have Questions?</h3>
+            <p style="margin-bottom: 12px;">
               If you have any queries about the process, feel free to reach out:
             </p>
-            <p style="margin-bottom: 5px; line-height: 1.8;">
+            <p style="margin-bottom: 5px;">
               <strong>support@arbitalk.com</strong><br>
-              <strong>+91 90812 97778</strong>
+              <strong class="phone">+91 90812 97778</strong>
             </p>
-            <p style="margin-bottom: 25px; line-height: 1.8;">
+            <p style="margin-bottom: 25px;">
               Our team will be happy to assist you and clarify any process-related doubts.
             </p>
 
-            <h3 style="font-size: 13pt; font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Disclaimer</h3>
-            <p style="margin-bottom: 15px; line-height: 1.8;">
+            <h3 style="font-weight: bold; margin-bottom: 15px; margin-top: 25px;">Disclaimer</h3>
+            <p style="margin-bottom: 15px;">
               <strong>Arbitalk is a neutral and independent online dispute resolution institution.</strong> We are <strong>not representatives of any party</strong> involved in the dispute.
             </p>
-            <p style="margin-bottom: 20px; line-height: 1.8;">
+            <p style="margin-bottom: 20px;">
               Our role is limited to providing <strong>administrative and technical support</strong> to facilitate an impartial and lawful settlement process, in line with the agreement between the parties.
             </p>
-            <p style="text-align: center; margin-top: 20px; font-weight: bold; font-size: 12pt;">
+            <p style="text-align: center; margin-top: 20px; font-weight: bold;">
               <strong>Settle Smart. Settle Online. Settle with Arbitalk.</strong>
             </p>
           </div>
