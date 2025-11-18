@@ -185,7 +185,16 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
       align-items: center;
       gap: 6px;
       color: #222;
+    }
+    .contact-link > a {
       text-decoration: none;
+    }
+    .contact-link > span {
+      font-family: 'Georgia', serif !important;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #222;
     }
     .contact-text {
       font-weight: 500;
@@ -287,9 +296,9 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, currentDate:
             </div>
             <div class="tagline">We Believe in Talk | Dispute Resolution Institution</div>
             <div class="contact">
-              <a target="_blank" href="https://arbitalk.com" class="contact-link">🌐 arbitalk.com</a>
-              <a target="_blank" href="mailto:info@arbitalk.com" class="contact-link">✉️ info@arbitalk.com</a>
-              <a href="tel:+91 77780 70439" class="contact-link phone">📞 +91 77780 70439</a>
+              <div class="contact-link"><span class="contact-icon">🌐</span><a target="_blank" href="https://arbitalk.com">arbitalk.com</a></div>
+              <div class="contact-link"><span class="contact-icon">✉️</span><a target="_blank" href="mailto:info@arbitalk.com">info@arbitalk.com</a></div>
+              <div class="contact-link"><span class="contact-icon">📞</span><a class="phone" href="tel:+91 77780 70439">+91 77780 70439</a></div>
             </div>
           </div>
         </td>
