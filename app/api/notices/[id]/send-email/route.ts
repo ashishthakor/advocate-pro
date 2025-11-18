@@ -74,6 +74,7 @@ export async function POST(
       respondentName: notice.respondent_name,
       respondentAddress: notice.respondent_address,
       respondentPincode: notice.respondent_pincode,
+      subject: notice.subject || 'Legal Notice',
       content: notice.content,
       caseNumber: notice.case.case_number,
       caseTitle: notice.case.title,
