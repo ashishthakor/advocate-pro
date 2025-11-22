@@ -18,6 +18,7 @@ interface NoticeEmailData {
   respondentPincode: string;
   subject?: string;
   content: string;
+  date?: string;
   caseNumber?: string;
   caseTitle?: string;
   recipientEmail: string;
@@ -66,6 +67,7 @@ export async function sendNoticeEmail(
           respondentPincode: data.respondentPincode,
           subject: data.subject || 'Legal Notice',
           content: data.content,
+          date: data.date,
           caseNumber: data.caseNumber,
           caseTitle: data.caseTitle,
         });
@@ -82,6 +84,7 @@ export async function sendNoticeEmail(
         respondentPincode: data.respondentPincode,
         subject: data.subject || 'Legal Notice',
         content: data.content,
+        date: data.date,
         caseNumber: data.caseNumber,
         caseTitle: data.caseTitle,
       });
