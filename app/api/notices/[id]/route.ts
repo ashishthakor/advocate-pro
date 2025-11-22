@@ -93,7 +93,7 @@ export async function PUT(
     const { id } = await params;
     const noticeId = parseInt(id);
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email } = body;
 
     // Validation
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
@@ -101,6 +101,29 @@ export async function PUT(
         { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    // Auto-fill date if empty - convert YYYY-MM-DD to DATE for database
+    let noticeDateForDB: string | null = null;
+    let noticeDateForPDF: string = '';
+    
+    if (date && date.trim() !== '') {
+      // Date comes in YYYY-MM-DD format from the form
+      noticeDateForDB = date.trim();
+      // Convert to DD-MM-YYYY for PDF
+      const dateObj = new Date(date);
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const year = dateObj.getFullYear();
+      noticeDateForPDF = `${day}-${month}-${year}`;
+    } else {
+      // Auto-fill with current date
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      noticeDateForDB = `${year}-${month}-${day}`;
+      noticeDateForPDF = `${day}-${month}-${year}`;
     }
 
     // Get existing notice
@@ -185,6 +208,7 @@ export async function PUT(
       respondentPincode: respondent_pincode,
       subject: subject,
       content: content,
+      date: noticeDateForPDF,
       caseNumber: caseData.case_number,
       caseTitle: caseData.title,
     });
@@ -216,6 +240,7 @@ export async function PUT(
       respondent_pincode,
       subject,
       content,
+      date: noticeDateForDB,
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
     });

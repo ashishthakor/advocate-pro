@@ -69,6 +69,7 @@ interface Notice {
   respondent_address: string;
   respondent_pincode: string;
   subject: string | null;
+  date: string | null;
   content: string;
   pdf_filename: string;
   email_sent: boolean;
@@ -115,6 +116,7 @@ export default function NoticesPage() {
   const [subject, setSubject] = useState('');
   const [content, setContent] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
+  const [date, setDate] = useState('');
   
   // Form validation errors
   const [formErrors, setFormErrors] = useState<{
@@ -125,6 +127,7 @@ export default function NoticesPage() {
     subject?: string;
     content?: string;
     recipientEmail?: string;
+    date?: string;
   }>({});
 
   // Email dialog states
@@ -248,6 +251,7 @@ export default function NoticesPage() {
           respondent_pincode: respondentPincode.trim(),
           subject: subject.trim(),
           content: content, // Don't trim HTML content - it may contain meaningful whitespace
+          date: date.trim() || undefined,
           recipient_email: recipientEmail.trim() || null,
         }),
       });
@@ -348,6 +352,8 @@ export default function NoticesPage() {
     // Set content directly - ReactQuill will handle it properly
     setContent(notice.content || '');
     setRecipientEmail(notice.recipient_email || '');
+    // Set date from notice - convert to YYYY-MM-DD format for date input
+    setDate(formatDateForInput(notice.date));
     setFormErrors({});
     setEditDialogOpen(true);
   };
@@ -371,6 +377,7 @@ export default function NoticesPage() {
           respondent_pincode: respondentPincode.trim(),
           subject: subject.trim(),
           content: content, // Don't trim HTML content - it may contain meaningful whitespace
+          date: date.trim() || undefined,
           recipient_email: recipientEmail.trim() || null,
         }),
       });
@@ -412,6 +419,57 @@ export default function NoticesPage() {
     }
   };
 
+  // Helper function to format date from database (YYYY-MM-DD) to input format
+  const formatDateForInput = (dateString: string | null | undefined): string => {
+    if (!dateString) return '';
+    try {
+      // Handle both DATE format (YYYY-MM-DD) and string format (DD.MM.YYYY)
+      if (dateString.includes('.')) {
+        // DD.MM.YYYY format - convert to YYYY-MM-DD
+        const [day, month, year] = dateString.split('.');
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      } else {
+        // Already in YYYY-MM-DD format
+        return dateString.split('T')[0]; // Remove time if present
+      }
+    } catch {
+      return '';
+    }
+  };
+
+  // Helper function to format date for display (DD-MM-YYYY)
+  const formatDateForDisplay = (dateString: string | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    try {
+      let date: Date;
+      if (dateString.includes('.')) {
+        // DD.MM.YYYY format
+        const [day, month, year] = dateString.split('.');
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else if (dateString.includes('-')) {
+        // YYYY-MM-DD or DD-MM-YYYY format
+        const parts = dateString.split('-');
+        if (parts[0].length === 4) {
+          // YYYY-MM-DD format
+          date = new Date(dateString);
+        } else {
+          // DD-MM-YYYY format
+          const [day, month, year] = parts;
+          date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        }
+      } else {
+        // YYYY-MM-DD format (no separator check needed)
+        date = new Date(dateString);
+      }
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    } catch {
+      return dateString;
+    }
+  };
+
   const resetForm = () => {
     setSelectedCaseId('');
     setRespondentName('');
@@ -420,6 +478,7 @@ export default function NoticesPage() {
     setSubject('');
     setContent('');
     setRecipientEmail('');
+    setDate('');
     setFormErrors({});
   };
 
@@ -480,22 +539,23 @@ export default function NoticesPage() {
                   <TableCell>Applicant</TableCell>
                   <TableCell>Respondent</TableCell>
                   <TableCell>File Name</TableCell>
+                  <TableCell>Notice Date</TableCell>
                   {/* <TableCell>Status</TableCell> */}
                   {/* <TableCell>Email Count</TableCell> */}
-                  <TableCell>Created</TableCell>
+                  {/* <TableCell>Created</TableCell> */}
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : notices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         No notices found
                       </Typography>
@@ -549,6 +609,11 @@ export default function NoticesPage() {
                           </Typography>
                         )}
                       </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatDateForDisplay(notice.date)}
+                        </Typography>
+                      </TableCell>
                       {/* <TableCell>
                         <Chip
                           label={notice.email_sent ? 'Email Sent' : 'Draft'}
@@ -561,9 +626,9 @@ export default function NoticesPage() {
                           {notice.email_sent_count || 0}
                         </Typography>
                       </TableCell> */}
-                      <TableCell>
+                      {/* <TableCell>
                         {new Date(notice.created_at).toLocaleDateString()}
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="Edit Notice">
@@ -784,6 +849,23 @@ export default function NoticesPage() {
                 required
                 error={!!formErrors.subject}
                 helperText={formErrors.subject || 'Subject line for the notice'}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Date (Optional)"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  if (formErrors.date) {
+                    setFormErrors({ ...formErrors, date: undefined });
+                  }
+                }}
+                error={!!formErrors.date}
+                helperText={formErrors.date || 'Format: DD-MM-YYYY (e.g., 06-11-2025). Leave empty to use current date.'}
+                placeholder="DD-MM-YYYY"
               />
             </Grid>
 
@@ -1030,6 +1112,26 @@ export default function NoticesPage() {
                 required
                 error={!!formErrors.subject}
                 helperText={formErrors.subject || 'Subject line for the notice'}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Date (Optional)"
+                type="date"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
+                  if (formErrors.date) {
+                    setFormErrors({ ...formErrors, date: undefined });
+                  }
+                }}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                error={!!formErrors.date}
+                helperText={formErrors.date || 'Leave empty to use current date'}
               />
             </Grid>
 

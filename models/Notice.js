@@ -31,6 +31,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(500),
       allowNull: true
     },
+    date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      comment: 'Date for the notice (stored as DATE)'
+    },
     content: {
       type: DataTypes.TEXT,
       allowNull: false
