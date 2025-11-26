@@ -609,7 +609,7 @@ export default {
     'fees.contact.addressValue': '11वा मजला, द सिटॅडेल, स्टार बाजारच्या समोर, अदाजण गाम, सुरत - 395009',
     'fees.contact.contactUs': 'आमच्याशी संपर्क साधा',
     'fees.contact.telephone': 'दूरध्वनी',
-    'fees.contact.phoneValue': '+91 7990809141',
+    'fees.contact.phoneValue': '+91 9081297778\n+91 9081297775',
     'fees.contact.phoneDescription': 'सोम-शुक्र: सकाळी 9:00 - संध्याकाळी 6:00',
     'fees.contact.writeToUs': 'आम्हाला लिहा',
     'fees.contact.emailValue': 'info@arbitalk.com',

@@ -644,7 +644,7 @@ export default {
     'fees.contact.addressValue': '11th Floor, The Citadel, Opp. Star Bazar, Adajan Gam, Surat - 395009',
     'fees.contact.contactUs': 'Contact us',
     'fees.contact.telephone': 'Tel',
-    'fees.contact.phoneValue': '+91 7990809141',
+    'fees.contact.phoneValue': '+91 9081297778\n+91 9081297775',
     'fees.contact.phoneDescription': 'Mon-Fri: 9:00 AM - 6:00 PM',
     'fees.contact.writeToUs': 'Write to us',
     'fees.contact.emailValue': 'info@arbitalk.com',

@@ -632,7 +632,7 @@ export default {
     'fees.contact.addressValue': '11મા માળ, ધ સિટાડેલ, સ્ટાર બજાર સામે, અદાજણ ગામ, સુરત - 395009',
     'fees.contact.contactUs': 'અમારો સંપર્ક કરો',
     'fees.contact.telephone': 'ટેલિફોન',
-    'fees.contact.phoneValue': '+91 7990809141',
+    'fees.contact.phoneValue': '+91 9081297778\n+91 9081297775',
     'fees.contact.phoneDescription': 'સોમ-શુક્ર: સવારે 9:00 - સાંજે 6:00',
     'fees.contact.writeToUs': 'અમને લખો',
     'fees.contact.emailValue': 'info@arbitalk.com',

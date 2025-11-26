@@ -766,7 +766,7 @@ export default function FeesPage() {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
                     {t('fees.contact.contactUs')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1, whiteSpace: 'pre-line' }}>
                     {t('fees.contact.telephone')}: {t('fees.contact.phoneValue')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">

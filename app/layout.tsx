@@ -7,6 +7,7 @@ import { AuthProvider } from '@/components/AuthProvider';
 import ReduxProvider from '@/components/ReduxProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ClientPolyfill from '@/components/ClientPolyfill';
+import { NotificationProvider } from '@/components/NotificationProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -54,7 +55,9 @@ export default function RootLayout({
                   <LanguageUpdater />
                   <ReduxProvider>
                     <AuthProvider>
-                      {children}
+                      <NotificationProvider>
+                        {children}
+                      </NotificationProvider>
                     </AuthProvider>
                   </ReduxProvider>
                 </LanguageProvider>

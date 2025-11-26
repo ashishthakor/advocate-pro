@@ -10,7 +10,6 @@ import {
   Button,
   Avatar,
   Grid,
-  Alert,
   CircularProgress,
   Divider,
   IconButton,
@@ -33,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
 import { apiFetch } from '@/lib/api-client';
+import { useNotification } from '@/components/NotificationProvider';
 
 interface AdvocateProfile {
   id: number;
@@ -52,11 +52,10 @@ interface AdvocateProfile {
 
 export default function AdvocateProfilePage() {
   const { user, updateUser } = useAuth();
+  const { showSuccess, showError } = useNotification();
   const [profile, setProfile] = useState<AdvocateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -104,10 +103,10 @@ export default function AdvocateProfilePage() {
           license_number: profileData.license_number || '',
         });
       } else {
-        setError(response.message || 'Failed to fetch profile');
+        showError(response.message || 'Failed to fetch profile');
       }
     } catch (err) {
-      setError('Failed to fetch profile');
+      showError('Failed to fetch profile');
     } finally {
       setLoading(false);
     }
@@ -131,8 +130,6 @@ export default function AdvocateProfilePage() {
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
-      setError('');
-      setSuccess('');
 
       const response = await apiFetch('/api/users/profile', {
         method: 'PUT',
@@ -140,7 +137,7 @@ export default function AdvocateProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Profile updated successfully');
+        showSuccess('Profile updated successfully');
         setIsEditing(false);
         await fetchProfile();
         // Update auth context
@@ -148,10 +145,12 @@ export default function AdvocateProfilePage() {
           updateUser({ ...user, ...formData, id: user.id });
         }
       } else {
-        setError(response.message || 'Failed to update profile');
+        const errorMessage = response.message || 'Failed to update profile';
+        showError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to update profile');
+      const errorMessage = 'Failed to update profile';
+      showError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -160,16 +159,16 @@ export default function AdvocateProfilePage() {
   const handleChangePassword = async () => {
     try {
       setSaving(true);
-      setError('');
-      setSuccess('');
 
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setError('New passwords do not match');
+        const errorMessage = 'New passwords do not match';
+        showError(errorMessage);
         return;
       }
 
       if (passwordData.newPassword.length < 6) {
-        setError('Password must be at least 6 characters long');
+        const errorMessage = 'Password must be at least 6 characters long';
+        showError(errorMessage);
         return;
       }
 
@@ -182,17 +181,19 @@ export default function AdvocateProfilePage() {
       });
 
       if (response.success) {
-        setSuccess('Password changed successfully');
+        showSuccess('Password changed successfully');
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         });
       } else {
-        setError(response.message || 'Failed to change password');
+        const errorMessage = response.message || 'Failed to change password';
+        showError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to change password');
+      const errorMessage = 'Failed to change password';
+      showError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -212,8 +213,6 @@ export default function AdvocateProfilePage() {
         license_number: profile.license_number || '',
       });
     }
-    setError('');
-    setSuccess('');
   };
 
   if (loading) {
@@ -226,18 +225,6 @@ export default function AdvocateProfilePage() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {success}
-        </Alert>
-      )}
-
       <Grid container spacing={3}>
         {/* Profile Information */}
         <Grid item xs={12} md={8}>

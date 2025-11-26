@@ -27,6 +27,7 @@ import LightModeIcon from '@mui/icons-material/LightMode';
 import { useTheme as useAppTheme } from '@/components/ThemeProvider';
 import { useLanguage } from '@/components/LanguageProvider';
 import LanguageSelector from '@/components/LanguageSelector';
+import { useNotification } from '@/components/NotificationProvider';
 import {
   Person as PersonIcon,
   Email as EmailIcon,
@@ -43,6 +44,7 @@ export default function AdvocateRegisterPage() {
   const theme = useTheme();
   const { darkMode, toggleDarkMode } = useAppTheme();
   const { t } = useLanguage();
+  const { showSuccess, showError } = useNotification();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -56,7 +58,6 @@ export default function AdvocateRegisterPage() {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
@@ -94,10 +95,10 @@ export default function AdvocateRegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t('auth.passwordsDoNotMatch'));
+      const errorMessage = t('auth.passwordsDoNotMatch');
+      showError(errorMessage);
       setLoading(false);
       return;
     }
@@ -118,15 +119,19 @@ export default function AdvocateRegisterPage() {
       const data = await response.json();
 
       if (data.success) {
+        const successMessage = data.message || t('auth.registrationSuccessPending');
+        showSuccess(successMessage);
         setSuccess(true);
         setTimeout(() => {
           router.push('/auth/advocate-login');
         }, 2000);
       } else {
-        setError(data.message || t('auth.registrationFailed'));
+        const errorMessage = data.message || t('auth.registrationFailed');
+        showError(errorMessage);
       }
     } catch (err) {
-      setError(t('auth.errorOccurred'));
+      const errorMessage = t('auth.errorOccurred');
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -221,11 +226,6 @@ export default function AdvocateRegisterPage() {
 
           <CardContent sx={{ p: { xs: 2, sm: 4 } }}>
             <form onSubmit={handleSubmit}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 3 }}>
-                  {error}
-                </Alert>
-              )}
 
               <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12}>
@@ -311,7 +311,7 @@ export default function AdvocateRegisterPage() {
                     >
                       {specializations.map((spec) => (
                         <MenuItem key={spec} value={spec}>
-                          {t(`auth.specialization.${spec.toLowerCase().replace(/\s+/g, '')}`) || spec}
+                          {spec}
                         </MenuItem>
                       ))}
                     </Select>

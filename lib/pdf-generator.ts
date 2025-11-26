@@ -379,7 +379,7 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, verifiedLogo
             <div class="contact">
               <span>🌐 <a href="https://arbitalk.com" target="_blank">arbitalk.com</a></span>
               <span>✉️ <a href="mailto:info@arbitalk.com" target="_blank">info@arbitalk.com</a></span>
-              <span>📞 <a class="phone" href="tel:+917778070439" target="_blank">+91 77780 70439</a></span>
+              <span>📞 <a class="phone" href="tel:+919081297778" target="_blank">+91 9081297778</a></span>
             </div>
           </div>
 
@@ -488,7 +488,7 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, verifiedLogo
                 </p>
                 <p style="margin-bottom: 0;">
                   <strong>support@arbitalk.com</strong><br>
-                  <strong class="phone">+91 90812 97778</strong>
+                  <strong class="phone">+91 9081297778</strong>
                 </p>
               </div>
               

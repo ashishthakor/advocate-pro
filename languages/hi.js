@@ -634,7 +634,7 @@ export default {
     'fees.contact.addressValue': '11वीं मंजिल, द सिटाडेल, स्टार बाजार के सामने, अडाजन गाम, सूरत - 395009',
     'fees.contact.contactUs': 'हमसे संपर्क करें',
     'fees.contact.telephone': 'टेल',
-    'fees.contact.phoneValue': '+91 7990809141',
+    'fees.contact.phoneValue': '+91 9081297778\n+91 9081297775',
     'fees.contact.phoneDescription': 'सोम-शुक्र: सुबह 9:00 - शाम 6:00',
     'fees.contact.writeToUs': 'हमें लिखें',
     'fees.contact.emailValue': 'info@arbitalk.com',
