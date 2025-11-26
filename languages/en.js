@@ -654,6 +654,16 @@ export default {
     'fees.contact.supportEmailDescription': 'For technical support',
     'fees.cta': 'Get a Custom Quote',
     
+    // Service Charges
+    'fees.serviceCharges.title': 'Service Charges',
+    'fees.serviceCharges.description': 'Additional service charges applicable for case processing and administration.',
+    'fees.serviceCharges.caseFillingCharge': 'Case filling Charge:',
+    'fees.serviceCharges.caseFillingAmount': '3000',
+    'fees.serviceCharges.administrationCost': 'Administration cost:',
+    'fees.serviceCharges.administrationAmount': '4500 Upto 1 lakh Or upto 2%',
+    'fees.serviceCharges.perSession': 'Per session:',
+    'fees.serviceCharges.perSessionAmount': '2000',
+    
     // Dispute Resolution Rules
     'fees.disputeResolutionRules.title': 'Dispute Resolution Rules',
     'fees.disputeResolutionRules.description': 'If you desire to resolve your dispute using Arbitalk\'s platform, you agree to be bound by its Dispute Resolution Rules ("Rules").\n\nThe Rules are designed to help you take maximum advantage of Arbitalk\'s online dispute resolution ("ODR") system and prevent needless litigation, safeguard yourself from adversities of disputes, and resolve them quickly, economically, effectively, and efficiently.\n\nSection 1 deals with preliminary aspects such as definitions, scope, modalities pertaining to communication, party obligations in respect of platform use, and data. Section 2 covers rules for arbitration proceedings on Arbitalk\'s ODR platform. Section 3 encapsulates rules for mediation/conciliation proceedings on Arbitalk\'s ODR platform.\n\nNote: If a dispute is referred for resolution to Arbitalk by a court, statutory authority, or governing body, then such disputes shall be resolved in accordance with the rules, regulations, and guidelines of the referring authority that are in effect as of the date on which the request is made to Arbitalk.',

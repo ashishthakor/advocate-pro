@@ -618,6 +618,16 @@ export default {
     'fees.contact.supportEmailValue': 'support@arbitalk.com',
     'fees.contact.supportEmailDescription': 'तांत्रिक सहाय्यासाठी',
     'fees.cta': 'सानुकूल कोटेशन मिळवा',
+    
+    // Service Charges
+    'fees.serviceCharges.title': 'Service Charges',
+    'fees.serviceCharges.description': 'Additional service charges applicable for case processing and administration.',
+    'fees.serviceCharges.caseFillingCharge': 'Case filling Charge:',
+    'fees.serviceCharges.caseFillingAmount': '3000',
+    'fees.serviceCharges.administrationCost': 'Administration cost:',
+    'fees.serviceCharges.administrationAmount': '4500 Upto 1 lakh Or upto 2%',
+    'fees.serviceCharges.perSession': 'Per session:',
+    'fees.serviceCharges.perSessionAmount': '2000',
 
     // Dispute Resolution Rules
     'fees.disputeResolutionRules.title': 'विवाद निराकरण नियम',
