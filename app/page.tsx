@@ -56,11 +56,16 @@ import { useAuth } from '@/components/AuthProvider';
 import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
 import constitutionalMandateImage from '@/assets/images/constitutional-mandate-adr.png';
+import peaceQuoteImage from '@/assets/images/krishna-peace-quote.png';
 
 // Get image source string
 const constitutionalMandateImageSrc = typeof constitutionalMandateImage === 'string' 
   ? constitutionalMandateImage 
   : (constitutionalMandateImage as any).src || constitutionalMandateImage;
+
+const peaceQuoteImageSrc = typeof peaceQuoteImage === 'string' 
+  ? peaceQuoteImage 
+  : (peaceQuoteImage as any).src || peaceQuoteImage;
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -1009,6 +1014,68 @@ export default function LandingPage() {
                 {t('about.startCase')}
               </Button>
             </Stack>
+          </motion.div>
+        </Container>
+      </Box>
+
+      {/* Inspirational Quote Section */}
+      <Box 
+        sx={{ 
+          bgcolor: (theme) => theme.palette.mode === 'dark' 
+            ? alpha(theme.palette.background.default, 0.5)
+            : alpha('#f5f5dc', 0.3), // Light beige background to match image
+          py: { xs: 8, md: 10 },
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundImage: (theme) => theme.palette.mode === 'dark'
+            ? 'radial-gradient(circle at 50% 50%, rgba(103, 80, 164, 0.1), transparent)'
+            : 'radial-gradient(circle at 50% 50%, rgba(255, 248, 220, 0.2), transparent)',
+        }}
+      >
+        <Container maxWidth="sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true }}
+          >
+            <Paper
+              elevation={0}
+              sx={{
+                textAlign: 'center',
+                position: 'relative',
+                p: { xs: 2, md: 3 },
+                borderRadius: 4,
+                bgcolor: 'transparent',
+                background: 'transparent',
+                boxShadow: 'none',
+                overflow: 'hidden',
+              }}
+            >
+              <Box
+                component="img"
+                src={peaceQuoteImageSrc}
+                alt="Peace is not a proposal, on which there is debate. Peace is a necessity. - Krishna"
+                sx={{
+                  width: '100%',
+                  maxWidth: { xs: '100%', sm: '500px', md: '600px' },
+                  height: 'auto',
+                  display: 'block',
+                  mx: 'auto',
+                  borderRadius: 2,
+                  boxShadow: (theme) => theme.palette.mode === 'dark' 
+                    ? '0 12px 40px rgba(0,0,0,0.4)' 
+                    : '0 12px 40px rgba(0,0,0,0.15)',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  '&:hover': {
+                    transform: 'scale(1.03)',
+                    boxShadow: (theme) => theme.palette.mode === 'dark' 
+                      ? '0 16px 48px rgba(0,0,0,0.5)' 
+                      : '0 16px 48px rgba(0,0,0,0.2)',
+                  },
+                }}
+              />
+            </Paper>
           </motion.div>
         </Container>
       </Box>
