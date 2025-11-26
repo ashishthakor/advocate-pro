@@ -1021,61 +1021,151 @@ export default function LandingPage() {
       {/* Inspirational Quote Section */}
       <Box 
         sx={{ 
+          position: 'relative',
+          py: { xs: 8, md: 10 },
+          overflow: 'hidden',
           bgcolor: (theme) => theme.palette.mode === 'dark' 
             ? alpha(theme.palette.background.default, 0.5)
-            : alpha('#f5f5dc', 0.3), // Light beige background to match image
-          py: { xs: 8, md: 10 },
-          position: 'relative',
-          overflow: 'hidden',
+            : alpha('#faf8f3', 0.4),
           backgroundImage: (theme) => theme.palette.mode === 'dark'
-            ? 'radial-gradient(circle at 50% 50%, rgba(103, 80, 164, 0.1), transparent)'
-            : 'radial-gradient(circle at 50% 50%, rgba(255, 248, 220, 0.2), transparent)',
+            ? `radial-gradient(circle at 50% 50%, ${alpha('#6750a4', 0.08)} 0%, transparent 70%)`
+            : `radial-gradient(circle at 50% 50%, ${alpha('#f5e6d3', 0.2)} 0%, transparent 70%)`,
         }}
       >
         <Container maxWidth="sm">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }}
           >
-            <Paper
-              elevation={0}
+            {/* Decorative top border */}
+            <Box
               sx={{
-                textAlign: 'center',
-                position: 'relative',
-                p: { xs: 2, md: 3 },
-                borderRadius: 4,
-                bgcolor: 'transparent',
-                background: 'transparent',
-                boxShadow: 'none',
-                overflow: 'hidden',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                mb: 4,
+                gap: 2,
               }}
             >
               <Box
-                component="img"
-                src={peaceQuoteImageSrc}
-                alt="Peace is not a proposal, on which there is debate. Peace is a necessity. - Krishna"
                 sx={{
-                  width: '100%',
-                  maxWidth: { xs: '100%', sm: '500px', md: '600px' },
-                  height: 'auto',
-                  display: 'block',
-                  mx: 'auto',
-                  borderRadius: 2,
-                  boxShadow: (theme) => theme.palette.mode === 'dark' 
-                    ? '0 12px 40px rgba(0,0,0,0.4)' 
-                    : '0 12px 40px rgba(0,0,0,0.15)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  '&:hover': {
-                    transform: 'scale(1.03)',
-                    boxShadow: (theme) => theme.palette.mode === 'dark' 
-                      ? '0 16px 48px rgba(0,0,0,0.5)' 
-                      : '0 16px 48px rgba(0,0,0,0.2)',
-                  },
+                  flex: 1,
+                  height: '2px',
+                  background: (theme) => `linear-gradient(to right, transparent, ${alpha(theme.palette.primary.main, 0.3)}, transparent)`,
                 }}
               />
-            </Paper>
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: 'primary.main',
+                    boxShadow: (theme) => `0 0 20px ${alpha(theme.palette.primary.main, 0.5)}`,
+                  }}
+                />
+              </motion.div>
+              <Box
+                sx={{
+                  flex: 1,
+                  height: '2px',
+                  background: (theme) => `linear-gradient(to left, transparent, ${alpha(theme.palette.primary.main, 0.3)}, transparent)`,
+                }}
+              />
+            </Box>
+
+            {/* Main Image Container */}
+            <Box
+              sx={{
+                textAlign: 'center',
+                position: 'relative',
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.01 }}
+              >
+                <Box
+                  component="img"
+                  src={peaceQuoteImageSrc}
+                  alt="Peace is not a proposal, on which there is debate. Peace is a necessity. - Krishna"
+                  sx={{
+                    width: '100%',
+                    maxWidth: { xs: '100%', sm: '400px', md: '450px' },
+                    height: 'auto',
+                    display: 'block',
+                    mx: 'auto',
+                    borderRadius: 2,
+                    boxShadow: (theme) => theme.palette.mode === 'dark' 
+                      ? '0 12px 40px rgba(0,0,0,0.4)' 
+                      : '0 12px 40px rgba(0,0,0,0.15)',
+                    transition: 'all 0.3s ease',
+                  }}
+                />
+              </motion.div>
+            </Box>
+
+            {/* Decorative bottom border */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                mt: 4,
+                gap: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  flex: 1,
+                  height: '2px',
+                  background: (theme) => `linear-gradient(to right, transparent, ${alpha(theme.palette.secondary.main, 0.3)}, transparent)`,
+                }}
+              />
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [360, 180, 0],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    bgcolor: 'secondary.main',
+                    boxShadow: (theme) => `0 0 20px ${alpha(theme.palette.secondary.main, 0.5)}`,
+                  }}
+                />
+              </motion.div>
+              <Box
+                sx={{
+                  flex: 1,
+                  height: '2px',
+                  background: (theme) => `linear-gradient(to left, transparent, ${alpha(theme.palette.secondary.main, 0.3)}, transparent)`,
+                }}
+              />
+            </Box>
           </motion.div>
         </Container>
       </Box>
