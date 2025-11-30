@@ -739,11 +739,18 @@ export default function AdvocatesPage() {
         }}
         maxWidth="lg"
         fullWidth
+        PaperProps={{
+          sx: {
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+          }
+        }}
       >
-        <DialogTitle>
+        <DialogTitle sx={{ flexShrink: 0 }}>
           KYC Documents - {selectedAdvocate?.name}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ flex: 1, overflow: 'auto', px: 2 }}>
           {loadingKyc ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress />
@@ -752,37 +759,68 @@ export default function AdvocatesPage() {
             <Grid container spacing={3} sx={{ mt: 1 }}>
               {/* Aadhar Card */}
               <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                    <Typography variant="h6" gutterBottom sx={{ flexShrink: 0 }}>
                       Aadhar Card
                     </Typography>
                     {kycDocuments.aadhar ? (
-                      <Box>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <Box
-                          component="iframe"
-                          src={kycDocuments.aadhar.presignedUrl}
                           sx={{
                             width: '100%',
-                            height: 400,
+                            flex: 1,
+                            minHeight: 300,
+                            maxHeight: 400,
                             border: '1px solid',
                             borderColor: 'divider',
                             borderRadius: 1,
                             mb: 2,
+                            overflow: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'background.default',
                           }}
-                        />
+                        >
+                          {kycDocuments.aadhar.filePath.toLowerCase().endsWith('.pdf') ? (
+                            <Box
+                              component="iframe"
+                              src={kycDocuments.aadhar.presignedUrl}
+                              sx={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                                minHeight: 300,
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              src={kycDocuments.aadhar.presignedUrl}
+                              alt="Aadhar Card"
+                              sx={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                              }}
+                            />
+                          )}
+                        </Box>
                         <Button
                           fullWidth
                           variant="outlined"
                           href={kycDocuments.aadhar.presignedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
+                          sx={{ flexShrink: 0 }}
                         >
                           Open in New Tab
                         </Button>
                       </Box>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                         No Aadhar document uploaded
                       </Typography>
                     )}
@@ -792,37 +830,68 @@ export default function AdvocatesPage() {
 
               {/* PAN Card */}
               <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                    <Typography variant="h6" gutterBottom sx={{ flexShrink: 0 }}>
                       PAN Card
                     </Typography>
                     {kycDocuments.pan ? (
-                      <Box>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <Box
-                          component="iframe"
-                          src={kycDocuments.pan.presignedUrl}
                           sx={{
                             width: '100%',
-                            height: 400,
+                            flex: 1,
+                            minHeight: 300,
+                            maxHeight: 400,
                             border: '1px solid',
                             borderColor: 'divider',
                             borderRadius: 1,
                             mb: 2,
+                            overflow: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'background.default',
                           }}
-                        />
+                        >
+                          {kycDocuments.pan.filePath.toLowerCase().endsWith('.pdf') ? (
+                            <Box
+                              component="iframe"
+                              src={kycDocuments.pan.presignedUrl}
+                              sx={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                                minHeight: 300,
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              src={kycDocuments.pan.presignedUrl}
+                              alt="PAN Card"
+                              sx={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                              }}
+                            />
+                          )}
+                        </Box>
                         <Button
                           fullWidth
                           variant="outlined"
                           href={kycDocuments.pan.presignedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
+                          sx={{ flexShrink: 0 }}
                         >
                           Open in New Tab
                         </Button>
                       </Box>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                         No PAN document uploaded
                       </Typography>
                     )}
@@ -832,37 +901,68 @@ export default function AdvocatesPage() {
 
               {/* Cancelled Cheque */}
               <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                    <Typography variant="h6" gutterBottom sx={{ flexShrink: 0 }}>
                       Cancelled Cheque
                     </Typography>
                     {kycDocuments.cancelled_cheque ? (
-                      <Box>
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         <Box
-                          component="iframe"
-                          src={kycDocuments.cancelled_cheque.presignedUrl}
                           sx={{
                             width: '100%',
-                            height: 400,
+                            flex: 1,
+                            minHeight: 300,
+                            maxHeight: 400,
                             border: '1px solid',
                             borderColor: 'divider',
                             borderRadius: 1,
                             mb: 2,
+                            overflow: 'auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'background.default',
                           }}
-                        />
+                        >
+                          {kycDocuments.cancelled_cheque.filePath.toLowerCase().endsWith('.pdf') ? (
+                            <Box
+                              component="iframe"
+                              src={kycDocuments.cancelled_cheque.presignedUrl}
+                              sx={{
+                                width: '100%',
+                                height: '100%',
+                                border: 'none',
+                                minHeight: 300,
+                              }}
+                            />
+                          ) : (
+                            <Box
+                              component="img"
+                              src={kycDocuments.cancelled_cheque.presignedUrl}
+                              alt="Cancelled Cheque"
+                              sx={{
+                                width: '100%',
+                                height: 'auto',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                              }}
+                            />
+                          )}
+                        </Box>
                         <Button
                           fullWidth
                           variant="outlined"
                           href={kycDocuments.cancelled_cheque.presignedUrl}
                           target="_blank"
                           rel="noopener noreferrer"
+                          sx={{ flexShrink: 0 }}
                         >
                           Open in New Tab
                         </Button>
                       </Box>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
                         No Cancelled Cheque uploaded
                       </Typography>
                     )}
@@ -872,7 +972,7 @@ export default function AdvocatesPage() {
             </Grid>
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ flexShrink: 0 }}>
           <Button onClick={() => {
             setKycDialog(false);
             setKycDocuments({});
