@@ -31,6 +31,7 @@ import {
   Select,
   MenuItem,
   InputAdornment,
+  Divider,
 } from '@mui/material';
 import {
   CheckCircle as CheckCircleIcon,
@@ -43,6 +44,7 @@ import {
   LocationOn as LocationIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
+  Description as DescriptionIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client'; 
 
@@ -97,6 +99,13 @@ export default function AdvocatesPage() {
   const [approvalLoading, setApprovalLoading] = useState(false);
   const [confirmationDialog, setConfirmationDialog] = useState(false);
   const [confirmationAction, setConfirmationAction] = useState<{ type: 'approve' | 'decline', advocate: Advocate | null }>({ type: 'approve', advocate: null });
+  const [kycDialog, setKycDialog] = useState(false);
+  const [kycDocuments, setKycDocuments] = useState<{
+    aadhar?: { filePath: string; presignedUrl: string };
+    pan?: { filePath: string; presignedUrl: string };
+    cancelled_cheque?: { filePath: string; presignedUrl: string };
+  }>({});
+  const [loadingKyc, setLoadingKyc] = useState(false);
 
   const fetchAdvocates = async (page = 1) => {
     try {
@@ -219,6 +228,32 @@ export default function AdvocatesPage() {
   const openApprovalDialog = (advocate: Advocate) => {
     setSelectedAdvocate(advocate);
     setApprovalDialog(true);
+  };
+
+  // Fetch KYC documents for an advocate
+  const fetchKycDocuments = async (userId: number) => {
+    try {
+      setLoadingKyc(true);
+      const response = await apiFetch(`/api/advocate/kyc/${userId}`);
+      
+      if (response.success) {
+        setKycDocuments(response.data || {});
+      } else {
+        setError(response.message || 'Failed to fetch KYC documents');
+      }
+    } catch (err) {
+      setError('Failed to fetch KYC documents');
+      console.error('KYC fetch error:', err);
+    } finally {
+      setLoadingKyc(false);
+    }
+  };
+
+  // Open KYC review dialog
+  const openKycDialog = async (advocate: Advocate) => {
+    setSelectedAdvocate(advocate);
+    setKycDialog(true);
+    await fetchKycDocuments(advocate.id);
   };
 
   const getStatusChip = (isApproved: boolean) => {
@@ -471,6 +506,15 @@ export default function AdvocatesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Tooltip title="View KYC Documents">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => openKycDialog(advocate)}
+                            >
+                              <DescriptionIcon />
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title="View Details">
                             <IconButton
                               size="small"
@@ -595,6 +639,18 @@ export default function AdvocatesPage() {
                 </Grid>
 
                 <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="subtitle2" gutterBottom>
+                    KYC Documents
+                  </Typography>
+                  <Box sx={{ mt: 2 }}>
+                    {selectedAdvocate && (
+                      <KycDocumentsView userId={selectedAdvocate.id} />
+                    )}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
                   <TextField
                     fullWidth
                     label="Approval Notes (Optional)"
@@ -673,6 +729,252 @@ export default function AdvocatesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* KYC Review Dialog */}
+      <Dialog
+        open={kycDialog}
+        onClose={() => {
+          setKycDialog(false);
+          setKycDocuments({});
+        }}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          KYC Documents - {selectedAdvocate?.name}
+        </DialogTitle>
+        <DialogContent>
+          {loadingKyc ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              {/* Aadhar Card */}
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Aadhar Card
+                    </Typography>
+                    {kycDocuments.aadhar ? (
+                      <Box>
+                        <Box
+                          component="iframe"
+                          src={kycDocuments.aadhar.presignedUrl}
+                          sx={{
+                            width: '100%',
+                            height: 400,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            mb: 2,
+                          }}
+                        />
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          href={kycDocuments.aadhar.presignedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open in New Tab
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No Aadhar document uploaded
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* PAN Card */}
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      PAN Card
+                    </Typography>
+                    {kycDocuments.pan ? (
+                      <Box>
+                        <Box
+                          component="iframe"
+                          src={kycDocuments.pan.presignedUrl}
+                          sx={{
+                            width: '100%',
+                            height: 400,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            mb: 2,
+                          }}
+                        />
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          href={kycDocuments.pan.presignedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open in New Tab
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No PAN document uploaded
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Cancelled Cheque */}
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Cancelled Cheque
+                    </Typography>
+                    {kycDocuments.cancelled_cheque ? (
+                      <Box>
+                        <Box
+                          component="iframe"
+                          src={kycDocuments.cancelled_cheque.presignedUrl}
+                          sx={{
+                            width: '100%',
+                            height: 400,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            mb: 2,
+                          }}
+                        />
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          href={kycDocuments.cancelled_cheque.presignedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Open in New Tab
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No Cancelled Cheque uploaded
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setKycDialog(false);
+            setKycDocuments({});
+          }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
+  );
+}
+
+// KYC Documents View Component (for use in approval dialog)
+function KycDocumentsView({ userId }: { userId: number }) {
+  const [documents, setDocuments] = useState<{
+    aadhar?: { filePath: string; presignedUrl: string };
+    pan?: { filePath: string; presignedUrl: string };
+    cancelled_cheque?: { filePath: string; presignedUrl: string };
+  }>({});
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const response = await apiFetch(`/api/advocate/kyc/${userId}`);
+        if (response.success) {
+          setDocuments(response.data || {});
+        }
+      } catch (err) {
+        console.error('Failed to fetch KYC documents:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDocs();
+  }, [userId]);
+
+  if (loading) {
+    return <CircularProgress size={24} />;
+  }
+
+  return (
+    <Box>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <Typography variant="body2" gutterBottom>
+            <strong>Aadhar:</strong>{' '}
+            {documents.aadhar ? (
+              <Button
+                size="small"
+                href={documents.aadhar.presignedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View
+              </Button>
+            ) : (
+              <Typography component="span" variant="body2" color="text.secondary">
+                Not uploaded
+              </Typography>
+            )}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Typography variant="body2" gutterBottom>
+            <strong>PAN:</strong>{' '}
+            {documents.pan ? (
+              <Button
+                size="small"
+                href={documents.pan.presignedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View
+              </Button>
+            ) : (
+              <Typography component="span" variant="body2" color="text.secondary">
+                Not uploaded
+              </Typography>
+            )}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <Typography variant="body2" gutterBottom>
+            <strong>Cancelled Cheque:</strong>{' '}
+            {documents.cancelled_cheque ? (
+              <Button
+                size="small"
+                href={documents.cancelled_cheque.presignedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View
+              </Button>
+            ) : (
+              <Typography component="span" variant="body2" color="text.secondary">
+                Not uploaded
+              </Typography>
+            )}
+          </Typography>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

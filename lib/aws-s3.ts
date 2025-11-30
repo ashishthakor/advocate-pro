@@ -31,6 +31,7 @@ export interface UploadFileParams {
   folder?: string;
   caseId?: number;
   userId?: number;
+  documentType?: 'aadhar' | 'pan' | 'cancelled_cheque'; // For KYC documents
 }
 
 export interface S3UploadResult {
@@ -100,11 +101,26 @@ export class S3FileUploader {
    */
   async uploadFile(params: UploadFileParams): Promise<S3UploadResult> {
     try {
-      const { file, fileName, mimeType, folder = 'documents', caseId, userId } = params;
+      const { file, fileName, mimeType, folder = 'documents', caseId, userId, documentType } = params;
       
       // Use folder as prefix if provided, otherwise use default structure
       let fileKey: string;
-      if (folder && folder !== 'documents' && folder !== 'cases') {
+      
+      // Handle KYC documents with specific path structure
+      if (documentType && userId) {
+        // Format: {pathPrefix}kyc/advocates/{userId}/{documentType}_{file_name}_{timestamp}_{uniqueId}.{extension}
+        const fileExtension = fileName.split('.').pop() || '';
+        const baseFileName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        // Sanitize filename: remove special characters, keep only alphanumeric, spaces, hyphens, underscores
+        const sanitizedFileName = baseFileName
+          .replace(/[^a-zA-Z0-9\s\-_]/g, '')
+          .replace(/\s+/g, '_')
+          .substring(0, 50); // Limit length
+        const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
+        const uniqueId = uuidv4().substring(0, 8);
+        const finalFileName = `${documentType}_${sanitizedFileName}_${timestamp}_${uniqueId}.${fileExtension}`;
+        fileKey = `${this.pathPrefix}kyc/advocates/${userId}/${finalFileName}`;
+      } else if (folder && folder !== 'documents' && folder !== 'cases') {
         // For notices, use the notices prefix with the filename
         fileKey = `${this.getNoticesPrefix()}${fileName}`;
       } else if (folder === 'cases' && caseId) {

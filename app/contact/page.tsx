@@ -125,7 +125,7 @@ export default function ContactPage() {
   const contactInfo = [
     {
       title: t('about.phone'),
-      value: '+91 7990809141',
+      value: '+91 9081297778\n+91 9081297775',
       icon: '📞',
       description: t('contact.monFri')
     },
@@ -584,7 +584,7 @@ export default function ContactPage() {
                         <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
                           {info.title}
                         </Typography>
-                        <Typography variant="body1" color="primary.main" sx={{ fontWeight: 'medium', mb: 1 }}>
+                        <Typography variant="body1" color="primary.main" sx={{ fontWeight: 'medium', mb: 1, whiteSpace: 'pre-line' }}>
                           {info.value}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -631,7 +631,7 @@ export default function ContactPage() {
                       {t('contact.emergencyDesc')}
                     </Typography>
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      +91 7990809141
+                      +91 7778070439
                     </Typography>
                   </Box>
                 </Box>

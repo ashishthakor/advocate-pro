@@ -561,6 +561,9 @@ export default function FeesPage() {
                     <strong>{t('fees.mediation.inrAdminFee')}</strong> – {t('fees.mediation.inrAdminAmount')};
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrPerSession')}</strong> – {t('fees.mediation.inrPerSessionAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>{t('fees.mediation.inrMediatorFee')}</strong> – {t('fees.mediation.inrMediatorAmount')}.
                   </Typography>
                 </Stack>
@@ -611,6 +614,58 @@ export default function FeesPage() {
                 </Stack>
               </Box>
             </Paper>
+
+            {/* Service Charges Section */}
+            {/* <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 3, md: 4 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                border: (t) => `1px solid ${t.palette.divider}`,
+                mb: 4,
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                {t('fees.serviceCharges.title')}
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                {t('fees.serviceCharges.description')}
+              </Typography>
+              <Box sx={{ overflowX: 'auto' }}>
+                <Box
+                  component="table"
+                  sx={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    '& th, & td': {
+                      border: (t) => `1px solid ${t.palette.divider}`,
+                      padding: 2,
+                      textAlign: 'left',
+                    },
+                    '& th': {
+                      bgcolor: 'background.default',
+                      fontWeight: 'bold',
+                    },
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <td>{t('fees.serviceCharges.caseFillingCharge')}</td>
+                      <td>{t('fees.serviceCharges.caseFillingAmount')}</td>
+                    </tr>
+                    <tr>
+                      <td>{t('fees.serviceCharges.administrationCost')}</td>
+                      <td>{t('fees.serviceCharges.administrationAmount')}</td>
+                    </tr>
+                    <tr>
+                      <td>{t('fees.serviceCharges.perSession')}</td>
+                      <td>{t('fees.serviceCharges.perSessionAmount')}</td>
+                    </tr>
+                  </tbody>
+                </Box>
+              </Box>
+            </Paper> */}
 
             {/* Special Projects Section */}
             <Paper
@@ -714,7 +769,7 @@ export default function FeesPage() {
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
                     {t('fees.contact.contactUs')}
                   </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 1, whiteSpace: 'pre-line' }}>
                     {t('fees.contact.telephone')}: {t('fees.contact.phoneValue')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
