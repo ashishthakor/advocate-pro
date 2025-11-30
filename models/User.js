@@ -75,6 +75,18 @@ module.exports = function(sequelize, DataTypes) {
     reset_password_expires: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    aadhar_file_path: {
+      type: DataTypes.STRING(500),
+      allowNull: true
+    },
+    pan_file_path: {
+      type: DataTypes.STRING(500),
+      allowNull: true
+    },
+    cancelled_cheque_file_path: {
+      type: DataTypes.STRING(500),
+      allowNull: true
     }
   }, {
     sequelize,

@@ -561,6 +561,9 @@ export default function FeesPage() {
                     <strong>{t('fees.mediation.inrAdminFee')}</strong> – {t('fees.mediation.inrAdminAmount')};
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrPerSession')}</strong> – {t('fees.mediation.inrPerSessionAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
                     <strong>{t('fees.mediation.inrMediatorFee')}</strong> – {t('fees.mediation.inrMediatorAmount')}.
                   </Typography>
                 </Stack>
@@ -613,7 +616,7 @@ export default function FeesPage() {
             </Paper>
 
             {/* Service Charges Section */}
-            <Paper
+            {/* <Paper
               elevation={0}
               sx={{
                 p: { xs: 3, md: 4 },
@@ -662,7 +665,7 @@ export default function FeesPage() {
                   </tbody>
                 </Box>
               </Box>
-            </Paper>
+            </Paper> */}
 
             {/* Special Projects Section */}
             <Paper

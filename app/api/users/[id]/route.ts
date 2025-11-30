@@ -97,7 +97,8 @@ export async function PUT(
     // Build update query
     const allowedFields = [
       'name', 'phone', 'address', 'specialization', 
-      'experience_years', 'bar_number', 'license_number', 'is_approved'
+      'experience_years', 'bar_number', 'license_number', 'is_approved',
+      'aadhar_file_path', 'pan_file_path', 'cancelled_cheque_file_path'
     ];
     const updateFields = [];
     const replacements = [];

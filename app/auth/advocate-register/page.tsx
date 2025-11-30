@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -37,6 +37,11 @@ import {
   Work as WorkIcon,
   School as SchoolIcon,
   ArrowBack as ArrowBackIcon,
+  CloudUpload as CloudUploadIcon,
+  Description as DescriptionIcon,
+  CheckCircle as CheckCircleIcon,
+  PictureAsPdf as PdfIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 
@@ -59,7 +64,28 @@ export default function AdvocateRegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [kycFiles, setKycFiles] = useState({
+    aadhar: null as File | null,
+    pan: null as File | null,
+    cancelled_cheque: null as File | null,
+  });
+  const [kycFilePreviews, setKycFilePreviews] = useState({
+    aadhar: null as string | null,
+    pan: null as string | null,
+    cancelled_cheque: null as string | null,
+  });
   const router = useRouter();
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(kycFilePreviews).forEach((preview) => {
+        if (preview) {
+          URL.revokeObjectURL(preview);
+        }
+      });
+    };
+  }, [kycFilePreviews]);
 
   const specializations = [
     'Criminal Law',
@@ -92,10 +118,54 @@ export default function AdvocateRegisterPage() {
     }));
   };
 
+  // Handle KYC file selection
+  const handleKycFileChange = (documentType: 'aadhar' | 'pan' | 'cancelled_cheque', file: File | null) => {
+    if (file) {
+      // Validate file type - only images and PDF
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        showError('Please upload PDF, JPEG, or PNG files only');
+        return;
+      }
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        showError('File size must be less than 5MB');
+        return;
+      }
+
+      // Create preview URL for both images and PDFs
+      const previewUrl = URL.createObjectURL(file);
+      setKycFilePreviews(prev => {
+        // Revoke old URL if exists
+        if (prev[documentType]) {
+          URL.revokeObjectURL(prev[documentType]!);
+        }
+        return {
+          ...prev,
+          [documentType]: previewUrl,
+        };
+      });
+    } else {
+      // Clear preview when file is removed
+      if (kycFilePreviews[documentType]) {
+        URL.revokeObjectURL(kycFilePreviews[documentType]!);
+      }
+      setKycFilePreviews(prev => ({
+        ...prev,
+        [documentType]: null,
+      }));
+    }
+    setKycFiles(prev => ({
+      ...prev,
+      [documentType]: file,
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate password match
     if (formData.password !== formData.confirmPassword) {
       const errorMessage = t('auth.passwordsDoNotMatch');
       showError(errorMessage);
@@ -103,17 +173,42 @@ export default function AdvocateRegisterPage() {
       return;
     }
 
+    // Validate KYC files
+    if (!kycFiles.aadhar || !kycFiles.pan || !kycFiles.cancelled_cheque) {
+      const missing = [];
+      if (!kycFiles.aadhar) missing.push('Aadhar');
+      if (!kycFiles.pan) missing.push('PAN');
+      if (!kycFiles.cancelled_cheque) missing.push('Cancelled Cheque');
+      showError(`Please upload all KYC documents: ${missing.join(', ')}`);
+      setLoading(false);
+      return;
+    }
+
     try {
+      // Create FormData with all form fields and files
+      const registrationFormData = new FormData();
+      
+      // Add form fields
+      registrationFormData.append('name', formData.name);
+      registrationFormData.append('email', formData.email);
+      registrationFormData.append('password', formData.password);
+      registrationFormData.append('phone', formData.phone);
+      registrationFormData.append('address', formData.address);
+      registrationFormData.append('specialization', formData.specialization);
+      registrationFormData.append('experience_years', formData.experience_years);
+      registrationFormData.append('bar_number', formData.bar_number);
+      registrationFormData.append('license_number', formData.license_number);
+      registrationFormData.append('role', 'advocate');
+      
+      // Add KYC files
+      registrationFormData.append('aadhar', kycFiles.aadhar);
+      registrationFormData.append('pan', kycFiles.pan);
+      registrationFormData.append('cancelled_cheque', kycFiles.cancelled_cheque);
+
+      // Single API call to register with files
       const response = await fetch('/api/auth/advocate-register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          role: 'advocate',
-          experience_years: parseInt(formData.experience_years),
-        }),
+        body: registrationFormData,
       });
 
       const data = await response.json();
@@ -129,8 +224,8 @@ export default function AdvocateRegisterPage() {
         const errorMessage = data.message || t('auth.registrationFailed');
         showError(errorMessage);
       }
-    } catch (err) {
-      const errorMessage = t('auth.errorOccurred');
+    } catch (err: any) {
+      const errorMessage = err?.message || t('auth.errorOccurred');
       showError(errorMessage);
     } finally {
       setLoading(false);
@@ -364,6 +459,315 @@ export default function AdvocateRegisterPage() {
 
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
+                    KYC Documents (Required)
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Please upload all three documents: Aadhar, PAN, and Cancelled Cheque (PDF or Image only, max 5MB each)
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    sx={{
+                      border: (theme) => `2px dashed ${kycFiles.aadhar ? theme.palette.success.main : theme.palette.divider}`,
+                      borderRadius: 2,
+                      p: 2,
+                      textAlign: 'center',
+                      bgcolor: kycFiles.aadhar ? 'action.selected' : 'background.default',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      position: 'relative',
+                      minHeight: 320,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <input
+                      type="file"
+                      id="aadhar-upload"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      style={{ display: 'none' }}
+                      onChange={(e) => handleKycFileChange('aadhar', e.target.files?.[0] || null)}
+                    />
+                    {kycFiles.aadhar ? (
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ flex: 1, mb: 2, minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {kycFilePreviews.aadhar ? (
+                            kycFiles.aadhar.type === 'application/pdf' ? (
+                              <Box
+                                component="iframe"
+                                src={kycFilePreviews.aadhar}
+                                sx={{
+                                  width: '100%',
+                                  height: 200,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                component="img"
+                                src={kycFilePreviews.aadhar}
+                                alt="Aadhar preview"
+                                sx={{
+                                  width: '100%',
+                                  height: '100%',
+                                  maxHeight: 200,
+                                  objectFit: 'contain',
+                                  borderRadius: 1,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                }}
+                              />
+                            )
+                          ) : null}
+                        </Box>
+                        <CheckCircleIcon sx={{ color: 'success.main', mb: 1 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Aadhar Card
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1, wordBreak: 'break-word' }}>
+                          {kycFiles.aadhar.name}
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleKycFileChange('aadhar', null);
+                            const input = document.getElementById('aadhar-upload') as HTMLInputElement;
+                            if (input) input.value = '';
+                          }}
+                          startIcon={<CloseIcon />}
+                        >
+                          Remove
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box 
+                        onClick={() => document.getElementById('aadhar-upload')?.click()}
+                        sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}
+                      >
+                        <CloudUploadIcon sx={{ color: 'action.active', mb: 1, fontSize: 48 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Aadhar Card *
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Click to upload
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    sx={{
+                      border: (theme) => `2px dashed ${kycFiles.pan ? theme.palette.success.main : theme.palette.divider}`,
+                      borderRadius: 2,
+                      p: 2,
+                      textAlign: 'center',
+                      bgcolor: kycFiles.pan ? 'action.selected' : 'background.default',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      position: 'relative',
+                      minHeight: 320,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <input
+                      type="file"
+                      id="pan-upload"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      style={{ display: 'none' }}
+                      onChange={(e) => handleKycFileChange('pan', e.target.files?.[0] || null)}
+                    />
+                    {kycFiles.pan ? (
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ flex: 1, mb: 2, minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {kycFilePreviews.pan ? (
+                            kycFiles.pan.type === 'application/pdf' ? (
+                              <Box
+                                component="iframe"
+                                src={kycFilePreviews.pan}
+                                sx={{
+                                  width: '100%',
+                                  height: 200,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                component="img"
+                                src={kycFilePreviews.pan}
+                                alt="PAN preview"
+                                sx={{
+                                  width: '100%',
+                                  height: '100%',
+                                  maxHeight: 200,
+                                  objectFit: 'contain',
+                                  borderRadius: 1,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                }}
+                              />
+                            )
+                          ) : null}
+                        </Box>
+                        <CheckCircleIcon sx={{ color: 'success.main', mb: 1 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          PAN Card
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1, wordBreak: 'break-word' }}>
+                          {kycFiles.pan.name}
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleKycFileChange('pan', null);
+                            const input = document.getElementById('pan-upload') as HTMLInputElement;
+                            if (input) input.value = '';
+                          }}
+                          startIcon={<CloseIcon />}
+                        >
+                          Remove
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box 
+                        onClick={() => document.getElementById('pan-upload')?.click()}
+                        sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}
+                      >
+                        <CloudUploadIcon sx={{ color: 'action.active', mb: 1, fontSize: 48 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          PAN Card *
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Click to upload
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <Box
+                    sx={{
+                      border: (theme) => `2px dashed ${kycFiles.cancelled_cheque ? theme.palette.success.main : theme.palette.divider}`,
+                      borderRadius: 2,
+                      p: 2,
+                      textAlign: 'center',
+                      bgcolor: kycFiles.cancelled_cheque ? 'action.selected' : 'background.default',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s',
+                      position: 'relative',
+                      minHeight: 320,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
+                    <input
+                      type="file"
+                      id="cheque-upload"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      style={{ display: 'none' }}
+                      onChange={(e) => handleKycFileChange('cancelled_cheque', e.target.files?.[0] || null)}
+                    />
+                    {kycFiles.cancelled_cheque ? (
+                      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Box sx={{ flex: 1, mb: 2, minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {kycFilePreviews.cancelled_cheque ? (
+                            kycFiles.cancelled_cheque.type === 'application/pdf' ? (
+                              <Box
+                                component="iframe"
+                                src={kycFilePreviews.cancelled_cheque}
+                                sx={{
+                                  width: '100%',
+                                  height: 200,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                  borderRadius: 1,
+                                }}
+                              />
+                            ) : (
+                              <Box
+                                component="img"
+                                src={kycFilePreviews.cancelled_cheque}
+                                alt="Cancelled Cheque preview"
+                                sx={{
+                                  width: '100%',
+                                  height: '100%',
+                                  maxHeight: 200,
+                                  objectFit: 'contain',
+                                  borderRadius: 1,
+                                  border: '1px solid',
+                                  borderColor: 'divider',
+                                }}
+                              />
+                            )
+                          ) : null}
+                        </Box>
+                        <CheckCircleIcon sx={{ color: 'success.main', mb: 1 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Cancelled Cheque
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1, wordBreak: 'break-word' }}>
+                          {kycFiles.cancelled_cheque.name}
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleKycFileChange('cancelled_cheque', null);
+                            const input = document.getElementById('cheque-upload') as HTMLInputElement;
+                            if (input) input.value = '';
+                          }}
+                          startIcon={<CloseIcon />}
+                        >
+                          Remove
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box 
+                        onClick={() => document.getElementById('cheque-upload')?.click()}
+                        sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}
+                      >
+                        <CloudUploadIcon sx={{ color: 'action.active', mb: 1, fontSize: 48 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                          Cancelled Cheque *
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Click to upload
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
                     {t('auth.accountSecurity')}
                   </Typography>
                 </Grid>
@@ -415,7 +819,14 @@ export default function AdvocateRegisterPage() {
                   boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.registerAsAdvocate')}
+                {loading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={24} color="inherit" />
+                    <Typography>Registering...</Typography>
+                  </Box>
+                ) : (
+                  t('auth.registerAsAdvocate')
+                )}
               </Button>
 
               <Divider sx={{ my: 3 }}>
