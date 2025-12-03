@@ -9,3 +9,15 @@
 ::-webkit-scrollbar-thumb {
   border-radius: 7px;
 }
+
+/* 3D Lord Krishna Image Glow Animation */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translateZ(-10px) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateZ(-10px) scale(1.05);
+  }
+}

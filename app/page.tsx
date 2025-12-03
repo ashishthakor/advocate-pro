@@ -28,7 +28,6 @@ import {
   ListItemButton,
 } from '@mui/material';
 import {
-  Gavel as GavelIcon,
   People as PeopleIcon,
   Security as SecurityIcon,
   Chat as ChatIcon,
@@ -475,56 +474,150 @@ export default function LandingPage() {
               </motion.div>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Box sx={{ textAlign: 'center', position: 'relative' }}>
+              <Box 
+                sx={{ 
+                  textAlign: 'center', 
+                  position: 'relative',
+                  perspective: '1200px',
+                  perspectiveOrigin: 'center center',
+                }}
+              >
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.8, rotate: -5 }} 
-                  whileInView={{ opacity: 1, scale: 1, rotate: 0 }} 
-                  transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }} 
+                  initial={{ opacity: 0, scale: 0.9 }} 
+                  whileInView={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    transition: { duration: 1, delay: 0.3, ease: "easeOut" }
+                  }} 
                   viewport={{ once: true }}
+                  animate={{
+                    y: [0, -12, 0],
+                    rotateY: [0, 5, -5, 0],
+                    rotateX: [0, 2, -2, 0],
+                    scale: [1, 1.015, 1],
+                  }}
+                  transition={{
+                    scale: { 
+                      duration: 3.5,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
+                      delay: 0.5,
+                    },
+                    y: {
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
+                      delay: 0.4,
+                    },
+                    rotateY: {
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
+                      delay: 0.5,
+                    },
+                    rotateX: {
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: [0.4, 0, 0.6, 1],
+                      delay: 0.6,
+                    },
+                  }}
+                  // whileHover={{ 
+                  //   scale: 1.03,
+                  //   rotateY: 6,
+                  //   rotateX: 3,
+                  //   y: -6,
+                  //   transition: {
+                  //     duration: 0.5,
+                  //     ease: "easeOut",
+                  //     type: "tween"
+                  //   }
+                  // }}
+                  style={{
+                    transformStyle: 'preserve-3d',
+                    willChange: 'transform',
+                  }}
                 >
                   <Box
+                    component="img"
+                    src={peaceQuoteImageSrc}
+                    alt="Peace is not a proposal, on which there is debate. Peace is a necessity. - Krishna"
                     sx={{
+                      width: '100%',
+                      maxWidth: { xs: '100%', sm: '400px', md: '450px' },
+                      height: 'auto',
+                      display: 'block',
+                      mx: 'auto',
+                      borderRadius: 2,
+                      transform: 'translateZ(25px)',
+                      boxShadow: (theme) => theme.palette.mode === 'dark' 
+                        ? '0 20px 60px rgba(0,0,0,0.6), 0 0 50px rgba(103, 80, 164, 0.35), 0 0 80px rgba(156, 39, 176, 0.2)' 
+                        : '0 20px 60px rgba(0,0,0,0.25), 0 0 50px rgba(25, 118, 210, 0.25), 0 0 80px rgba(156, 39, 176, 0.15)',
+                      filter: 'drop-shadow(0 10px 30px rgba(0,0,0,0.3))',
                       position: 'relative',
-                      display: 'inline-block',
-                      p: 4,
-                      borderRadius: 4,
-                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
-                      border: (theme) => `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                      willChange: 'transform, filter',
+                      backfaceVisibility: 'hidden',
+                      WebkitFontSmoothing: 'antialiased',
+                      WebkitBackfaceVisibility: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: '-20px',
+                        left: '-20px',
+                        right: '-20px',
+                        bottom: '-20px',
+                        background: (theme) => `radial-gradient(circle at 50% 50%, ${alpha(theme.palette.primary.main, 0.25)}, ${alpha(theme.palette.secondary.main, 0.2)}, transparent 70%)`,
+                        borderRadius: 2,
+                        zIndex: -1,
+                        opacity: 0.7,
+                        transform: 'translateZ(-10px)',
+                        animation: 'pulseGlow 4s ease-in-out infinite',
+                      },
                     }}
-                  >
-                    <GavelIcon sx={{ fontSize: { xs: 120, sm: 160, md: 200 }, color: 'primary.main', opacity: 0.8 }} />
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.1, 1],
-                        opacity: [1, 0.8, 1]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: -10,
-                          right: -10,
-                          width: 60,
-                          height: 60,
-                          borderRadius: '50%',
-                          bgcolor: 'secondary.main',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <SecurityIcon sx={{ color: 'white', fontSize: 30 }} />
-                      </Box>
-                    </motion.div>
-                  </Box>
+                  />
                 </motion.div>
               </Box>
             </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Stats Section */}
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4} justifyContent="center">
+            {stats.map((stat, index) => (
+              <Grid item xs={6} sm={4} md={2.4} key={index} sx={{ display: 'flex' }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  style={{ width: '100%', display: 'flex' }}
+                >
+                  <Paper
+                    sx={{
+                      p: 3,
+                      textAlign: 'center',
+                      bgcolor: 'background.paper',
+                      border: (theme) => `1px solid ${theme.palette.divider}`,
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      minHeight: '100%',
+                    }}
+                  >
+                    <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                      {stat.number}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {stat.label}
+                    </Typography>
+                  </Paper>
+                </motion.div>
+              </Grid>
+            ))}
           </Grid>
         </Container>
       </Box>
@@ -774,46 +867,6 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* Stats Section */}
-      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
-        <Container maxWidth="lg">
-          <Grid container spacing={4} justifyContent="center">
-            {stats.map((stat, index) => (
-              <Grid item xs={6} sm={4} md={2.4} key={index} sx={{ display: 'flex' }}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  style={{ width: '100%', display: 'flex' }}
-                >
-                  <Paper
-                    sx={{
-                      p: 3,
-                      textAlign: 'center',
-                      bgcolor: 'background.paper',
-                      border: (theme) => `1px solid ${theme.palette.divider}`,
-                      width: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                      minHeight: '100%',
-                    }}
-                  >
-                    <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
-                      {stat.number}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {stat.label}
-                    </Typography>
-                  </Paper>
-                </motion.div>
-              </Grid>
-            ))}
-          </Grid>
-        </Container>
-      </Box>
-
       {/* Constitutional and Legislative Mandate Section */}
       <Box sx={{ bgcolor: 'background.default', py: { xs: 6, md: 8 } }}>
         <Container maxWidth="lg">
@@ -1014,158 +1067,6 @@ export default function LandingPage() {
                 {t('about.startCase')}
               </Button>
             </Stack>
-          </motion.div>
-        </Container>
-      </Box>
-
-      {/* Inspirational Quote Section */}
-      <Box 
-        sx={{ 
-          position: 'relative',
-          py: { xs: 8, md: 10 },
-          overflow: 'hidden',
-          bgcolor: (theme) => theme.palette.mode === 'dark' 
-            ? alpha(theme.palette.background.default, 0.5)
-            : alpha('#faf8f3', 0.4),
-          backgroundImage: (theme) => theme.palette.mode === 'dark'
-            ? `radial-gradient(circle at 50% 50%, ${alpha('#6750a4', 0.08)} 0%, transparent 70%)`
-            : `radial-gradient(circle at 50% 50%, ${alpha('#f5e6d3', 0.2)} 0%, transparent 70%)`,
-        }}
-      >
-        <Container maxWidth="sm">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            viewport={{ once: true }}
-          >
-            {/* Decorative top border */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                mb: 4,
-                gap: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  flex: 1,
-                  height: '2px',
-                  background: (theme) => `linear-gradient(to right, transparent, ${alpha(theme.palette.primary.main, 0.3)}, transparent)`,
-                }}
-              />
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 180, 360],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    boxShadow: (theme) => `0 0 20px ${alpha(theme.palette.primary.main, 0.5)}`,
-                  }}
-                />
-              </motion.div>
-              <Box
-                sx={{
-                  flex: 1,
-                  height: '2px',
-                  background: (theme) => `linear-gradient(to left, transparent, ${alpha(theme.palette.primary.main, 0.3)}, transparent)`,
-                }}
-              />
-            </Box>
-
-            {/* Main Image Container */}
-            <Box
-              sx={{
-                textAlign: 'center',
-                position: 'relative',
-              }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.01 }}
-              >
-                <Box
-                  component="img"
-                  src={peaceQuoteImageSrc}
-                  alt="Peace is not a proposal, on which there is debate. Peace is a necessity. - Krishna"
-                  sx={{
-                    width: '100%',
-                    maxWidth: { xs: '100%', sm: '400px', md: '450px' },
-                    height: 'auto',
-                    display: 'block',
-                    mx: 'auto',
-                    borderRadius: 2,
-                    boxShadow: (theme) => theme.palette.mode === 'dark' 
-                      ? '0 12px 40px rgba(0,0,0,0.4)' 
-                      : '0 12px 40px rgba(0,0,0,0.15)',
-                    transition: 'all 0.3s ease',
-                  }}
-                />
-              </motion.div>
-            </Box>
-
-            {/* Decorative bottom border */}
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                mt: 4,
-                gap: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  flex: 1,
-                  height: '2px',
-                  background: (theme) => `linear-gradient(to right, transparent, ${alpha(theme.palette.secondary.main, 0.3)}, transparent)`,
-                }}
-              />
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [360, 180, 0],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    bgcolor: 'secondary.main',
-                    boxShadow: (theme) => `0 0 20px ${alpha(theme.palette.secondary.main, 0.5)}`,
-                  }}
-                />
-              </motion.div>
-              <Box
-                sx={{
-                  flex: 1,
-                  height: '2px',
-                  background: (theme) => `linear-gradient(to left, transparent, ${alpha(theme.palette.secondary.main, 0.3)}, transparent)`,
-                }}
-              />
-            </Box>
           </motion.div>
         </Container>
       </Box>

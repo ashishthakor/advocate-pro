@@ -33,7 +33,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Email is not configured' }, { status: 500 });
   }
 
-  const toAddress = process.env.CONTACT_TO_EMAIL || 'contact@example.com';
+  const toAddress = (process.env.CONTACT_TO_EMAIL || '').trim();
+  
+  // Validate recipient email is configured
+  if (!toAddress) {
+    console.error('CONTACT_TO_EMAIL is not configured');
+    return NextResponse.json({ error: 'Recipient email is not configured' }, { status: 500 });
+  }
+
+  // Validate email address format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(toAddress)) {
+    console.error('Invalid CONTACT_TO_EMAIL format:', toAddress);
+    return NextResponse.json({ error: 'Invalid recipient email format' }, { status: 500 });
+  }
 
   try {
     const body: Partial<ContactPayload> = await request.json();
@@ -60,9 +73,19 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    const { error } = await resend.emails.send({
-    //   from: `Arbitalk Contact <no-reply@${(process.env.RESEND_DOMAIN || 'example.com')}>`,
-      from: `onboarding@resend.dev`,
+    // Use verified domain if available, otherwise fallback to test domain
+    const resendDomain = process.env.RESEND_DOMAIN;
+    const fromAddress = resendDomain 
+      ? `Arbitalk Contact <no-reply@${resendDomain}>`
+      : `onboarding@resend.dev`;
+
+    // If using test domain, warn that it can only send to account owner
+    if (!resendDomain) {
+      console.warn('Using test domain. Can only send to account owner email.');
+    }
+
+    const { data, error } = await resend.emails.send({
+      from: fromAddress,
       to: [toAddress],
       replyTo: email,
       subject: `Arbitalk Contact: ${subject}`,
@@ -70,13 +93,25 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-        console.log("🚀 ~ POST ~ error:", error)
-      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+      console.error('Resend email error:', JSON.stringify(error, null, 2));
+      console.error('Attempted to send to:', toAddress);
+      console.error('Using from address:', fromAddress);
+      
+      const errorMessage = error.message || JSON.stringify(error);
+      return NextResponse.json({ 
+        error: 'Failed to send email',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      }, { status: 500 });
     }
 
+    console.log('Email sent successfully to:', toAddress);
     return NextResponse.json({ ok: true });
-  } catch (e) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  } catch (e: any) {
+    console.error('Contact form error:', e);
+    return NextResponse.json({ 
+      error: 'Invalid request',
+      details: process.env.NODE_ENV === 'development' ? e.message : undefined
+    }, { status: 400 });
   }
 }
 
