@@ -182,10 +182,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only users can create cases
-    if (authResult.user.role !== 'user') {
+    // Only users and admins can create cases
+    if (authResult.user.role !== 'user' && authResult.user.role !== 'admin') {
       return NextResponse.json(
-        { success: false, message: 'Only users can create cases' },
+        { success: false, message: 'Only users and admins can create cases' },
         { status: 403 }
       );
     }
@@ -203,6 +203,8 @@ export async function POST(request: NextRequest) {
       fees_paid,
       start_date,
       end_date,
+      user_id, // Allow admin to specify user_id
+      advocate_id, // Allow admin to specify advocate_id
       // Requester
       requester_name,
       requester_email,
@@ -246,7 +248,8 @@ export async function POST(request: NextRequest) {
       description,
       case_type: case_type || 'civil',
       priority: priority || 'medium',
-      user_id: authResult.user.userId,
+      user_id: (authResult.user.role === 'admin' && user_id) ? user_id : authResult.user.userId,
+      advocate_id: (authResult.user.role === 'admin' && advocate_id) ? advocate_id : null,
       court_name: court_name || null,
       judge_name: judge_name || null,
       next_hearing_date: next_hearing_date || null,

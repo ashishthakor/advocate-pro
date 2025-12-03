@@ -38,7 +38,9 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Visibility as VisibilityIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
+import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers } from '@/store/slices/usersSlice';
 import type { RootState } from '@/store';
@@ -164,7 +166,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+      <Box gap={2} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -172,6 +174,14 @@ export default function UsersPage() {
           disabled={loading}
         >
           Refresh
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          href="/admin/users/create"
+          startIcon={<AddIcon />}
+        >
+          Create Client
         </Button>
       </Box>
 

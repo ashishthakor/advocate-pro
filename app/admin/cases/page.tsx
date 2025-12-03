@@ -41,7 +41,9 @@ import {
   Message as MessageIcon,
   Edit as EditIcon,
   AttachFile as AttachFileIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
@@ -275,7 +277,7 @@ export default function CasesPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+      <Box gap={2} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -283,6 +285,14 @@ export default function CasesPage() {
           disabled={loading}
         >
           Refresh
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          href="/admin/cases/create"
+          startIcon={<AddIcon />}
+        >
+          Create Case
         </Button>
       </Box>
 

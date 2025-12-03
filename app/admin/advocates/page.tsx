@@ -45,7 +45,9 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Description as DescriptionIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client'; 
 
 interface Advocate {
@@ -279,7 +281,7 @@ export default function AdvocatesPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+      <Box gap={2} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -287,6 +289,14 @@ export default function AdvocatesPage() {
           disabled={loading}
         >
           Refresh
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          href="/admin/advocates/create"
+          startIcon={<AddIcon />}
+        >
+          Create Advocate
         </Button>
       </Box>
 
