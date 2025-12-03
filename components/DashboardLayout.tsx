@@ -100,7 +100,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
       case 'admin':
         return [
           { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/admin/dashboard' },
-          { text: t('layout.users'), icon: <PeopleIcon />, path: '/admin/users' },
+          { text: t('layout.clients'), icon: <PeopleIcon />, path: '/admin/users' },
           { text: t('layout.advocates'), icon: <WorkIcon />, path: '/admin/advocates' },
           { text: t('layout.cases'), icon: <FolderIcon />, path: '/admin/cases' },
           { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/admin/notices' },

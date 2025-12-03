@@ -87,12 +87,11 @@ export default function UsersPage() {
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // Fetch only clients (users with role='user')
   const fetchUsers = async (page = 1) => {
     try {
       setLoading(true);
@@ -103,11 +102,10 @@ export default function UsersPage() {
         limit: itemsPerPage.toString(),
         sortBy,
         sortOrder,
+        role: 'user', // Always fetch only clients
       });
       
       if (searchTerm) params.append('search', searchTerm);
-      if (roleFilter) params.append('role', roleFilter);
-      if (statusFilter) params.append('is_approved', statusFilter);
 
       const response = await apiFetch(`/api/users?${params.toString()}`);
       
@@ -115,10 +113,10 @@ export default function UsersPage() {
         setUsers(response.data);
         setPagination(response.pagination);
       } else {
-        setError(response.message || 'Failed to fetch users');
+        setError(response.message || 'Failed to fetch clients');
       }
     } catch (err) {
-      setError('Failed to fetch users');
+      setError('Failed to fetch clients');
     } finally {
       setLoading(false);
     }
@@ -126,7 +124,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers(1);
-  }, [searchTerm, roleFilter, statusFilter, sortBy, sortOrder, itemsPerPage]);
+  }, [searchTerm, sortBy, sortOrder, itemsPerPage]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     fetchUsers(page);
@@ -146,14 +144,6 @@ export default function UsersPage() {
     setSearchTerm(value);
   };
 
-  const handleRoleFilter = (value: string) => {
-    setRoleFilter(value);
-  };
-
-  const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-  };
-
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
@@ -163,44 +153,6 @@ export default function UsersPage() {
     }
   };
 
-  const getRoleChip = (role: string) => {
-    const colors = {
-      admin: 'error',
-      advocate: 'secondary',
-      user: 'primary',
-    } as const;
-
-    return (
-      <Chip
-        label={role.charAt(0).toUpperCase() + role.slice(1)}
-        color={colors[role as keyof typeof colors] || 'default'}
-        size="small"
-      />
-    );
-  };
-
-  const getStatusChip = (isApproved: boolean) => {
-    return (
-      <Chip
-        label={isApproved ? 'Approved' : 'Pending'}
-        color={isApproved ? 'success' : 'warning'}
-        size="small"
-      />
-    );
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return '👑';
-      case 'advocate':
-        return '⚖️';
-      case 'user':
-        return '👤';
-      default:
-        return '👤';
-    }
-  };
 
   if (loading) {
     return (
@@ -230,7 +182,7 @@ export default function UsersPage() {
       )}
 
       {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      {/* <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -243,7 +195,7 @@ export default function UsersPage() {
                     {pagination.totalItems}
                   </Typography>
                   <Typography color="text.secondary">
-                    Total Users
+                    Total Clients
                   </Typography>
                 </Box>
               </Box>
@@ -260,10 +212,10 @@ export default function UsersPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {users.filter(u => u.role === 'user').length}
+                    {users.filter(u => u.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
-                    Regular Users
+                    Approved Clients
                   </Typography>
                 </Box>
               </Box>
@@ -275,51 +227,31 @@ export default function UsersPage() {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                  ⚖️
+                <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+                  ⏳
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {users.filter(u => u.role === 'advocate').length}
+                    {users.filter(u => !u.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
-                    Advocates
+                    Pending Clients
                   </Typography>
                 </Box>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'error.main', mr: 2 }}>
-                  👑
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {users.filter(u => u.role === 'admin').length}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Admins
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      </Grid> */}
 
       {/* Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search users..."
+                placeholder="Search clients..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 InputProps={{
@@ -330,35 +262,6 @@ export default function UsersPage() {
                   ),
                 }}
               />
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Role</InputLabel>
-                <Select
-                  value={roleFilter}
-                  label="Role"
-                  onChange={(e) => handleRoleFilter(e.target.value)}
-                >
-                  <MenuItem value="">All Roles</MenuItem>
-                  <MenuItem value="user">Users</MenuItem>
-                  <MenuItem value="advocate">Advocates</MenuItem>
-                  <MenuItem value="admin">Admins</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={statusFilter}
-                  label="Status"
-                  onChange={(e) => handleStatusFilter(e.target.value)}
-                >
-                  <MenuItem value="">All Status</MenuItem>
-                  <MenuItem value="true">Approved</MenuItem>
-                  <MenuItem value="false">Pending</MenuItem>
-                </Select>
-              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
@@ -390,21 +293,9 @@ export default function UsersPage() {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('name')}
                   >
-                    User {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    Client {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell>Contact</TableCell>
-                  <TableCell 
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => handleSort('role')}
-                  >
-                    Role {sortBy === 'role' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                  </TableCell>
-                  <TableCell 
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => handleSort('is_approved')}
-                  >
-                    Status {sortBy === 'is_approved' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                  </TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('created_at')}
@@ -417,15 +308,15 @@ export default function UsersPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No users found
+                        No clients found
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -434,8 +325,8 @@ export default function UsersPage() {
                     <TableRow key={user.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Avatar sx={{ mr: 2 }}>
-                            {getRoleIcon(user.role)}
+                          <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
+                            👤
                           </Avatar>
                           <Box>
                             <Typography variant="subtitle2">
@@ -460,12 +351,6 @@ export default function UsersPage() {
                             </Box>
                           )}
                         </Box>
-                      </TableCell>
-                      <TableCell>
-                        {getRoleChip(user.role)}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusChip(user.is_approved)}
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
@@ -505,7 +390,7 @@ export default function UsersPage() {
           {/* Pagination Info */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} users
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} clients
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Page {pagination.currentPage} of {pagination.totalPages}
