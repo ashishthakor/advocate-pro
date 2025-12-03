@@ -71,6 +71,32 @@ export async function GET(request: NextRequest) {
     const total = await User.count({ where: whereConditions });
     const totalPages = Math.ceil(total / limit);
 
+    // Get statistics (approved and pending counts) - only when role filter is applied
+    let statistics = null;
+    if (role) {
+      const baseWhereConditions: any = { role };
+      if (search) {
+        baseWhereConditions[Op.or] = [
+          { name: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
+          { phone: { [Op.like]: `%${search}%` } }
+        ];
+      }
+      
+      const approvedCount = await User.count({ 
+        where: { ...baseWhereConditions, is_approved: true } 
+      });
+      const pendingCount = await User.count({ 
+        where: { ...baseWhereConditions, is_approved: false } 
+      });
+      
+      statistics = {
+        total: total,
+        approved: approvedCount,
+        pending: pendingCount
+      };
+    }
+
     // Get users with pagination using Sequelize ORM
     const users = await User.findAll({
       where: whereConditions,
@@ -90,7 +116,8 @@ export async function GET(request: NextRequest) {
         itemsPerPage: limit,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1
-      }
+      },
+      ...(statistics && { statistics })
     });
 
   } catch (error) {

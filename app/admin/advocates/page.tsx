@@ -87,6 +87,11 @@ export default function AdvocatesPage() {
     hasNextPage: false,
     hasPrevPage: false,
   });
+  const [statistics, setStatistics] = useState<{
+    total: number;
+    approved: number;
+    pending: number;
+  } | null>(null);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -130,6 +135,9 @@ export default function AdvocatesPage() {
       if (response.success) {
         setAdvocates(response.data);
         setPagination(response.pagination);
+        if (response.statistics) {
+          setStatistics(response.statistics);
+        }
       } else {
         setError(response.message || 'Failed to fetch advocates');
       }
@@ -337,7 +345,7 @@ export default function AdvocatesPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {advocates.filter(a => a.is_approved).length}
+                    {statistics?.approved ?? advocates.filter(a => a.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
                     Approved
@@ -357,7 +365,7 @@ export default function AdvocatesPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {advocates.filter(a => !a.is_approved).length}
+                    {statistics?.pending ?? advocates.filter(a => !a.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
                     Pending

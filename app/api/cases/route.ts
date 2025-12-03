@@ -111,6 +111,35 @@ export async function GET(request: NextRequest) {
       raw: false // We need toJSON to work properly
     });
 
+    // Build base where conditions for statistics (without status filter, but with other filters)
+    const baseWhereConditions: any = {};
+    
+    if (authResult.user.role === 'user') {
+      baseWhereConditions.user_id = authResult.user.userId;
+    } else if (authResult.user.role === 'advocate') {
+      baseWhereConditions.advocate_id = authResult.user.userId;
+    }
+    // Admin can see all cases, so no additional where condition
+    
+    if (caseType) {
+      baseWhereConditions.case_type = caseType;
+    }
+    if (priority) {
+      baseWhereConditions.priority = priority;
+    }
+    if (assignment === 'assigned') {
+      baseWhereConditions.advocate_id = { [Op.ne]: null };
+    } else if (assignment === 'unassigned') {
+      baseWhereConditions.advocate_id = null;
+    }
+    if (search) {
+      baseWhereConditions[Op.or] = [
+        { title: { [Op.like]: `%${search}%` } },
+        { description: { [Op.like]: `%${search}%` } },
+        { case_number: { [Op.like]: `%${search}%` } }
+      ];
+    }
+
     // Get total count
     const total = await Case.count({ 
       where: whereConditions,
@@ -129,6 +158,70 @@ export async function GET(request: NextRequest) {
     });
     
     const totalPages = Math.ceil(total / limit);
+
+    // Get statistics (only for admin role, and only when not filtering by status)
+    let statistics = null;
+    if (authResult.user.role === 'admin' && !status) {
+      const includeForStats = [
+        {
+          model: User,
+          as: 'user',
+          attributes: []
+        },
+        {
+          model: User,
+          as: 'advocate',
+          attributes: [],
+          required: false
+        }
+      ];
+
+      // Count all statuses to ensure total matches
+      const waitingForAction = await Case.count({
+        where: { ...baseWhereConditions, status: 'waiting_for_action' },
+        include: includeForStats
+      });
+      
+      const neutralsNeedsAssignment = await Case.count({
+        where: { ...baseWhereConditions, status: 'neutrals_needs_to_be_assigned' },
+        include: includeForStats
+      });
+      
+      const consented = await Case.count({
+        where: { ...baseWhereConditions, status: 'consented' },
+        include: includeForStats
+      });
+      
+      const hold = await Case.count({
+        where: { ...baseWhereConditions, status: 'hold' },
+        include: includeForStats
+      });
+      
+      const temporaryNonStarter = await Case.count({
+        where: { ...baseWhereConditions, status: 'temporary_non_starter' },
+        include: includeForStats
+      });
+      
+      const completedCases = await Case.count({
+        where: {
+          ...baseWhereConditions,
+          status: { [Op.in]: ['settled', 'closed_no_consent', 'close_no_settlement', 'withdrawn'] }
+        },
+        include: includeForStats
+      });
+
+      const totalFromStats = await Case.count({ where: baseWhereConditions, include: includeForStats });
+
+      statistics = {
+        total: totalFromStats,
+        waiting_for_action: waitingForAction,
+        neutrals_needs_to_be_assigned: neutralsNeedsAssignment,
+        consented: consented,
+        hold: hold,
+        temporary_non_starter: temporaryNonStarter,
+        completed: completedCases
+      };
+    }
 
     // Cases already have flat fields from attributes col, just convert to JSON
     const transformedCases = cases.map((case_: any) => {
@@ -159,7 +252,8 @@ export async function GET(request: NextRequest) {
           itemsPerPage: limit,
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1
-        }
+        },
+        ...(statistics && { statistics })
       }
     });
 
