@@ -57,6 +57,8 @@ interface Case {
     email: string;
     phone: string;
     address: string;
+    user_type?: string;
+    company_name?: string;
   };
   // Flat fields from API
   user_name?: string;
