@@ -30,6 +30,15 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       defaultValue: false
     },
+    user_type: {
+      type: DataTypes.ENUM('individual', 'corporate'),
+      allowNull: true,
+      defaultValue: 'individual'
+    },
+    company_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
     phone: {
       type: DataTypes.STRING(20),
       allowNull: true

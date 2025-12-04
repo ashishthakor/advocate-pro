@@ -15,6 +15,7 @@ interface NoticeData {
   date?: string; // Date from notice form (format: DD.MM.YYYY)
   caseNumber?: string;
   caseTitle?: string;
+  applicantCompanyName?: string;
 }
 
 // Hardcoded content that appears after "Dear Sir/Madam,"
@@ -412,14 +413,14 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, verifiedLogo
             <div style="margin-top: 30px; margin-bottom: 10px; page-break-inside: avoid; break-inside: avoid;">
               <div style="margin-bottom: 0px;">Date: ${formattedDate}</div>
               <div style="margin-bottom: 5px;">Surat.</div>
-              <div style="margin-bottom: 0px; font-family: 'Georgia', serif;">...............Om panwala...............</div>
-              <div style="margin-bottom: 0px;">(Ravindrabhai Om Panwala</div>
-              <div>Proprietor of EcomfirstVentures)</div>
+              <div style="margin-bottom: 0px; font-family: 'Georgia', serif;">............... ${escapeHtml(data.applicantName)} ...............</div>
+              ${data.applicantCompanyName ? `<div>Proprietor of ${escapeHtml(data.applicantCompanyName)}</div>` : ''}
             </div>
           </div>
 
           <!-- Static Conciliation Information - Page 1 -->
-          <div style="page-break-before: always; margin-top: 40px;">
+          <!-- <div style="page-break-before: always; margin-top: 40px;"> -->
+          <div style="margin-top: 40px;">
             <h3 style="font-weight: bold; margin-bottom: 15px;">What is Conciliation?</h3>
             <p style="margin-bottom: 15px;">
               Conciliation is a <strong>voluntary and confidential process</strong> where both parties work together, with the assistance of a <strong>neutral expert called a Conciliator</strong>, to find a mutually agreeable solution. Once both parties reach an agreement, the Conciliator issues a <strong>Conciliation Settlement Agreement</strong>, which is <strong>legally binding and enforceable</strong> just like a court decree (under <strong>Section 74 of the Arbitration and Conciliation Act, 1996</strong>).
@@ -477,7 +478,7 @@ function generateHTMLTemplate(data: NoticeData, logoBase64: string, verifiedLogo
           
           <!-- Need Assistance Section -->
           <!-- <div style="margin-top: 40px; page-break-before: always;"> -->
-          <div style="margin-top: 80px;">
+          <div style="margin-top: 60px;">
             <!-- Top Section: Need Assistance + Verified Logo -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; page-break-inside: avoid; break-inside: avoid;">
               <!-- Left: Need Assistance Section -->

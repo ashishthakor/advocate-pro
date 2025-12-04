@@ -140,7 +140,7 @@ export async function PUT(
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'email', 'phone', 'address']
+              attributes: ['id', 'name', 'email', 'phone', 'address', 'user_type', 'company_name']
             }
           ]
         }
@@ -161,7 +161,7 @@ export async function PUT(
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'phone', 'address']
+          attributes: ['id', 'name', 'email', 'phone', 'address', 'user_type', 'company_name']
         }
       ]
     });
@@ -211,6 +211,7 @@ export async function PUT(
       date: noticeDateForPDF,
       caseNumber: caseData.case_number,
       caseTitle: caseData.title,
+      applicantCompanyName: caseData.user.user_type === 'corporate' ? caseData.user.company_name : undefined,
     });
 
     // Upload new PDF to S3 (use same filename or generate new one)

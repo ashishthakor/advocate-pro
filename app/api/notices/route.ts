@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'phone', 'address']
+          attributes: ['id', 'name', 'email', 'phone', 'address', 'user_type', 'company_name']
         }
       ]
     });
@@ -270,6 +270,7 @@ export async function POST(request: NextRequest) {
       date: noticeDateForPDF,
       caseNumber: caseData.case_number,
       caseTitle: caseData.title,
+      applicantCompanyName: caseData.user.user_type === 'corporate' ? caseData.user.company_name : undefined,
     });
 
     // Ensure S3 bucket exists

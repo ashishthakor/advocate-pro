@@ -23,11 +23,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, email, password, phone, address } = body;
+    const { name, email, password, phone, address, user_type = 'individual', company_name } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, message: 'Name, email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate company name for corporate users
+    if (user_type === 'corporate' && !company_name?.trim()) {
+      return NextResponse.json(
+        { success: false, message: 'Company name is required for corporate users' },
         { status: 400 }
       );
     }
@@ -55,6 +63,8 @@ export async function POST(request: NextRequest) {
       role: 'user',
       phone: phone || null,
       address: address || null,
+      user_type: user_type || 'individual',
+      company_name: user_type === 'corporate' ? company_name?.trim() : null,
       is_approved: true // Auto-approved when created by admin
     });
 

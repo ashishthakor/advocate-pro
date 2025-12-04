@@ -659,7 +659,16 @@ export default function NoticesPage() {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {notice.case?.user?.name || 'N/A'}
+                        <Box>
+                          <Typography variant="body2">
+                            {notice.case?.user?.name || 'N/A'}
+                          </Typography>
+                          {notice.case?.user?.user_type === 'corporate' && notice.case?.user?.company_name && (
+                            <Typography variant="caption" color="text.secondary">
+                              {notice.case.user.company_name}
+                            </Typography>
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Box>
@@ -837,6 +846,11 @@ export default function NoticesPage() {
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     <strong>Name:</strong> {selectedCase.user?.name || selectedCase.user_name || 'N/A'}
                   </Typography>
+                  {selectedCase.user?.user_type === 'corporate' && selectedCase.user?.company_name && (
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Company:</strong> {selectedCase.user.company_name}
+                    </Typography>
+                  )}
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     <strong>Address:</strong> {selectedCase.user?.address || selectedCase.user_address || 'N/A'}
                   </Typography>
@@ -1064,6 +1078,8 @@ export default function NoticesPage() {
                     const userAddress = selectedCase?.user?.address || selectedCase?.user_address;
                     const userEmail = selectedCase?.user?.email || selectedCase?.user_email;
                     const userPhone = selectedCase?.user?.phone || selectedCase?.user_phone;
+                    const isCorporate = selectedCase?.user?.user_type === 'corporate';
+                    const companyName = selectedCase?.user?.company_name;
                     
                     if (userName) {
                       return (
@@ -1071,6 +1087,11 @@ export default function NoticesPage() {
                           <Typography variant="body2">
                             <strong>Name:</strong> {userName}
                           </Typography>
+                          {isCorporate && companyName && (
+                            <Typography variant="body2">
+                              <strong>Company:</strong> {companyName}
+                            </Typography>
+                          )}
                           <Typography variant="body2">
                             <strong>Address:</strong> {userAddress || 'N/A'}
                           </Typography>
@@ -1090,6 +1111,11 @@ export default function NoticesPage() {
                           <Typography variant="body2">
                             <strong>Name:</strong> {caseUser.name || 'N/A'}
                           </Typography>
+                          {caseUser.user_type === 'corporate' && caseUser.company_name && (
+                            <Typography variant="body2">
+                              <strong>Company:</strong> {caseUser.company_name}
+                            </Typography>
+                          )}
                           <Typography variant="body2">
                             <strong>Address:</strong> {caseUser.address || 'N/A'}
                           </Typography>

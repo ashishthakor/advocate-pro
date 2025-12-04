@@ -31,12 +31,20 @@ import {
   Search as SearchIcon,
   Message as MessageIcon,
   Assignment as AssignmentIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Business as BusinessIcon,
 } from '@mui/icons-material';
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { useAuth } from '@/components/AuthProvider';
 import { apiFetch } from '@/lib/api-client';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useRouter } from 'next/navigation';
+import { useDebounce } from '@/lib/utils';
 
 interface Client {
   id: number;
@@ -44,52 +52,48 @@ interface Client {
   email: string;
   phone: string;
   address: string;
+  user_type?: string;
+  company_name?: string;
   created_at: string;
-  cases_count: number;
+  cases_count?: number;
 }
 
 export default function AdvocateClientsPage() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userTypeFilter, setUserTypeFilter] = useState<string>('');
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     fetchClients();
-  }, []);
+  }, [debouncedSearchTerm, userTypeFilter]);
 
   const fetchClients = async () => {
     try {
       setLoading(true);
       
-      // Fetch cases assigned to this advocate to get their clients
-      const response = await apiFetch('/api/cases');
+      // Fetch clients using users API (same as admin side)
+      const params = new URLSearchParams({
+        role: 'user', // Always fetch only clients
+      });
+      
+      if (debouncedSearchTerm) {
+        params.append('search', debouncedSearchTerm);
+      }
+      if (userTypeFilter) {
+        params.append('user_type', userTypeFilter);
+      }
+      
+      const response = await apiFetch(`/api/users?${params.toString()}`);
       
       if (response.success) {
-        const cases = response.data.cases || response.data;
-        
-        // Extract unique clients from assigned cases
-        const clientMap = new Map();
-        cases.forEach((case_: any) => {
-          if (case_.user_id && !clientMap.has(case_.user_id)) {
-            clientMap.set(case_.user_id, {
-              id: case_.user_id,
-              name: case_.user_name || 'Unknown Client',
-              email: case_.user_email || '',
-              phone: case_.user_phone || '',
-              address: case_.user_address || '',
-              created_at: case_.created_at,
-              cases_count: 1,
-            });
-          } else if (case_.user_id) {
-            const client = clientMap.get(case_.user_id);
-            client.cases_count += 1;
-          }
-        });
-        
-        setClients(Array.from(clientMap.values()));
+        setClients(response.data || []);
       }
     } catch (err) {
       console.error('Fetch clients error:', err);
@@ -97,11 +101,6 @@ export default function AdvocateClientsPage() {
       setLoading(false);
     }
   };
-
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleChatClient = (clientId: number) => {
     router.push(`/advocate/chat`);
@@ -140,22 +139,40 @@ export default function AdvocateClientsPage() {
       </Button>
       </Box>
 
-      {/* Search */}
+      {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <TextField
-            fullWidth
-            placeholder="Search clients by name or email..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={6} md={4}>
+              <TextField
+                fullWidth
+                placeholder="Search clients by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Account Type</InputLabel>
+                <Select
+                  value={userTypeFilter}
+                  label="Account Type"
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="individual">Individual</MenuItem>
+                  <MenuItem value="corporate">Corporate</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -190,7 +207,7 @@ export default function AdvocateClientsPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {clients.reduce((sum, client) => sum + client.cases_count, 0)}
+                    {clients.reduce((sum, client) => sum + (client.cases_count || 0), 0)}
                   </Typography>
                   <Typography color="text.secondary">
                     Total Cases
@@ -230,7 +247,7 @@ export default function AdvocateClientsPage() {
                 </Avatar>
                 <Box>
                   <Typography variant="h4" component="div">
-                    {clients.length > 0 ? Math.round(clients.reduce((sum, client) => sum + client.cases_count, 0) / clients.length * 10) / 10 : 0}
+                    {clients.length > 0 ? Math.round(clients.reduce((sum, client) => sum + (client.cases_count || 0), 0) / clients.length * 10) / 10 : 0}
                   </Typography>
                   <Typography color="text.secondary">
                     Avg Cases/Client
@@ -245,14 +262,18 @@ export default function AdvocateClientsPage() {
       {/* Clients Table */}
       <Card>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 3 }}>
+          {/* <Typography variant="h6" sx={{ mb: 3 }}>
             Client List
-          </Typography>
+          </Typography> */}
 
-          {filteredClients.length === 0 ? (
+          {loading ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : clients.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="body2" color="text.secondary">
-                {searchTerm ? 'No clients found matching your search' : 'No clients assigned yet'}
+                {searchTerm || userTypeFilter ? 'No clients found matching your search' : 'No clients assigned yet'}
               </Typography>
             </Box>
           ) : (
@@ -261,6 +282,7 @@ export default function AdvocateClientsPage() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Client</TableCell>
+                    <TableCell>Type</TableCell>
                     <TableCell>Contact Info</TableCell>
                     <TableCell>Cases</TableCell>
                     <TableCell>Member Since</TableCell>
@@ -268,7 +290,7 @@ export default function AdvocateClientsPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredClients.map((client) => (
+                  {clients.map((client) => (
                     <TableRow key={client.id} hover>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -282,8 +304,22 @@ export default function AdvocateClientsPage() {
                             <Typography variant="caption" color="text.secondary">
                               Client ID: {client.id}
                             </Typography>
+                            {client.user_type === 'corporate' && client.company_name && (
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                <BusinessIcon sx={{ fontSize: 12, mr: 0.5, verticalAlign: 'middle' }} />
+                                {client.company_name}
+                              </Typography>
+                            )}
                           </Box>
                         </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={client.user_type === 'corporate' ? 'Corporate' : 'Individual'}
+                          color={client.user_type === 'corporate' ? 'primary' : 'default'}
+                          size="small"
+                          variant="outlined"
+                        />
                       </TableCell>
                       <TableCell>
                         <Box>
@@ -313,7 +349,7 @@ export default function AdvocateClientsPage() {
                       </TableCell>
                       <TableCell>
                         <Chip
-                          label={`${client.cases_count} case${client.cases_count !== 1 ? 's' : ''}`}
+                          label={`${client.cases_count || 0} case${(client.cases_count || 0) !== 1 ? 's' : ''}`}
                           color="primary"
                           size="small"
                         />

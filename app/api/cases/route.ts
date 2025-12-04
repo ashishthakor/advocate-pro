@@ -77,6 +77,34 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    // For advocate role with search, also search in user/client fields
+    let includeConditions: any[] = [
+      {
+        model: User,
+        as: 'user',
+        attributes: [], // Don't include nested user object
+        required: false
+      },
+      {
+        model: User,
+        as: 'advocate',
+        attributes: [], // Don't include nested advocate object
+        required: false // LEFT JOIN for advocate (can be null)
+      }
+    ];
+
+    // If advocate is searching, add user field search conditions
+    if (search && authResult.user.role === 'advocate') {
+      includeConditions[0].where = {
+        [Op.or]: [
+          { name: { [Op.like]: `%${search}%` } },
+          { email: { [Op.like]: `%${search}%` } },
+          { phone: { [Op.like]: `%${search}%` } }
+        ]
+      };
+      includeConditions[0].required = true; // INNER JOIN to filter by user fields
+    }
+
     // Get cases with user and advocate information using Sequelize ORM
     // Use attributes with col to directly select joined columns as flat fields
     const cases = await Case.findAll({
@@ -87,24 +115,14 @@ export async function GET(request: NextRequest) {
           [col('user.email'), 'user_email'],
           [col('user.phone'), 'user_phone'],
           [col('user.address'), 'user_address'],
+          [col('user.user_type'), 'user_type'],
+          [col('user.company_name'), 'user_company_name'],
           [col('advocate.name'), 'advocate_name'],
           [col('advocate.email'), 'advocate_email'],
           [col('advocate.phone'), 'advocate_phone']
         ]
       },
-      include: [
-        {
-          model: User,
-          as: 'user',
-          attributes: [] // Don't include nested user object
-        },
-        {
-          model: User,
-          as: 'advocate',
-          attributes: [], // Don't include nested advocate object
-          required: false // LEFT JOIN for advocate (can be null)
-        }
-      ],
+      include: includeConditions,
       order: [[sortBy, sortOrder.toUpperCase()]],
       limit: limit,
       offset: offset,
@@ -235,6 +253,8 @@ export async function GET(request: NextRequest) {
         user_email: caseData.user_email || null,
         user_phone: caseData.user_phone || null,
         user_address: caseData.user_address || null,
+        user_type: caseData.user_type || null,
+        user_company_name: caseData.user_company_name || null,
         advocate_name: caseData.advocate_name || null,
         advocate_email: caseData.advocate_email || null,
         advocate_phone: caseData.advocate_phone || null,

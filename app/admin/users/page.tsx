@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -39,6 +39,7 @@ import {
   Refresh as RefreshIcon,
   Visibility as VisibilityIcon,
   Add as AddIcon,
+  Business as BusinessIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -46,6 +47,7 @@ import { fetchUsers } from '@/store/slices/usersSlice';
 import type { RootState } from '@/store';
 import { apiFetch } from '@/lib/api-client';
 import UserDetailsModal from '@/components/UserDetailsModal';
+import { useDebounce } from '@/lib/utils';
 
 interface User {
   id: number;
@@ -55,6 +57,8 @@ interface User {
   address: string;
   role: string;
   is_approved: boolean;
+  user_type?: string;
+  company_name?: string;
   specialization?: string;
   experience_years?: number;
   bar_number?: string;
@@ -89,9 +93,16 @@ export default function UsersPage() {
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
+  const [userTypeFilter, setUserTypeFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  
+  // Ref to maintain search input focus
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch only clients (users with role='user')
   const fetchUsers = async (page = 1) => {
@@ -107,7 +118,8 @@ export default function UsersPage() {
         role: 'user', // Always fetch only clients
       });
       
-      if (searchTerm) params.append('search', searchTerm);
+      if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+      if (userTypeFilter) params.append('user_type', userTypeFilter);
 
       const response = await apiFetch(`/api/users?${params.toString()}`);
       
@@ -126,7 +138,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers(1);
-  }, [searchTerm, sortBy, sortOrder, itemsPerPage]);
+  }, [debouncedSearchTerm, userTypeFilter, sortBy, sortOrder, itemsPerPage]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     fetchUsers(page);
@@ -261,6 +273,7 @@ export default function UsersPage() {
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
+                inputRef={searchInputRef}
                 placeholder="Search clients..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
@@ -272,6 +285,20 @@ export default function UsersPage() {
                   ),
                 }}
               />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel>Account Type</InputLabel>
+                <Select
+                  value={userTypeFilter}
+                  label="Account Type"
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="individual">Individual</MenuItem>
+                  <MenuItem value="corporate">Corporate</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <FormControl fullWidth>
@@ -305,6 +332,7 @@ export default function UsersPage() {
                   >
                     Client {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
+                  <TableCell>Type</TableCell>
                   <TableCell>Contact</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
@@ -318,13 +346,13 @@ export default function UsersPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         No clients found
                       </Typography>
@@ -345,8 +373,22 @@ export default function UsersPage() {
                             <Typography variant="caption" color="text.secondary">
                               ID: {user.id}
                             </Typography>
+                            {user.user_type === 'corporate' && user.company_name && (
+                              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                <BusinessIcon sx={{ fontSize: 12, mr: 0.5, verticalAlign: 'middle' }} />
+                                {user.company_name}
+                              </Typography>
+                            )}
                           </Box>
                         </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={user.user_type === 'corporate' ? 'Corporate' : 'Individual'}
+                          color={user.user_type === 'corporate' ? 'primary' : 'default'}
+                          size="small"
+                          variant="outlined"
+                        />
                       </TableCell>
                       <TableCell>
                         <Box>

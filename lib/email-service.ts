@@ -10,6 +10,7 @@ if (process.env.SENDGRID_API_KEY) {
 
 interface NoticeEmailData {
   applicantName: string;
+  applicantCompanyName?: string;
   applicantAddress: string;
   applicantEmail?: string;
   applicantPhone?: string;
@@ -70,6 +71,7 @@ export async function sendNoticeEmail(
           date: data.date,
           caseNumber: data.caseNumber,
           caseTitle: data.caseTitle,
+          applicantCompanyName: data.applicantCompanyName,
         });
       }
     } else {
@@ -87,6 +89,7 @@ export async function sendNoticeEmail(
         date: data.date,
         caseNumber: data.caseNumber,
         caseTitle: data.caseTitle,
+        applicantCompanyName: data.applicantCompanyName,
       });
     }
 

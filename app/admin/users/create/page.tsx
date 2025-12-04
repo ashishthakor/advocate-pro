@@ -22,7 +22,14 @@ import {
   Phone as PhoneIcon,
   Home as HomeIcon,
   Lock as LockIcon,
+  Business as BusinessIcon,
 } from '@mui/icons-material';
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -37,16 +44,28 @@ export default function CreateUserPage() {
     address: '',
     password: '',
     confirmPassword: '',
+    user_type: 'individual',
+    company_name: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+      // Clear company_name when switching to individual
+      ...(name === 'user_type' && value === 'individual' ? { company_name: '' } : {}),
     }));
   };
 
@@ -67,6 +86,13 @@ export default function CreateUserPage() {
       return;
     }
 
+    // Validate company name for corporate users
+    if (formData.user_type === 'corporate' && !formData.company_name?.trim()) {
+      setError('Company name is required for corporate users');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await apiFetch('/api/admin/users', {
         method: 'POST',
@@ -76,6 +102,8 @@ export default function CreateUserPage() {
           phone: formData.phone,
           address: formData.address,
           password: formData.password,
+          user_type: formData.user_type,
+          company_name: formData.user_type === 'corporate' ? formData.company_name : null,
         },
       });
 
@@ -130,6 +158,37 @@ export default function CreateUserPage() {
         <CardContent sx={{ p: 4 }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <FormControl fullWidth required>
+                  <InputLabel>Account Type</InputLabel>
+                  <Select
+                    name="user_type"
+                    value={formData.user_type}
+                    onChange={handleSelectChange}
+                    label="Account Type"
+                  >
+                    <MenuItem value="individual">Individual</MenuItem>
+                    <MenuItem value="corporate">Corporate</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {formData.user_type === 'corporate' && (
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Company Name"
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleInputChange}
+                    required
+                    InputProps={{
+                      startAdornment: <BusinessIcon sx={{ mr: 1, color: 'action.active' }} />,
+                    }}
+                  />
+                </Grid>
+              )}
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
