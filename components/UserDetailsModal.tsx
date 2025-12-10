@@ -23,6 +23,7 @@ import {
   Phone as PhoneIcon,
   LocationOn as LocationIcon,
   CalendarToday as CalendarIcon,
+  Business as BusinessIcon,
 } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
 
@@ -34,6 +35,8 @@ interface UserDetails {
   address: string;
   role: string;
   is_approved: boolean;
+  user_type?: string;
+  company_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -107,9 +110,18 @@ export default function UserDetailsModal({ open, onClose, userDetails }: UserDet
               <Typography variant="body2" color="text.secondary">
                 {userDetails.email}
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                 {getRoleChip(userDetails.role)}
                 {getStatusChip(userDetails.is_approved)}
+                {userDetails.user_type && (
+                  <Chip
+                    label={userDetails.user_type === 'corporate' ? 'Corporate' : 'Individual'}
+                    color={userDetails.user_type === 'corporate' ? 'primary' : 'default'}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                )}
               </Box>
             </Box>
           </Box>
@@ -130,6 +142,17 @@ export default function UserDetailsModal({ open, onClose, userDetails }: UserDet
               </Typography>
               <Typography variant="body1">{userDetails.name}</Typography>
             </Grid>
+            {userDetails.user_type === 'corporate' && userDetails.company_name && (
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Company Name
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <BusinessIcon fontSize="small" />
+                  {userDetails.company_name}
+                </Typography>
+              </Grid>
+            )}
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Email Address
@@ -156,6 +179,17 @@ export default function UserDetailsModal({ open, onClose, userDetails }: UserDet
                 <LocationIcon fontSize="small" />
                 {userDetails.address || 'Not provided'}
               </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Account Type
+              </Typography>
+              <Chip
+                label={userDetails.user_type === 'corporate' ? 'Corporate' : 'Individual'}
+                color={userDetails.user_type === 'corporate' ? 'primary' : 'default'}
+                size="small"
+                variant="outlined"
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" color="text.secondary" gutterBottom>

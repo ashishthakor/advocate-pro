@@ -5,7 +5,7 @@ import { logUserRegistration } from '@/lib/activity-logger';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, phone, address, role = 'user' } = await request.json();
+    const { name, email, password, phone, address, role = 'user', user_type = 'individual', company_name } = await request.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -37,6 +37,14 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Validate company name for corporate users
+    if (user_type === 'corporate' && !company_name?.trim()) {
+      return NextResponse.json(
+        { success: false, message: 'Company name is required for corporate registration' },
+        { status: 400 }
+      );
+    }
+
     // Create new user using Sequelize ORM
     const newUser = await User.create({
       name,
@@ -45,6 +53,8 @@ export async function POST(request: NextRequest) {
       role,
       phone: phone || null,
       address: address || null,
+      user_type: user_type || 'individual',
+      company_name: user_type === 'corporate' ? company_name?.trim() : null,
       is_approved: true // All users are auto-approved by default
     });
 

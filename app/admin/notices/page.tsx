@@ -40,9 +40,12 @@ import {
   Delete as DeleteIcon,
   Description as DescriptionIcon,
   Edit as EditIcon,
+  Search as SearchIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
 import ReactQuillEditor from '@/components/ReactQuillEditor';
+import { useDebounce } from '@/lib/utils';
+import { InputAdornment } from '@mui/material';
 
 interface Case {
   id: number;
@@ -54,6 +57,8 @@ interface Case {
     email: string;
     phone: string;
     address: string;
+    user_type?: string;
+    company_name?: string;
   };
   // Flat fields from API
   user_name?: string;
@@ -144,10 +149,21 @@ export default function NoticesPage() {
   // Track dialog open state for ReactQuill key
   const [createDialogKey, setCreateDialogKey] = useState(0);
 
+  // Search and sort states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('date');
+  const [sortOrder, setSortOrder] = useState('DESC');
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   useEffect(() => {
-    fetchNotices();
     fetchCases();
   }, []);
+
+  useEffect(() => {
+    fetchNotices(1);
+  }, [debouncedSearchTerm, sortBy, sortOrder]);
 
   const fetchCases = async () => {
     try {
@@ -160,12 +176,24 @@ export default function NoticesPage() {
     }
   };
 
+  // Fetch notices with search and sort
   const fetchNotices = async (page = 1) => {
     try {
       setLoading(true);
       setError('');
       
-      const response = await apiFetch(`/api/notices?page=${page}&limit=10`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: '10',
+        sortBy,
+        sortOrder,
+      });
+      
+      if (debouncedSearchTerm) {
+        params.append('search', debouncedSearchTerm);
+      }
+      
+      const response = await apiFetch(`/api/notices?${params.toString()}`);
       
       if (response.success) {
         setNotices(response.data.notices || []);
@@ -178,6 +206,23 @@ export default function NoticesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle search input
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  // Handle sort
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC');
+    } else {
+      setSortBy(field);
+      setSortOrder('ASC');
+    }
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const validateForm = (): boolean => {
@@ -528,6 +573,30 @@ export default function NoticesPage() {
         />
       )}
 
+      {/* Search and Filters */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Search notices by case number, case title, respondent name, subject..."
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
       {/* Notices Table */}
       <Card>
         <CardContent>
@@ -535,29 +604,46 @@ export default function NoticesPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Case</TableCell>
-                  <TableCell>Applicant</TableCell>
-                  <TableCell>Respondent</TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('case_number')}
+                  >
+                    Case {sortBy === 'case_number' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('user_name')}
+                  >
+                    Applicant {sortBy === 'user_name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('respondent_name')}
+                  >
+                    Respondent {sortBy === 'respondent_name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
                   <TableCell>File Name</TableCell>
-                  <TableCell>Notice Date</TableCell>
-                  {/* <TableCell>Status</TableCell> */}
-                  {/* <TableCell>Email Count</TableCell> */}
-                  {/* <TableCell>Created</TableCell> */}
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('date')}
+                  >
+                    Notice Date {sortBy === 'date' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : notices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No notices found
+                        {searchTerm ? 'No notices found matching your search' : 'No notices found'}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -575,7 +661,16 @@ export default function NoticesPage() {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {notice.case?.user?.name || 'N/A'}
+                        <Box>
+                          <Typography variant="body2">
+                            {notice.case?.user?.name || 'N/A'}
+                          </Typography>
+                          {notice.case?.user?.user_type === 'corporate' && notice.case?.user?.company_name && (
+                            <Typography variant="caption" color="text.secondary">
+                              {notice.case.user.company_name}
+                            </Typography>
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Box>
@@ -614,21 +709,6 @@ export default function NoticesPage() {
                           {formatDateForDisplay(notice.date)}
                         </Typography>
                       </TableCell>
-                      {/* <TableCell>
-                        <Chip
-                          label={notice.email_sent ? 'Email Sent' : 'Draft'}
-                          color={notice.email_sent ? 'success' : 'default'}
-                          size="small"
-                        />
-                      </TableCell> */}
-                      {/* <TableCell>
-                        <Typography variant="body2">
-                          {notice.email_sent_count || 0}
-                        </Typography>
-                      </TableCell> */}
-                      {/* <TableCell>
-                        {new Date(notice.created_at).toLocaleDateString()}
-                      </TableCell> */}
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="Edit Notice">
@@ -768,6 +848,11 @@ export default function NoticesPage() {
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     <strong>Name:</strong> {selectedCase.user?.name || selectedCase.user_name || 'N/A'}
                   </Typography>
+                  {selectedCase.user?.user_type === 'corporate' && selectedCase.user?.company_name && (
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                      <strong>Company:</strong> {selectedCase.user.company_name}
+                    </Typography>
+                  )}
                   <Typography variant="body2" sx={{ mb: 0.5 }}>
                     <strong>Address:</strong> {selectedCase.user?.address || selectedCase.user_address || 'N/A'}
                   </Typography>
@@ -995,6 +1080,8 @@ export default function NoticesPage() {
                     const userAddress = selectedCase?.user?.address || selectedCase?.user_address;
                     const userEmail = selectedCase?.user?.email || selectedCase?.user_email;
                     const userPhone = selectedCase?.user?.phone || selectedCase?.user_phone;
+                    const isCorporate = selectedCase?.user?.user_type === 'corporate';
+                    const companyName = selectedCase?.user?.company_name;
                     
                     if (userName) {
                       return (
@@ -1002,6 +1089,11 @@ export default function NoticesPage() {
                           <Typography variant="body2">
                             <strong>Name:</strong> {userName}
                           </Typography>
+                          {isCorporate && companyName && (
+                            <Typography variant="body2">
+                              <strong>Company:</strong> {companyName}
+                            </Typography>
+                          )}
                           <Typography variant="body2">
                             <strong>Address:</strong> {userAddress || 'N/A'}
                           </Typography>
@@ -1021,6 +1113,11 @@ export default function NoticesPage() {
                           <Typography variant="body2">
                             <strong>Name:</strong> {caseUser.name || 'N/A'}
                           </Typography>
+                          {caseUser.user_type === 'corporate' && caseUser.company_name && (
+                            <Typography variant="body2">
+                              <strong>Company:</strong> {caseUser.company_name}
+                            </Typography>
+                          )}
                           <Typography variant="body2">
                             <strong>Address:</strong> {caseUser.address || 'N/A'}
                           </Typography>

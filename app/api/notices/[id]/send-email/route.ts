@@ -51,7 +51,7 @@ export async function POST(
             {
               model: User,
               as: 'user',
-              attributes: ['id', 'name', 'email', 'phone', 'address']
+              attributes: ['id', 'name', 'email', 'phone', 'address', 'user_type', 'company_name']
             }
           ]
         }
@@ -80,6 +80,7 @@ export async function POST(
       caseTitle: notice.case.title,
       recipientEmail: recipient_email,
       recipientName: notice.respondent_name,
+      applicantCompanyName: notice.case.user.user_type === 'corporate' ? notice.case.user.company_name : undefined,
     }, notice.pdf_filename || undefined);
 
     if (!emailResult.success) {

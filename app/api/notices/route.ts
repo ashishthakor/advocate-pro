@@ -3,6 +3,7 @@ const { Notice, Case, User } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { generateNoticePDF } from '@/lib/pdf-generator';
 import { s3Uploader } from '@/lib/aws-s3';
+import { Op, col } from 'sequelize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +27,27 @@ export async function GET(request: NextRequest) {
     const caseId = searchParams.get('case_id');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search');
+    const sortBy = searchParams.get('sortBy') || 'date';
+    const sortOrder = searchParams.get('sortOrder') || 'DESC';
+
+    // Validate sort parameters
+    const validSortColumns = ['id', 'respondent_name', 'subject', 'date', 'case_number', 'user_name'];
+    const validSortOrders = ['ASC', 'DESC'];
+    
+    if (!validSortColumns.includes(sortBy)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid sort column' },
+        { status: 400 }
+      );
+    }
+    
+    if (!validSortOrders.includes(sortOrder.toUpperCase())) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid sort order' },
+        { status: 400 }
+      );
+    }
 
     const whereConditions: any = {
       deleted_at: null // Only get non-deleted notices
@@ -36,24 +58,108 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit;
 
+    // Build include conditions
+    const includeConditions: any = [
+      {
+        model: Case,
+        as: 'case',
+        required: true, // INNER JOIN to ensure case exists
+        include: [
+          {
+            model: User,
+            as: 'user',
+            attributes: ['id', 'name', 'email', 'phone', 'address']
+          }
+        ]
+      }
+    ];
+
+    // Add search conditions - search across notice fields and related case/user fields
+    if (search && search.trim() !== '') {
+      const searchTerm = search.trim();
+      
+      // Search in notice fields directly
+      const noticeSearchConditions: any[] = [
+        { respondent_name: { [Op.like]: `%${searchTerm}%` } },
+        { subject: { [Op.like]: `%${searchTerm}%` } },
+        { respondent_address: { [Op.like]: `%${searchTerm}%` } },
+        { pdf_filename: { [Op.like]: `%${searchTerm}%` } }
+      ];
+
+      try {
+        // For case and user fields, find matching case IDs first
+        // This is more efficient than complex nested queries
+        const matchingCases = await Case.findAll({
+          where: {
+            [Op.or]: [
+              { case_number: { [Op.like]: `%${searchTerm}%` } },
+              { title: { [Op.like]: `%${searchTerm}%` } }
+            ]
+          },
+          attributes: ['id'],
+          raw: true
+        });
+        const matchingCaseIds = matchingCases.map((c: any) => c.id);
+
+        // Get user IDs that match the search
+        const matchingUsers = await User.findAll({
+          where: {
+            [Op.or]: [
+              { name: { [Op.like]: `%${searchTerm}%` } },
+              { email: { [Op.like]: `%${searchTerm}%` } }
+            ]
+          },
+          attributes: ['id'],
+          raw: true
+        });
+        const matchingUserIds = matchingUsers.map((u: any) => u.id);
+
+        // Get case IDs for cases belonging to matching users
+        if (matchingUserIds.length > 0) {
+          const casesForMatchingUsers = await Case.findAll({
+            where: {
+              user_id: { [Op.in]: matchingUserIds }
+            },
+            attributes: ['id'],
+            raw: true
+          });
+          const caseIdsForMatchingUsers = casesForMatchingUsers.map((c: any) => c.id);
+          matchingCaseIds.push(...caseIdsForMatchingUsers);
+        }
+
+        // Combine all matching case IDs (remove duplicates)
+        const allMatchingCaseIds = [...new Set(matchingCaseIds)];
+
+        // Add case_id search condition if we have matches
+        if (allMatchingCaseIds.length > 0) {
+          noticeSearchConditions.push({ case_id: { [Op.in]: allMatchingCaseIds } });
+        }
+      } catch (searchError) {
+        console.error('Error in search subqueries:', searchError);
+        // If subquery fails, just search in notice fields
+      }
+
+      // Combine all search conditions
+      whereConditions[Op.or] = noticeSearchConditions;
+    }
+
+    // Build order clause
+    let orderClause: any;
+    if (sortBy === 'case_number') {
+      orderClause = [[{ model: Case, as: 'case' }, 'case_number', sortOrder.toUpperCase()]];
+    } else if (sortBy === 'user_name') {
+      orderClause = [[{ model: Case, as: 'case' }, { model: User, as: 'user' }, 'name', sortOrder.toUpperCase()]];
+    } else {
+      orderClause = [[sortBy, sortOrder.toUpperCase()]];
+    }
+
     const { count, rows: notices } = await Notice.findAndCountAll({
       where: whereConditions,
-      include: [
-        {
-          model: Case,
-          as: 'case',
-          include: [
-            {
-              model: User,
-              as: 'user',
-              attributes: ['id', 'name', 'email', 'phone', 'address']
-            }
-          ]
-        }
-      ],
-      order: [['created_at', 'DESC']],
+      include: includeConditions,
+      order: orderClause,
       limit,
-      offset
+      offset,
+      distinct: true // Important when using includes to avoid duplicate counts
     });
 
     return NextResponse.json({
@@ -138,7 +244,7 @@ export async function POST(request: NextRequest) {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'phone', 'address']
+          attributes: ['id', 'name', 'email', 'phone', 'address', 'user_type', 'company_name']
         }
       ]
     });
@@ -164,6 +270,7 @@ export async function POST(request: NextRequest) {
       date: noticeDateForPDF,
       caseNumber: caseData.case_number,
       caseTitle: caseData.title,
+      applicantCompanyName: caseData.user.user_type === 'corporate' ? caseData.user.company_name : undefined,
     });
 
     // Ensure S3 bucket exists

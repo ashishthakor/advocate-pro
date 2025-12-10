@@ -84,7 +84,7 @@ export default function AboutPage() {
     },
     {
       name: 'Naresh Kikani',
-      role: 'Co-founder & Business Advisor',
+      role: 'Business Advisor',
       experience: 'Co-founder',
       specialization: 'Business Advisor',
       image: '👨‍💼'

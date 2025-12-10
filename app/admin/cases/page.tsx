@@ -41,7 +41,9 @@ import {
   Message as MessageIcon,
   Edit as EditIcon,
   AttachFile as AttachFileIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
+import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
@@ -115,6 +117,15 @@ export default function CasesPage() {
     hasNextPage: false,
     hasPrevPage: false,
   });
+  const [statistics, setStatistics] = useState<{
+    total: number;
+    waiting_for_action: number;
+    neutrals_needs_to_be_assigned: number;
+    consented: number;
+    hold: number;
+    temporary_non_starter: number;
+    completed: number;
+  } | null>(null);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -160,6 +171,9 @@ export default function CasesPage() {
       if (response.success) {
         setCases(response.data.cases);
         setPagination(response.data.pagination);
+        if (response.data.statistics) {
+          setStatistics(response.data.statistics);
+        }
       } else {
         setError(response.message || 'Failed to fetch cases');
       }
@@ -275,7 +289,7 @@ export default function CasesPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
+      <Box gap={2} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -283,6 +297,14 @@ export default function CasesPage() {
           disabled={loading}
         >
           Refresh
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          href="/admin/cases/create"
+          startIcon={<AddIcon />}
+        >
+          Create Case
         </Button>
       </Box>
 
@@ -292,83 +314,108 @@ export default function CasesPage() {
         </Alert>
       )}
 
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                  <FolderIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {pagination.totalItems}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Total Cases
-                  </Typography>
-                </Box>
+      {/* Statistics Cards - Compact Layout */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold">
+                  {statistics?.total ?? pagination.totalItems}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Total
+                </Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
-                  <ScheduleIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {cases.filter(c => c.status === 'waiting_for_action').length}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Waiting For Action
-                  </Typography>
-                </Box>
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="info.main">
+                  {statistics?.waiting_for_action ?? cases.filter(c => c.status === 'waiting_for_action').length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Waiting
+                </Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
-                  <AssignmentIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {cases.filter(c => c.status === 'neutrals_needs_to_be_assigned').length}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Neutrals Needs Assignment
-                  </Typography>
-                </Box>
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="warning.main">
+                  {statistics?.neutrals_needs_to_be_assigned ?? cases.filter(c => c.status === 'neutrals_needs_to_be_assigned').length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Needs Assignment
+                </Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <MessageIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {cases.filter(c => ['settled', 'closed_no_consent', 'close_no_settlement', 'withdrawn'].includes(c.status)).length}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Completed Cases
-                  </Typography>
-                </Box>
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="success.main">
+                  {statistics?.consented ?? cases.filter(c => c.status === 'consented').length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Consented
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="success.dark">
+                  {statistics?.completed ?? cases.filter(c => ['settled', 'closed_no_consent', 'close_no_settlement', 'withdrawn'].includes(c.status)).length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Completed
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="warning.dark">
+                  {statistics?.hold ?? cases.filter(c => c.status === 'hold').length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  On Hold
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={3} md={1.71}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="text.secondary">
+                  {statistics?.temporary_non_starter ?? cases.filter(c => c.status === 'temporary_non_starter').length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Non Starter
+                </Typography>
               </Box>
             </CardContent>
           </Card>
