@@ -28,6 +28,10 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Folder as FolderIcon,
@@ -42,6 +46,8 @@ import {
   Edit as EditIcon,
   AttachFile as AttachFileIcon,
   Add as AddIcon,
+  CheckCircle as CheckCircleIcon,
+  AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
@@ -91,6 +97,8 @@ interface Case {
   user_email?: string;
   advocate_name?: string;
   advocate_email?: string;
+  payment_status?: string | null;
+  payment_amount?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -132,6 +140,7 @@ export default function CasesPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [caseTypeFilter, setCaseTypeFilter] = useState('');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -145,6 +154,13 @@ export default function CasesPage() {
   const [selectedCaseForDocuments, setSelectedCaseForDocuments] = useState<Case | null>(null);
   const [caseDocuments, setCaseDocuments] = useState<any[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [markingPayment, setMarkingPayment] = useState<number | null>(null);
+  const [editFeesModalOpen, setEditFeesModalOpen] = useState(false);
+  const [selectedCaseForFees, setSelectedCaseForFees] = useState<Case | null>(null);
+  const [customFees, setCustomFees] = useState<string>('');
+  const [updatingFees, setUpdatingFees] = useState(false);
+  const [markPaymentModalOpen, setMarkPaymentModalOpen] = useState(false);
+  const [selectedCaseForPayment, setSelectedCaseForPayment] = useState<Case | null>(null);
 
   // Debounced search term
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -165,6 +181,7 @@ export default function CasesPage() {
       if (statusFilter) params.append('status', statusFilter);
       if (priorityFilter) params.append('priority', priorityFilter);
       if (caseTypeFilter) params.append('case_type', caseTypeFilter);
+      if (paymentStatusFilter) params.append('payment_status', paymentStatusFilter);
 
       const response = await apiFetch(`/api/cases?${params.toString()}`);
       
@@ -186,7 +203,7 @@ export default function CasesPage() {
 
   useEffect(() => {
     fetchCases(1);
-  }, [debouncedSearchTerm, statusFilter, priorityFilter, caseTypeFilter, sortBy, sortOrder, itemsPerPage]);
+  }, [debouncedSearchTerm, statusFilter, priorityFilter, caseTypeFilter, paymentStatusFilter, sortBy, sortOrder, itemsPerPage]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     fetchCases(page);
@@ -206,6 +223,10 @@ export default function CasesPage() {
 
   const handleCaseTypeFilter = (value: string) => {
     setCaseTypeFilter(value);
+  };
+
+  const handlePaymentStatusFilter = (value: string) => {
+    setPaymentStatusFilter(value);
   };
 
   const handleSort = (field: string) => {
@@ -258,6 +279,118 @@ export default function CasesPage() {
   const handleStatusUpdated = () => {
     fetchCases(pagination.currentPage);
   };
+
+  // Handle edit fees for a case
+  const handleEditFees = (case_: Case) => {
+    // Prevent editing fees if payment is already completed
+    if (case_.payment_status === 'completed') {
+      setError('Cannot edit fees for cases with completed payments');
+      return;
+    }
+    
+    setSelectedCaseForFees(case_);
+    setCustomFees(case_.fees?.toString() || '');
+    setEditFeesModalOpen(true);
+  };
+
+  // Handle update fees
+  const handleUpdateFees = async () => {
+    if (!selectedCaseForFees) return;
+
+    // Prevent updating fees if payment is already completed
+    if (selectedCaseForFees.payment_status === 'completed') {
+      setError('Cannot edit fees for cases with completed payments');
+      setEditFeesModalOpen(false);
+      return;
+    }
+
+    // If empty or 0, use default ₹3000
+    let feesValue = parseFloat(customFees);
+    if (isNaN(feesValue) || feesValue <= 0) {
+      feesValue = 3000; // Default to ₹3000
+    }
+
+    setUpdatingFees(true);
+    try {
+      const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
+        `/api/cases/${selectedCaseForFees.id}`,
+        {
+          method: 'PUT',
+          json: {
+            fees: feesValue
+          }
+        }
+      );
+
+      if (res && (res as any).success) {
+        setEditFeesModalOpen(false);
+        setSelectedCaseForFees(null);
+        setCustomFees('');
+        await fetchCases(pagination.currentPage);
+      } else {
+        setError((res as any).message || 'Failed to update fees');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to update fees');
+    } finally {
+      setUpdatingFees(false);
+    }
+  };
+
+  // Handle close edit fees modal
+  const handleCloseEditFeesModal = () => {
+    setEditFeesModalOpen(false);
+    setSelectedCaseForFees(null);
+    setCustomFees('');
+  };
+
+  // Handle open mark payment modal
+  const handleOpenMarkPaymentModal = (case_: Case) => {
+    if (!case_ || case_.status !== 'pending_payment') return;
+    setSelectedCaseForPayment(case_);
+    setMarkPaymentModalOpen(true);
+  };
+
+  // Handle close mark payment modal
+  const handleCloseMarkPaymentModal = () => {
+    setMarkPaymentModalOpen(false);
+    setSelectedCaseForPayment(null);
+  };
+
+  // Handle mark payment as paid
+  const handleMarkPaymentPaid = async () => {
+    if (!selectedCaseForPayment || selectedCaseForPayment.status !== 'pending_payment') return;
+
+    // Use custom fees if set, otherwise default
+    const paymentAmount = selectedCaseForPayment.fees && selectedCaseForPayment.fees > 0 ? selectedCaseForPayment.fees : 3000;
+
+    setMarkingPayment(selectedCaseForPayment.id);
+    try {
+      const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
+        '/api/payments/mark-paid',
+        {
+          method: 'POST',
+          json: {
+            case_id: selectedCaseForPayment.id,
+            amount: paymentAmount,
+            notes: 'Manually marked as paid by admin'
+          }
+        }
+      );
+
+      if (res && (res as any).success) {
+        setMarkPaymentModalOpen(false);
+        setSelectedCaseForPayment(null);
+        await fetchCases(pagination.currentPage);
+      } else {
+        setError((res as any).message || 'Failed to mark payment as paid');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to mark payment as paid');
+    } finally {
+      setMarkingPayment(null);
+    }
+  };
   
   const getStatusChip = (status: string) => {
     const config = getStatusConfig(status);
@@ -283,6 +416,37 @@ export default function CasesPage() {
         color={colors[priority as keyof typeof colors] || 'default'}
         size="small"
         variant="outlined"
+      />
+    );
+  };
+
+  const getPaymentStatusChip = (paymentStatus: string | null | undefined) => {
+    if (!paymentStatus) {
+      return (
+        <Chip
+          label="No Payment"
+          color="default"
+          size="small"
+          variant="outlined"
+        />
+      );
+    }
+
+    const statusConfig: Record<string, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
+      completed: { label: 'Paid', color: 'success' },
+      pending: { label: 'Pending', color: 'warning' },
+      failed: { label: 'Failed', color: 'error' },
+      refunded: { label: 'Refunded', color: 'default' }
+    };
+
+    const config = statusConfig[paymentStatus] || { label: paymentStatus, color: 'default' as const };
+
+    return (
+      <Chip
+        label={config.label}
+        color={config.color}
+        size="small"
+        variant={paymentStatus === 'completed' ? 'filled' : 'outlined'}
       />
     );
   };
@@ -476,7 +640,23 @@ export default function CasesPage() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Payment Status</InputLabel>
+                <Select
+                  value={paymentStatusFilter}
+                  label="Payment Status"
+                  onChange={(e) => handlePaymentStatusFilter(e.target.value)}
+                >
+                  <MenuItem value="">All Payments</MenuItem>
+                  <MenuItem value="completed">Paid</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="failed">Failed</MenuItem>
+                  <MenuItem value="refunded">Refunded</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
               <FormControl fullWidth>
                 <InputLabel>Items per page</InputLabel>
                 <Select
@@ -528,19 +708,20 @@ export default function CasesPage() {
                   >
                     Created {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
+                  <TableCell>Payment Status</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : cases.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         No cases found
                       </Typography>
@@ -604,7 +785,31 @@ export default function CasesPage() {
                         </Typography>
                       </TableCell>
                       <TableCell>
+                        {getPaymentStatusChip(case_.payment_status)}
+                        {case_.payment_amount && (
+                          <Typography variant="caption" color="text.secondary" display="block">
+                            ₹{parseFloat(case_.payment_amount.toString()).toFixed(2)}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          {case_.status === 'pending_payment' && (
+                            <Tooltip title="Mark Payment as Paid">
+                              <IconButton 
+                                size="small" 
+                                color="success"
+                                onClick={() => handleOpenMarkPaymentModal(case_)}
+                                disabled={markingPayment === case_.id}
+                              >
+                                {markingPayment === case_.id ? (
+                                  <CircularProgress size={20} />
+                                ) : (
+                                  <CheckCircleIcon />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <Tooltip title="View Details">
                             <IconButton size="small" onClick={() => handleViewCase(case_)}>
                               <VisibilityIcon />
@@ -619,6 +824,18 @@ export default function CasesPage() {
                               <AttachFileIcon />
                             </IconButton>
                           </Tooltip>
+                          {/* Only show edit fees button if payment is not completed */}
+                          {case_.payment_status !== 'completed' && (
+                            <Tooltip title="Edit Registration Fees">
+                              <IconButton 
+                                size="small" 
+                                color="warning"
+                                onClick={() => handleEditFees(case_)}
+                              >
+                                <AttachMoneyIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <Tooltip title="Update Status">
                             <IconButton 
                               size="small" 
@@ -628,15 +845,17 @@ export default function CasesPage() {
                               <EditIcon />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Chat">
-                            <IconButton 
-                              size="small" 
-                              color="primary"
-                              onClick={() => router.push(`/admin/chat/${case_.id}`)}
-                            >
-                              <MessageIcon />
-                            </IconButton>
-                          </Tooltip>
+                          {case_.status !== 'pending_payment' && (
+                            <Tooltip title="Chat">
+                              <IconButton 
+                                size="small" 
+                                color="primary"
+                                onClick={() => router.push(`/admin/chat/${case_.id}`)}
+                              >
+                                <MessageIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -682,6 +901,7 @@ export default function CasesPage() {
           currentPriority={selectedCase.priority}
           caseTitle={selectedCase.title}
           onStatusUpdated={handleStatusUpdated}
+          paymentStatus={selectedCase.payment_status}
         />
       )}
 
@@ -704,6 +924,114 @@ export default function CasesPage() {
           loading={loadingDocuments}
         />
       )}
+
+      {/* Edit Fees Modal */}
+      <Dialog open={editFeesModalOpen} onClose={handleCloseEditFeesModal} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Edit Registration Fees
+          {selectedCaseForFees && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Case: {selectedCaseForFees.title} (#{selectedCaseForFees.case_number || selectedCaseForFees.id})
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Registration Fees (₹)"
+              type="number"
+              value={customFees}
+              onChange={(e) => setCustomFees(e.target.value)}
+              InputProps={{
+                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+              }}
+              helperText="Set custom registration fees for this case. Default is ₹3000 if not set."
+              inputProps={{
+                min: 0,
+                step: 0.01
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Default fee: ₹3000. User will see this amount when making payment. Cannot edit fees for cases with completed payments.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseEditFeesModal} disabled={updatingFees}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleUpdateFees} 
+            variant="contained" 
+            disabled={updatingFees}
+            startIcon={updatingFees ? <CircularProgress size={20} /> : null}
+          >
+            {updatingFees ? 'Updating...' : 'Update Fees'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Mark Payment as Paid Modal */}
+      <Dialog open={markPaymentModalOpen} onClose={handleCloseMarkPaymentModal} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Mark Payment as Paid
+          {selectedCaseForPayment && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Case: {selectedCaseForPayment.title} (#{selectedCaseForPayment.case_number || selectedCaseForPayment.id})
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            {selectedCaseForPayment && (
+              <>
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  This action will mark the payment as paid and update the case status to "Waiting For Action".
+                </Alert>
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Payment Amount:
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'success.main' }}>
+                    ₹{selectedCaseForPayment.fees && selectedCaseForPayment.fees > 0 
+                      ? parseFloat(selectedCaseForPayment.fees.toString()).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : '3,000.00'}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Case Details:
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Title:</strong> {selectedCaseForPayment.title}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Client:</strong> {selectedCaseForPayment.user_name || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Current Status:</strong> {selectedCaseForPayment.status}
+                  </Typography>
+                </Box>
+              </>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseMarkPaymentModal} disabled={markingPayment === selectedCaseForPayment?.id}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleMarkPaymentPaid} 
+            variant="contained" 
+            color="success"
+            disabled={markingPayment === selectedCaseForPayment?.id}
+            startIcon={markingPayment === selectedCaseForPayment?.id ? <CircularProgress size={20} /> : <CheckCircleIcon />}
+          >
+            {markingPayment === selectedCaseForPayment?.id ? 'Processing...' : 'Mark as Paid'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

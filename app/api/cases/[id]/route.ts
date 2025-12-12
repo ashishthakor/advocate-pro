@@ -143,6 +143,72 @@ export async function PUT(
       );
     }
 
+    // Prevent updating fees if payment is already completed
+    if (updateData.hasOwnProperty('fees')) {
+      const { Payment } = require('@/models/init-models');
+      const completedPayment = await Payment.findOne({
+        where: {
+          case_id: caseId,
+          status: 'completed'
+        }
+      });
+
+      if (completedPayment) {
+        return NextResponse.json(
+          { success: false, message: 'Cannot edit fees for cases with completed payments' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Prevent users from updating cases with pending_payment status
+    if (authResult.user.role === 'user' && existingCase.status === 'pending_payment') {
+      return NextResponse.json(
+        { success: false, message: 'Cannot update case until payment is completed' },
+        { status: 400 }
+      );
+    }
+
+    // Prevent admin from updating case status if payment is pending
+    if (authResult.user.role === 'admin' && updateData.hasOwnProperty('status')) {
+      const { Payment } = require('@/models/init-models');
+      const pendingPayment = await Payment.findOne({
+        where: {
+          case_id: caseId,
+          status: 'pending'
+        }
+      });
+
+      // Block status update if payment is pending
+      if (pendingPayment) {
+        return NextResponse.json(
+          { success: false, message: 'Cannot update case status. Payment is still pending. Please wait for payment completion or mark payment as paid.' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Prevent admin from updating status to pending_payment if payment is already completed
+    // Allow changing to pending_payment only if no completed payment exists
+    if (updateData.hasOwnProperty('status') && updateData.status === 'pending_payment') {
+      const { Payment } = require('@/models/init-models');
+      const completedPayment = await Payment.findOne({
+        where: {
+          case_id: caseId,
+          status: 'completed'
+        }
+      });
+
+      // Only block if payment is already completed
+      if (completedPayment) {
+        return NextResponse.json(
+          { success: false, message: 'Cannot change status to pending_payment. Payment has already been completed for this case.' },
+          { status: 400 }
+        );
+      }
+      // If no completed payment exists, allow the status change to pending_payment
+    }
+
     // Update case using Sequelize ORM
     const allowedFields = ['title', 'description', 'status', 'priority', 'court_name', 'judge_name', 'next_hearing_date', 'fees', 'fees_paid', 'advocate_id'];
     const updateData_filtered: any = {};

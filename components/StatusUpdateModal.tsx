@@ -15,6 +15,7 @@ import {
   Typography,
   Chip,
   CircularProgress,
+  Alert,
 } from '@mui/material';
 import { apiFetch } from '@/lib/api-client';
 import { CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
@@ -27,6 +28,7 @@ interface StatusUpdateModalProps {
   currentPriority: string;
   caseTitle: string;
   onStatusUpdated: () => void;
+  paymentStatus?: string | null;
 }
 
 export default function StatusUpdateModal({
@@ -37,6 +39,7 @@ export default function StatusUpdateModal({
   currentPriority,
   caseTitle,
   onStatusUpdated,
+  paymentStatus,
 }: StatusUpdateModalProps) {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [selectedPriority, setSelectedPriority] = useState(currentPriority);
@@ -55,6 +58,12 @@ export default function StatusUpdateModal({
   const handleStatusUpdate = async () => {
     if (selectedStatus === currentStatus && selectedPriority === currentPriority) {
       onClose();
+      return;
+    }
+
+    // Prevent status update if payment is pending
+    if (paymentStatus === 'pending') {
+      setError('Cannot update case status. Payment is still pending. Please wait for payment completion or mark payment as paid.');
       return;
     }
 
@@ -109,7 +118,7 @@ export default function StatusUpdateModal({
           <Typography variant="body2" color="text.secondary" gutterBottom>
             Case: {caseTitle}
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <Typography variant="body2">Current Status:</Typography>
             <Chip
               label={getStatusConfig(currentStatus).label}
@@ -117,6 +126,11 @@ export default function StatusUpdateModal({
               size="small"
             />
           </Box>
+          {paymentStatus === 'pending' && (
+            <Alert severity="warning" sx={{ mt: 1 }}>
+              Payment is pending. Status cannot be updated until payment is completed.
+            </Alert>
+          )}
         </Box>
 
         <FormControl fullWidth>
@@ -125,15 +139,26 @@ export default function StatusUpdateModal({
             value={selectedStatus}
             label="New Status"
             onChange={(e) => setSelectedStatus(e.target.value)}
+            disabled={paymentStatus === 'pending'}
           >
-            {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
-              <MenuItem key={value} value={value}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <span>{config.icon}</span>
-                  <span>{config.label}</span>
-                </Box>
-              </MenuItem>
-            ))}
+            {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => {
+              // Only disable pending_payment option if payment is already completed
+              // Allow changing to pending_payment if payment is not completed (null, undefined, 'pending', 'failed', etc.)
+              const isDisabled = value === 'pending_payment' && paymentStatus === 'completed';
+              return (
+                <MenuItem key={value} value={value} disabled={isDisabled}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <span>{config.icon}</span>
+                    <span>{config.label}</span>
+                    {isDisabled && (
+                      <Typography variant="caption" color="error" sx={{ ml: 'auto' }}>
+                        (Payment completed - cannot revert)
+                      </Typography>
+                    )}
+                  </Box>
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
 
@@ -164,7 +189,7 @@ export default function StatusUpdateModal({
         <Button
           onClick={handleStatusUpdate}
           variant="contained"
-          disabled={loading || (selectedStatus === currentStatus && selectedPriority === currentPriority)}
+          disabled={loading || (selectedStatus === currentStatus && selectedPriority === currentPriority) || paymentStatus === 'pending'}
         >
           {loading ? <CircularProgress size={20} /> : 'Update'}
         </Button>

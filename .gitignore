@@ -22,6 +22,8 @@
 # env files (can opt-in for committing if needed)
 .env*
 
+# Ecosystem config
+ecosystem.config.js
 
 # THEME
 /THEME
@@ -40,3 +42,4 @@
 setup.js
 /SINGLE_DEVELOPER_GUIDE.md
 /next.tar.gz
+/docs

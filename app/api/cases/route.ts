@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User } = require('@/models/init-models');
+const { Case, User, Payment, sequelize } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseCreated } from '@/lib/activity-logger';
-import { Op, col } from 'sequelize';
+import { Op, col, literal } from 'sequelize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     const priority = searchParams.get('priority');
     const search = searchParams.get('search');
     const assignment = searchParams.get('assignment'); // 'assigned' or 'unassigned'
+    const paymentStatus = searchParams.get('payment_status'); // 'completed', 'pending', 'failed'
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'DESC';
     const offset = (page - 1) * limit;
@@ -105,8 +106,38 @@ export async function GET(request: NextRequest) {
       includeConditions[0].required = true; // INNER JOIN to filter by user fields
     }
 
+    // Add payment status filter to where conditions if specified
+    if (paymentStatus) {
+      // Use subquery to filter cases by payment status
+      const paymentSubquery = literal(`(
+        SELECT status FROM payments 
+        WHERE payments.case_id = cases.id 
+        ORDER BY payments.created_at DESC 
+        LIMIT 1
+      ) = '${paymentStatus.replace(/'/g, "''")}'`);
+      if (!whereConditions[Op.and]) {
+        whereConditions[Op.and] = [];
+      }
+      whereConditions[Op.and].push(paymentSubquery);
+    }
+
     // Get cases with user and advocate information using Sequelize ORM
     // Use attributes with col to directly select joined columns as flat fields
+    // Use subquery to get latest payment status for each case
+    const paymentStatusSubquery = literal(`(
+      SELECT status FROM payments 
+      WHERE payments.case_id = cases.id 
+      ORDER BY payments.created_at DESC 
+      LIMIT 1
+    )`);
+    
+    const paymentAmountSubquery = literal(`(
+      SELECT amount FROM payments 
+      WHERE payments.case_id = cases.id 
+      ORDER BY payments.created_at DESC 
+      LIMIT 1
+    )`);
+
     const cases = await Case.findAll({
       where: whereConditions,
       attributes: {
@@ -119,7 +150,9 @@ export async function GET(request: NextRequest) {
           [col('user.company_name'), 'user_company_name'],
           [col('advocate.name'), 'advocate_name'],
           [col('advocate.email'), 'advocate_email'],
-          [col('advocate.phone'), 'advocate_phone']
+          [col('advocate.phone'), 'advocate_phone'],
+          [paymentStatusSubquery, 'payment_status'],
+          [paymentAmountSubquery, 'payment_amount']
         ]
       },
       include: includeConditions,
@@ -258,6 +291,9 @@ export async function GET(request: NextRequest) {
         advocate_name: caseData.advocate_name || null,
         advocate_email: caseData.advocate_email || null,
         advocate_phone: caseData.advocate_phone || null,
+        // Payment status fields (from subquery)
+        payment_status: caseData.payment_status || null,
+        payment_amount: caseData.payment_amount || null,
       };
     });
 
@@ -355,6 +391,12 @@ export async function POST(request: NextRequest) {
     // Generate case number
     const caseNumber = `CASE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
+    // Determine status: For regular users, create draft case pending payment
+    // For admins, create case directly (they can mark payment manually)
+    const caseStatus = (authResult.user.role === 'user') ? 'pending_payment' : 'waiting_for_action';
+    const caseFees = fees || (authResult.user.role === 'user' ? 3000.00 : 0.00);
+    const caseFeesPaid = fees_paid || (authResult.user.role === 'user' ? 0.00 : 0.00);
+
     // Create new case using Sequelize ORM
     const newCase = await Case.create({
       case_number: caseNumber,
@@ -362,13 +404,14 @@ export async function POST(request: NextRequest) {
       description,
       case_type: case_type || 'civil',
       priority: priority || 'medium',
+      status: caseStatus,
       user_id: (authResult.user.role === 'admin' && user_id) ? user_id : authResult.user.userId,
       advocate_id: (authResult.user.role === 'admin' && advocate_id) ? advocate_id : null,
       court_name: court_name || null,
       judge_name: judge_name || null,
       next_hearing_date: next_hearing_date || null,
-      fees: fees || 0.00,
-      fees_paid: fees_paid || 0.00,
+      fees: caseFees,
+      fees_paid: caseFeesPaid,
       start_date: start_date || null,
       end_date: end_date || null,
       requester_name: requester_name || null,
