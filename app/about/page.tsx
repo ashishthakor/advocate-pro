@@ -82,13 +82,13 @@ export default function AboutPage() {
       specialization: 'Chief Operating Officer',
       image: '👨‍💼'
     },
-    {
-      name: 'Naresh Kikani',
-      role: 'Business Advisor',
-      experience: 'Co-founder',
-      specialization: 'Business Advisor',
-      image: '👨‍💼'
-    }
+    // {
+    //   name: 'Naresh Kikani',
+    //   role: 'Business Advisor',
+    //   experience: 'Co-founder',
+    //   specialization: 'Business Advisor',
+    //   image: '👨‍💼'
+    // }
   ];
 
   const values = [

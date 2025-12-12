@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use custom fees from case if set, otherwise use provided amount or default
-    let paymentAmount = PAYMENT_CONSTANTS.CASE_REGISTRATION_FEE;
+    let paymentAmount: number = PAYMENT_CONSTANTS.CASE_REGISTRATION_FEE;
     if (case_.fees && parseFloat(case_.fees) > 0) {
       paymentAmount = parseFloat(case_.fees);
     } else if (amount && parseFloat(amount) > 0) {
