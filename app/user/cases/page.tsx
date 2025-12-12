@@ -28,7 +28,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { Search as SearchIcon, Refresh as RefreshIcon, Message as MessageIcon, Visibility as VisibilityIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Refresh as RefreshIcon, Message as MessageIcon, Visibility as VisibilityIcon, Payment as PaymentIcon } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import { useRouter } from 'next/navigation';
@@ -47,6 +47,8 @@ interface Case {
   advocate_id?: number;
   user_name?: string;
   advocate_name?: string;
+  payment_status?: string | null;
+  payment_amount?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,6 +79,8 @@ export default function UserCasesPage() {
   
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState<number | null>(null);
+  const [paymentError, setPaymentError] = useState('');
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -193,6 +197,132 @@ export default function UserCasesPage() {
     );
   };
 
+  // Load Razorpay script dynamically
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // Handle retry payment for pending payment cases
+  const handleRetryPayment = async (caseItem: Case) => {
+    if (!caseItem || caseItem.status !== 'pending_payment') return;
+
+    setProcessingPayment(caseItem.id);
+    setPaymentError('');
+
+    try {
+      // Create payment order for existing case
+      const paymentRes = await apiFetch<{ success: boolean; data: any; message?: string }>(
+        '/api/payments/create-order',
+        {
+          method: 'POST',
+          json: {
+            description: 'Case Registration Fee',
+            case_id: caseItem.id
+            // Amount will be determined by API based on case custom fees or default
+          }
+        }
+      );
+
+      if (!paymentRes || !(paymentRes as any).success || !(paymentRes as any).data) {
+        setPaymentError((paymentRes as any)?.message || 'Failed to create payment order');
+        setProcessingPayment(null);
+        return;
+      }
+
+      const paymentOrder = (paymentRes as any).data;
+
+      // Load Razorpay script
+      const razorpayLoaded = await loadRazorpayScript();
+      if (!razorpayLoaded) {
+        setPaymentError('Failed to load payment gateway. Please refresh the page.');
+        setProcessingPayment(null);
+        return;
+      }
+
+      // Initialize Razorpay checkout
+      const options = {
+        key: paymentOrder.key_id,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency,
+        name: 'Arbitalk',
+        description: paymentOrder.description,
+        order_id: paymentOrder.order_id,
+        handler: async (response: any) => {
+          try {
+            // Verify payment
+            const verifyRes = await apiFetch<{ success: boolean; data: any; message?: string }>(
+              '/api/payments/verify',
+              {
+                method: 'POST',
+                json: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                }
+              }
+            );
+
+            if (verifyRes && (verifyRes as any).success && (verifyRes as any).data) {
+              const updatedCase = (verifyRes as any).data.case;
+              
+              if (updatedCase && updatedCase.id) {
+                // Refresh cases list and redirect to chat
+                await fetchCases(pagination.currentPage);
+                router.push(`/user/chat/${updatedCase.id}`);
+              } else {
+                setPaymentError('Payment successful but case update failed. Please contact support.');
+                await fetchCases(pagination.currentPage);
+              }
+            } else {
+              setPaymentError((verifyRes as any)?.message || 'Payment verification failed. Please try again.');
+              await fetchCases(pagination.currentPage);
+            }
+          } catch (err: any) {
+            setPaymentError(err?.message || 'Failed to verify payment');
+            await fetchCases(pagination.currentPage);
+          } finally {
+            setProcessingPayment(null);
+          }
+        },
+        prefill: {
+          name: paymentOrder.name,
+          email: paymentOrder.email,
+          contact: paymentOrder.contact,
+        },
+        theme: {
+          color: '#1976d2',
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessingPayment(null);
+          }
+        }
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.on('payment.failed', (response: any) => {
+        setPaymentError('Payment failed. Please try again.');
+        setProcessingPayment(null);
+        fetchCases(pagination.currentPage);
+      });
+      razorpay.open();
+    } catch (err: any) {
+      setPaymentError(err?.message || 'Failed to process payment');
+      setProcessingPayment(null);
+    }
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 3 }}>
@@ -211,6 +341,11 @@ export default function UserCasesPage() {
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>
+      )}
+      {paymentError && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setPaymentError('')}>
+          {paymentError}
+        </Alert>
       )}
 
       {/* Filters */}
@@ -366,20 +501,38 @@ export default function UserCasesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
+                          {c.status === 'pending_payment' && (
+                            <Tooltip title="Complete Payment">
+                              <IconButton 
+                                size="small" 
+                                color="error"
+                                onClick={() => handleRetryPayment(c)}
+                                disabled={processingPayment === c.id}
+                              >
+                                {processingPayment === c.id ? (
+                                  <CircularProgress size={20} />
+                                ) : (
+                                  <PaymentIcon />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           <Tooltip title={t('cases.viewDetails')}>
                             <IconButton size="small" onClick={() => handleViewDetails(c)}>
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title={t('cases.chat')}>
-                            <IconButton 
-                              size="small" 
-                              color="primary"
-                              onClick={() => router.push(`/user/chat/${c.id}`)}
-                            >
-                              <MessageIcon />
-                            </IconButton>
-                          </Tooltip>
+                          {c.status !== 'pending_payment' && (
+                            <Tooltip title={t('cases.chat')}>
+                              <IconButton 
+                                size="small" 
+                                color="primary"
+                                onClick={() => router.push(`/user/chat/${c.id}`)}
+                              >
+                                <MessageIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>

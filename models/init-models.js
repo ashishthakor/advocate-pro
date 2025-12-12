@@ -6,6 +6,7 @@ const ChatMessage = require("./ChatMessage")(sequelize, DataTypes);
 const Document = require("./Document")(sequelize, DataTypes);
 const Notice = require("./Notice")(sequelize, DataTypes);
 const RecentActivity = require("./RecentActivity")(sequelize, DataTypes);
+const Payment = require("./Payment")(sequelize, DataTypes);
 
 // Define associations
 
@@ -41,11 +42,19 @@ Notice.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
 User.hasMany(RecentActivity, { as: 'activities', foreignKey: 'user_id' });
 RecentActivity.belongsTo(User, { as: 'user', foreignKey: 'user_id' });
 
+// Payment Relations
+User.hasMany(Payment, { as: 'payments', foreignKey: 'user_id' });
+Payment.belongsTo(User, { as: 'user', foreignKey: 'user_id' });
+
+Case.hasMany(Payment, { as: 'payments', foreignKey: 'case_id' });
+Payment.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
+
 module.exports = {
   User,
   Case,
   ChatMessage,
   Document,
   Notice,
-  RecentActivity
+  RecentActivity,
+  Payment
 };

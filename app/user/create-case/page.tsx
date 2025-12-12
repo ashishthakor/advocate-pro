@@ -253,17 +253,30 @@ export default function CreateCasePage() {
     return uploaded;
   };
 
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentOrder, setPaymentOrder] = useState<any>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [draftCaseId, setDraftCaseId] = useState<number | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!isRequiredFilled) {
+      setError('Please fill all required fields');
+      return;
+    }
+
+    // Create draft case first
     setSubmitting(true);
     try {
-      // First create the case
       const payload: any = {
         ...form,
         sought_other: form.sought_other ? form.sought_other_text : '',
-        attachments_json: null, // We'll upload files after case creation
+        attachments_json: null, // We'll upload files after payment
       };
+      
+      // Create draft case (will be in pending_payment status)
       const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
         '/api/cases',
         { method: 'POST', json: payload }
@@ -272,22 +285,197 @@ export default function CreateCasePage() {
       if (res && (res as any).success && (res as any).data) {
         const created = (res as any).data;
         if (created.id) {
-          // Upload documents after case is created
+          setDraftCaseId(created.id);
+          
+          // Upload documents to draft case
           if (files.length > 0) {
             await uploadAttachments(created.id);
           }
-          setSuccessOpen(true);
-          setTimeout(() => router.push(`/user/chat/${created.id}`), 600);
-          return;
+          
+          // Now create payment order for this draft case
+          const paymentRes = await apiFetch<{ success: boolean; data: any; message?: string }>(
+            '/api/payments/create-order',
+            { 
+              method: 'POST', 
+              json: {
+                description: 'Case Registration Fee', // Using literal here as it's user-facing
+                case_id: created.id
+                // Amount will be determined by API based on case custom fees or default
+              }
+            }
+          );
+
+          if (paymentRes && (paymentRes as any).success && (paymentRes as any).data) {
+            setPaymentOrder((paymentRes as any).data);
+            setShowPayment(true);
+          } else {
+            setError((paymentRes as any).message || 'Failed to create payment order');
+          }
         }
+      } else {
+        setError((res as any).message || t('createCase.failedToCreate'));
       }
-      setError((res as any).message || t('createCase.failedToCreate'));
     } catch (err: any) {
       setError(err?.message || t('createCase.failedToCreate'));
     } finally {
       setSubmitting(false);
     }
   };
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async () => {
+    if (!paymentOrder || !draftCaseId) return;
+
+    setProcessingPayment(true);
+    setError('');
+
+    try {
+      const razorpayLoaded = await loadRazorpayScript();
+      if (!razorpayLoaded) {
+        setError('Failed to load payment gateway. Please refresh the page.');
+        setProcessingPayment(false);
+        return;
+      }
+
+      const options = {
+        key: paymentOrder.key_id,
+        amount: paymentOrder.amount,
+        currency: paymentOrder.currency,
+        name: 'Arbitalk',
+        description: paymentOrder.description,
+        order_id: paymentOrder.order_id,
+        handler: async (response: any) => {
+          try {
+            // Verify payment
+            const verifyRes = await apiFetch<{ success: boolean; data: any; message?: string }>(
+              '/api/payments/verify',
+              {
+                method: 'POST',
+                json: {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature
+                }
+              }
+            );
+
+            if (verifyRes && (verifyRes as any).success && (verifyRes as any).data) {
+              const updatedCase = (verifyRes as any).data.case;
+              
+              if (updatedCase && updatedCase.id) {
+                setSuccessOpen(true);
+                setTimeout(() => router.push(`/user/chat/${updatedCase.id}`), 600);
+              } else {
+                setError('Payment successful but case update failed. Please contact support.');
+                // Case remains in pending_payment status, user can retry from cases list
+              }
+            } else {
+              setError((verifyRes as any).message || 'Payment verification failed. Your case is saved and you can retry payment from your cases list.');
+              // Case remains in pending_payment status, user can retry
+            }
+          } catch (err: any) {
+            setError(err?.message || 'Failed to verify payment');
+          } finally {
+            setProcessingPayment(false);
+          }
+        },
+        prefill: {
+          name: paymentOrder.name,
+          email: paymentOrder.email,
+          contact: paymentOrder.contact,
+        },
+        theme: {
+          color: '#1976d2',
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessingPayment(false);
+            // Keep payment screen open so user can retry
+          }
+        }
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to process payment');
+      setProcessingPayment(false);
+    }
+  };
+
+  if (showPayment && paymentOrder) {
+    return (
+      <Box>
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <IconButton onClick={() => setShowPayment(false)} size="small"><ArrowBackIcon /></IconButton>
+          <Typography variant="h5">Payment - Case Registration</Typography>
+        </Stack>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+        <Card sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Complete Your Payment
+            </Typography>
+            <Divider sx={{ mb: 3 }} />
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body1" color="text.secondary" gutterBottom>
+                Case Registration Fee
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
+                ₹{paymentOrder.amount ? (paymentOrder.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please complete the payment to proceed with case registration.
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="contained"
+                fullWidth
+                size="large"
+                onClick={handlePayment}
+                disabled={processingPayment}
+                startIcon={processingPayment ? <CircularProgress size={20} /> : undefined}
+              >
+                {processingPayment ? 'Processing...' : `Pay ₹${paymentOrder.amount ? (paymentOrder.amount / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'}`}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setShowPayment(false);
+                  router.push('/user/cases');
+                }}
+                disabled={processingPayment}
+              >
+                Pay Later
+              </Button>
+            </Stack>
+            <Alert severity="info" sx={{ mt: 2 }}>
+              Your case has been saved as draft. You can complete the payment later from your cases list.
+            </Alert>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
 
   return (
     <Box>
