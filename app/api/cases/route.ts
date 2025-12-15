@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     const paymentStatus = searchParams.get('payment_status'); // 'completed', 'pending', 'failed'
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'DESC';
+    const from = searchParams.get('from');
     const offset = (page - 1) * limit;
 
     // Validate pagination parameters
@@ -76,6 +77,15 @@ export async function GET(request: NextRequest) {
         { description: { [Op.like]: `%${search}%` } },
         { case_number: { [Op.like]: `%${search}%` } }
       ];
+    }
+
+    // For user role, by default exclude cases in pending_payment status
+    // (so update modules/lists don't show unpaid drafts)
+    if (from === 'updates') {
+      if (!whereConditions[Op.and]) {
+        whereConditions[Op.and] = [];
+      }
+      whereConditions[Op.and].push({ status: { [Op.ne]: 'pending_payment' } });
     }
 
     // For advocate role with search, also search in user/client fields
