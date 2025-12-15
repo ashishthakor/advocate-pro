@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
                 User Login
               </Link>
               <Link href="/auth/advocate-login" color="inherit" underline="hover">
-                Advocate Login
+                Neutral Login
               </Link>
               <Link href="/auth/admin-login" color="inherit" underline="hover">
                 Admin Login
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
                 User Registration
               </Link>
               <Link href="/auth/advocate-register" color="inherit" underline="hover">
-                Advocate Registration
+                Neutral Registration
               </Link>
             </Box>
           </Grid>
