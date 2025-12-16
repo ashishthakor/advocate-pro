@@ -128,6 +128,13 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
     }
   };
 
+  const getUserTypeLabel = () => {
+    if (userType === 'advocate') {
+      return 'Neutral';
+    }
+    return userType.charAt(0).toUpperCase() + userType.slice(1);
+  };
+
   const drawer = (
     <div>
       <Toolbar sx={{ px: 2 }}>
@@ -135,7 +142,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           <Avatar sx={{ width: 32, height: 32 }}>A</Avatar>
           <Box>
             <Typography variant="subtitle1" fontWeight={700} lineHeight={1.1}>
-              {userType.charAt(0).toUpperCase() + userType.slice(1)}
+              {getUserTypeLabel()}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {t('common.panel')}
@@ -222,7 +229,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           </IconButton>
           <Box sx={{ flexGrow: 1 }}>
             <Typography variant="h6" noWrap component="div">
-              {title || `${userType.charAt(0).toUpperCase() + userType.slice(1)} Dashboard`}
+              {title || `${getUserTypeLabel()} Dashboard`}
             </Typography>
             {subtitle && (
               <Typography variant="subtitle2" noWrap component="div">

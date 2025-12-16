@@ -689,7 +689,7 @@ export default function CasesPage() {
                     Case {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell>Client</TableCell>
-                  <TableCell>Advocate</TableCell>
+                  <TableCell>Neutral</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('status')}
@@ -723,7 +723,7 @@ export default function CasesPage() {
                   <TableRow>
                     <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No cases found
+                        No Cases found
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -882,7 +882,7 @@ export default function CasesPage() {
           {/* Pagination Info */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} cases
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} Cases
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Page {pagination.currentPage} of {pagination.totalPages}

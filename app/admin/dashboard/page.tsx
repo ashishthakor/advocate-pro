@@ -399,7 +399,7 @@ export default function AdminDashboard() {
                 href="/admin/advocates"
                 fullWidth
               >
-                Manage Advocates
+                Manage Neutrals
               </Button>
             </Box>
           </Paper>

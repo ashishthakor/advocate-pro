@@ -74,7 +74,7 @@ export default function UserChatPage() {
 
   const fetchCases = async () => {
     try {
-      const response = await fetch('/api/cases', {
+      const response = await fetch('/api/cases?from=updates', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -166,7 +166,7 @@ export default function UserChatPage() {
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
+          <Grid container spacing={2} alignItems="center" justifyContent={'space-between'}>
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
@@ -182,7 +182,7 @@ export default function UserChatPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            {/* <Grid item xs={12} md={3}>
               <TextField
                 fullWidth
                 select
@@ -199,7 +199,7 @@ export default function UserChatPage() {
                 <option value="on_hold">{t('chat.onHold')}</option>
                 <option value="closed">{t('chat.closed')}</option>
               </TextField>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} md={3}>
               <Button
                 variant="contained"

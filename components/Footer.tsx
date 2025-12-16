@@ -67,7 +67,7 @@ export const Footer: React.FC = () => {
                 User Login
               </Link>
               <Link href="/auth/advocate-login" color="inherit" underline="hover">
-                Advocate Login
+                Neutral Login
               </Link>
               <Link href="/auth/admin-login" color="inherit" underline="hover">
                 Admin Login
@@ -76,7 +76,7 @@ export const Footer: React.FC = () => {
                 User Registration
               </Link>
               <Link href="/auth/advocate-register" color="inherit" underline="hover">
-                Advocate Registration
+                Neutral Registration
               </Link>
             </Box>
           </Grid>
@@ -139,15 +139,18 @@ export const Footer: React.FC = () => {
           <Typography variant="body2" color="grey.400">
             © 2024 LegalCase Pro. All rights reserved.
           </Typography>
-          <Box sx={{ display: 'flex', gap: 3 }}>
-            <Link href="/privacy" color="inherit" underline="hover" variant="body2">
+          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+            <Link href="/privacy-policy" color="inherit" underline="hover" variant="body2">
               Privacy Policy
             </Link>
-            <Link href="/terms" color="inherit" underline="hover" variant="body2">
-              Terms of Service
+            <Link href="/terms-conditions" color="inherit" underline="hover" variant="body2">
+              Terms & Conditions
             </Link>
-            <Link href="/cookies" color="inherit" underline="hover" variant="body2">
-              Cookie Policy
+            <Link href="/fees" color="inherit" underline="hover" variant="body2">
+              Fees
+            </Link>
+            <Link href="/contact" color="inherit" underline="hover" variant="body2">
+              Contact Us
             </Link>
           </Box>
         </Box>

@@ -171,7 +171,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               User Login
             </Button>
             <Button color="secondary" onClick={() => router.push('/auth/advocate-login')}>
-              Advocate Login
+              Neutral Login
             </Button>
             <Button color="error" onClick={() => router.push('/auth/admin-login')}>
               Admin Login

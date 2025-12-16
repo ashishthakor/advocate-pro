@@ -215,7 +215,7 @@ export default function UserLoginPage() {
                   size="small"
                   color="secondary"
                 >
-                  Advocate Login
+                  Neutral Login
                 </Button>
                 <Button
                   component={Link}

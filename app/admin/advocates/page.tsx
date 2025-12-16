@@ -304,7 +304,7 @@ export default function AdvocatesPage() {
           href="/admin/advocates/create"
           startIcon={<AddIcon />}
         >
-          Create Advocate
+          Create Neutral
         </Button>
       </Box>
 
@@ -328,7 +328,7 @@ export default function AdvocatesPage() {
                     {pagination.totalItems}
                   </Typography>
                   <Typography color="text.secondary">
-                    Total Advocates
+                    Total Neutrals
                   </Typography>
                 </Box>
               </Box>
@@ -384,7 +384,7 @@ export default function AdvocatesPage() {
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search advocates..."
+                placeholder="Search Neutrals..."
                 value={searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 InputProps={{
@@ -440,7 +440,7 @@ export default function AdvocatesPage() {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('name')}
                   >
-                    Advocate {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    Neutral {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell>Contact</TableCell>
                   <TableCell 
@@ -475,7 +475,7 @@ export default function AdvocatesPage() {
                   <TableRow>
                     <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
-                        No advocates found
+                        No Neutrals found
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -589,7 +589,7 @@ export default function AdvocatesPage() {
           {/* Pagination Info */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} advocates
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} Neutrals
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Page {pagination.currentPage} of {pagination.totalPages}
@@ -606,7 +606,7 @@ export default function AdvocatesPage() {
         fullWidth
       >
         <DialogTitle>
-          Advocate Details - {selectedAdvocate?.name}
+          Neutral Details - {selectedAdvocate?.name}
         </DialogTitle>
         <DialogContent>
           {selectedAdvocate && (
@@ -726,7 +726,7 @@ export default function AdvocatesPage() {
         </DialogTitle>
         <DialogContent>
           <Typography variant="body1">
-            Are you sure you want to {confirmationAction.type === 'approve' ? 'approve' : 'decline'} advocate <strong>{confirmationAction.advocate?.name}</strong>?
+            Are you sure you want to {confirmationAction.type === 'approve' ? 'approve' : 'decline'} Neutral <strong>{confirmationAction.advocate?.name}</strong>?
           </Typography>
         </DialogContent>
         <DialogActions>
