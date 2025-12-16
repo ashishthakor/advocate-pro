@@ -57,12 +57,16 @@ interface CreateCaseForm {
   requester_email: string;
   requester_phone: string;
   requester_address: string;
+  requester_business_name: string;
+  requester_gst_number: string;
 
   // Respondent
   respondent_name: string;
   respondent_phone: string;
   respondent_email: string;
   respondent_address: string;
+  respondent_business_name: string;
+  respondent_gst_number: string;
 
   // Dispute details
   relationship_between_parties: 'Client' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
@@ -114,11 +118,15 @@ export default function CreateCasePage() {
     requester_email: '',
     requester_phone: '',
     requester_address: '',
+    requester_business_name: '',
+    requester_gst_number: '',
 
     respondent_name: '',
     respondent_phone: '',
     respondent_email: '',
     respondent_address: '',
+    respondent_business_name: '',
+    respondent_gst_number: '',
 
     relationship_between_parties: '',
     nature_of_dispute: '',
@@ -567,6 +575,22 @@ export default function CreateCasePage() {
                   onChange={handleChange('requester_address')}
                 />
               </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label={t('createCase.businessName')}
+                  fullWidth
+                  value={form.requester_business_name}
+                  onChange={handleChange('requester_business_name')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label={t('createCase.gstNumber')}
+                  fullWidth
+                  value={form.requester_gst_number}
+                  onChange={handleChange('requester_gst_number')}
+                />
+              </Grid>
             </Grid>
           </CardContent>
         </Card>
@@ -607,6 +631,22 @@ export default function CreateCasePage() {
                   fullWidth
                   value={form.respondent_address}
                   onChange={handleChange('respondent_address')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label={t('createCase.businessName')}
+                  fullWidth
+                  value={form.respondent_business_name}
+                  onChange={handleChange('respondent_business_name')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label={t('createCase.gstNumber')}
+                  fullWidth
+                  value={form.respondent_gst_number}
+                  onChange={handleChange('respondent_gst_number')}
                 />
               </Grid>
             </Grid>
