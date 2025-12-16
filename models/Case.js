@@ -109,6 +109,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    requester_business_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    requester_gst_number: {
+      type: DataTypes.STRING(50),
+      allowNull: true
+    },
     respondent_name: {
       type: DataTypes.STRING(255),
       allowNull: true
@@ -123,6 +131,14 @@ module.exports = function(sequelize, DataTypes) {
     },
     respondent_address: {
       type: DataTypes.TEXT,
+      allowNull: true
+    },
+    respondent_business_name: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    respondent_gst_number: {
+      type: DataTypes.STRING(50),
       allowNull: true
     },
     relationship_between_parties: {

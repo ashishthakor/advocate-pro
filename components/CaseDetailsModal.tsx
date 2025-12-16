@@ -50,10 +50,14 @@ interface CaseDetails {
   requester_email?: string;
   requester_phone?: string;
   requester_address?: string;
+  requester_business_name?: string;
+  requester_gst_number?: string;
   respondent_name?: string;
   respondent_email?: string;
   respondent_phone?: string;
   respondent_address?: string;
+  respondent_business_name?: string;
+  respondent_gst_number?: string;
   relationship_between_parties?: string;
   nature_of_dispute?: string;
   brief_description_of_dispute?: string;
@@ -506,6 +510,26 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                   color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
                 }}>{caseDetails.requester_address || '-'}</Typography>
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>{t('caseDetails.businessName')}</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                }}>{caseDetails.requester_business_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>{t('caseDetails.gstNumber')}</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                }}>{caseDetails.requester_gst_number || '-'}</Typography>
+              </Grid>
             </Grid>
           </Box>
 
@@ -558,6 +582,26 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 <Typography variant="body1" sx={{ 
                   color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
                 }}>{caseDetails.respondent_address || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>{t('caseDetails.businessName')}</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                }}>{caseDetails.respondent_business_name || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>{t('caseDetails.gstNumber')}</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                }}>{caseDetails.respondent_gst_number || '-'}</Typography>
               </Grid>
             </Grid>
           </Box>

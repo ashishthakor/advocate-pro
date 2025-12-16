@@ -78,10 +78,14 @@ interface Case {
   requester_email?: string;
   requester_phone?: string;
   requester_address?: string;
+  requester_business_name?: string;
+  requester_gst_number?: string;
   respondent_name?: string;
   respondent_email?: string;
   respondent_phone?: string;
   respondent_address?: string;
+  respondent_business_name?: string;
+  respondent_gst_number?: string;
   relationship_between_parties?: string;
   nature_of_dispute?: string;
   brief_description_of_dispute?: string;
