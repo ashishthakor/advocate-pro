@@ -37,6 +37,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { RadioGroup, FormControlLabel, Radio, FormGroup, Checkbox, InputLabel } from '@mui/material';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useAuth } from '@/components/AuthProvider';
 
 interface CreateCaseForm {
   // Case basic info
@@ -100,6 +101,7 @@ const NATURE_OF_DISPUTE_OPTIONS = [
 export default function CreateCasePage() {
   const router = useRouter();
   const { t } = useLanguage();
+  const { user } = useAuth();
   const MAX_FILES = 5;
   const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
   const [form, setForm] = useState<CreateCaseForm>({
@@ -151,6 +153,42 @@ export default function CreateCasePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const dropZoneRef = React.useRef<HTMLDivElement>(null);
+  const [userProfileLoaded, setUserProfileLoaded] = useState(false);
+
+  // Fetch user profile and prefill requester details
+  React.useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (userProfileLoaded) return; // Only fetch once
+      
+      try {
+        const response = await apiFetch<{ success: boolean; data: any }>('/api/users/profile');
+        if (response && response.success && response.data) {
+          const profileData = response.data;
+          setForm((prev) => ({
+            ...prev,
+            requester_name: profileData.name || prev.requester_name,
+            requester_email: profileData.email || prev.requester_email,
+            requester_phone: profileData.phone || prev.requester_phone,
+            requester_address: profileData.address || prev.requester_address,
+            requester_business_name: profileData.company_name || prev.requester_business_name,
+          }));
+          setUserProfileLoaded(true);
+        }
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+        // If API fails, try to use data from localStorage/auth context
+        if (user) {
+          setForm((prev) => ({
+            ...prev,
+            requester_name: user.name || prev.requester_name,
+            requester_email: user.email || prev.requester_email,
+          }));
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [userProfileLoaded, user]);
 
   const isEmail = (v: string) => /.+@.+\..+/.test(v);
   const isRequiredFilled = (
