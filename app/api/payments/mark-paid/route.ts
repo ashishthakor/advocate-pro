@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { case_id, amount, notes } = body;
+    const { case_id, amount, notes, transaction_id } = body;
 
     if (!case_id) {
       return NextResponse.json(
@@ -70,7 +70,9 @@ export async function POST(request: NextRequest) {
       status: PAYMENT_CONSTANTS.STATUS.COMPLETED,
       payment_method: PAYMENT_CONSTANTS.METHOD.MANUAL,
       payment_description: PAYMENT_CONSTANTS.DESCRIPTIONS.CASE_REGISTRATION_MANUAL,
-      metadata: notes ? JSON.stringify({ notes, marked_by: authResult.user.userId, marked_at: new Date().toISOString() }) : null
+      transaction_id: transaction_id || null,
+      marked_by: authResult.user.userId,
+      metadata: notes ? JSON.stringify({ notes, marked_at: new Date().toISOString() }) : null
     });
 
     // Update case status and fees

@@ -148,6 +148,25 @@ export async function GET(request: NextRequest) {
       LIMIT 1
     )`);
 
+    // Get transaction_id from latest completed payment
+    const transactionIdSubquery = literal(`(
+      SELECT transaction_id FROM payments 
+      WHERE payments.case_id = cases.id 
+      AND payments.status = 'completed'
+      ORDER BY payments.created_at DESC 
+      LIMIT 1
+    )`);
+
+    // Get marked_by_name from latest completed payment (join with users table)
+    const markedByNameSubquery = literal(`(
+      SELECT u.name FROM payments p
+      INNER JOIN users u ON p.marked_by = u.id
+      WHERE p.case_id = cases.id 
+      AND p.status = 'completed'
+      ORDER BY p.created_at DESC 
+      LIMIT 1
+    )`);
+
     const cases = await Case.findAll({
       where: whereConditions,
       attributes: {
@@ -162,7 +181,9 @@ export async function GET(request: NextRequest) {
           [col('advocate.email'), 'advocate_email'],
           [col('advocate.phone'), 'advocate_phone'],
           [paymentStatusSubquery, 'payment_status'],
-          [paymentAmountSubquery, 'payment_amount']
+          [paymentAmountSubquery, 'payment_amount'],
+          [transactionIdSubquery, 'transaction_id'],
+          [markedByNameSubquery, 'marked_by_name']
         ]
       },
       include: includeConditions,
@@ -304,6 +325,9 @@ export async function GET(request: NextRequest) {
         // Payment status fields (from subquery)
         payment_status: caseData.payment_status || null,
         payment_amount: caseData.payment_amount || null,
+        // Payment transaction and marked by fields (from subquery)
+        transaction_id: caseData.transaction_id || null,
+        marked_by_name: caseData.marked_by_name || null,
       };
     });
 

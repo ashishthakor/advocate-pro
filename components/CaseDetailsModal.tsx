@@ -73,6 +73,8 @@ interface CaseDetails {
   user_email?: string;
   advocate_name?: string;
   advocate_email?: string;
+  transaction_id?: string | null;
+  marked_by_name?: string | null;
 }
 
 interface CaseDetailsModalProps {
@@ -418,7 +420,30 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                  fontWeight: 'bold',
                }}>₹{caseDetails.fees_paid || 0}</Typography>
              </Grid>
-             <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>Transaction ID</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                  fontWeight: 600,
+                  fontFamily: 'monospace',
+                }}>{caseDetails.transaction_id || "-"}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="body2" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                  fontWeight: 500,
+                  mb: 0.5,
+                }}>Marked as Paid By</Typography>
+                <Typography variant="body1" sx={{ 
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+                  fontWeight: 600,
+                }}>{caseDetails.marked_by_name || "-"}</Typography>
+              </Grid>
+             {/* <Grid item xs={12} sm={6}>
                <Typography variant="body2" sx={{ 
                  color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
                  fontWeight: 500,
@@ -432,7 +457,7 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                }}>
                  ₹{(caseDetails.fees || 0) - (caseDetails.fees_paid || 0)}
                </Typography>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Paper>
 

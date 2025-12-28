@@ -165,6 +165,7 @@ export default function CasesPage() {
   const [updatingFees, setUpdatingFees] = useState(false);
   const [markPaymentModalOpen, setMarkPaymentModalOpen] = useState(false);
   const [selectedCaseForPayment, setSelectedCaseForPayment] = useState<Case | null>(null);
+  const [transactionId, setTransactionId] = useState('');
 
   // Debounced search term
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -359,6 +360,7 @@ export default function CasesPage() {
   const handleCloseMarkPaymentModal = () => {
     setMarkPaymentModalOpen(false);
     setSelectedCaseForPayment(null);
+    setTransactionId('');
   };
 
   // Handle mark payment as paid
@@ -377,6 +379,7 @@ export default function CasesPage() {
           json: {
             case_id: selectedCaseForPayment.id,
             amount: paymentAmount,
+            transaction_id: transactionId.trim() || undefined,
             notes: 'Manually marked as paid by admin'
           }
         }
@@ -385,6 +388,7 @@ export default function CasesPage() {
       if (res && (res as any).success) {
         setMarkPaymentModalOpen(false);
         setSelectedCaseForPayment(null);
+        setTransactionId('');
         await fetchCases(pagination.currentPage);
       } else {
         setError((res as any).message || 'Failed to mark payment as paid');
@@ -1016,6 +1020,17 @@ export default function CasesPage() {
                   <Typography variant="body2">
                     <strong>Current Status:</strong> {selectedCaseForPayment.status}
                   </Typography>
+                </Box>
+                <Box sx={{ mt: 3 }}>
+                  <TextField
+                    fullWidth
+                    label="Transaction ID (Optional)"
+                    placeholder="Enter transaction ID or reference number"
+                    value={transactionId}
+                    onChange={(e) => setTransactionId(e.target.value)}
+                    variant="outlined"
+                    helperText="Enter the transaction ID or reference number for this payment"
+                  />
                 </Box>
               </>
             )}

@@ -234,7 +234,8 @@ export default function CreateCasePage() {
     form.requester_address &&
     form.relationship_between_parties &&
     form.nature_of_dispute &&
-    form.brief_description_of_dispute
+    form.brief_description_of_dispute &&
+    form.sought_other_text.trim() !== '' // Make description mandatory
   );
 
   const getFileIcon = (fileType: string) => {
@@ -336,7 +337,7 @@ export default function CreateCasePage() {
         ...form,
         user_id: parseInt(form.user_id),
         advocate_id: form.advocate_id ? parseInt(form.advocate_id) : null,
-        sought_other: form.sought_other ? form.sought_other_text : '',
+        sought_other: form.sought_other ? form.sought_other_text : form.sought_other_text,
         attachments_json: null, // We'll upload files after case creation
       };
       const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
@@ -708,15 +709,18 @@ export default function CreateCasePage() {
                     label="Other"
                   />
                 </FormGroup>
-                {form.sought_other && (
-                  <TextField
-                    sx={{ mt: 1 }}
-                    label="Please specify"
-                    fullWidth
-                    value={form.sought_other_text}
-                    onChange={(e) => setForm((p) => ({ ...p, sought_other_text: e.target.value }))}
-                  />
-                )}
+                <TextField
+                  sx={{ mt: 2 }}
+                  label="Description"
+                  fullWidth
+                  required
+                  multiline
+                  rows={3}
+                  value={form.sought_other_text}
+                  onChange={(e) => setForm((p) => ({ ...p, sought_other_text: e.target.value }))}
+                  helperText="Please provide a detailed description of the relief being sought"
+                  // error={!form.sought_other_text.trim()}
+                />
               </Grid>
             </Grid>
           </CardContent>
