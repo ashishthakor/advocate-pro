@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
       SELECT 
         id, name, email, phone, address, role, is_approved,
         specialization, experience_years, bar_number, license_number,
+        user_type, company_name,
         created_at, updated_at
       FROM users 
       WHERE id = ?
@@ -116,6 +117,7 @@ export async function PUT(request: NextRequest) {
       SELECT 
         id, name, email, phone, address, role, is_approved,
         specialization, experience_years, bar_number, license_number,
+        user_type, company_name,
         created_at, updated_at
       FROM users 
       WHERE id = ?

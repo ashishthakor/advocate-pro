@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User } = require('@/models/init-models');
+const { Case, User, Payment } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseAssigned, logCaseStatusChanged } from '@/lib/activity-logger';
 import { col } from 'sequelize';
@@ -50,6 +50,23 @@ export async function GET(
       ]
     });
 
+    // Get the latest completed payment for this case with marked_by user info
+    const latestPayment = await Payment.findOne({
+      where: {
+        case_id: caseId,
+        status: 'completed'
+      },
+      order: [['created_at', 'DESC']],
+      include: [
+        {
+          model: User,
+          as: 'markedByUser',
+          attributes: ['id', 'name', 'email'],
+          required: false
+        }
+      ]
+    });
+
     if (!caseData) {
       return NextResponse.json(
         { success: false, message: 'Case not found' },
@@ -74,10 +91,23 @@ export async function GET(
 
     // Case already has flat fields from attributes literal, just convert to JSON
     const caseDataJson = caseData.toJSON ? caseData.toJSON() : caseData;
+    
+    // Extract payment information and add directly to case data
+    let transaction_id = null;
+    let marked_by_name = null;
+    if (latestPayment) {
+      const paymentJson = latestPayment.toJSON ? latestPayment.toJSON() : latestPayment;
+      transaction_id = paymentJson.transaction_id || null;
+      marked_by_name = paymentJson.markedByUser?.name || null;
+    }
+
     const transformedCase = {
       ...caseDataJson,
       // Ensure advocate_id is properly set (could be null)
       advocate_id: caseDataJson.advocate_id || null,
+      // Add payment fields directly to case
+      transaction_id: transaction_id,
+      marked_by_name: marked_by_name
     };
 
     return NextResponse.json({
@@ -170,21 +200,37 @@ export async function PUT(
     }
 
     // Prevent admin from updating case status if payment is pending
+    // Only block if there's a pending payment AND no completed payment exists
     if (authResult.user.role === 'admin' && updateData.hasOwnProperty('status')) {
       const { Payment } = require('@/models/init-models');
-      const pendingPayment = await Payment.findOne({
+      
+      // Check for completed payment first
+      const completedPayment = await Payment.findOne({
         where: {
           case_id: caseId,
-          status: 'pending'
+          status: 'completed'
         }
       });
 
-      // Block status update if payment is pending
-      if (pendingPayment) {
-        return NextResponse.json(
-          { success: false, message: 'Cannot update case status. Payment is still pending. Please wait for payment completion or mark payment as paid.' },
-          { status: 400 }
-        );
+      // If there's a completed payment, allow status update
+      if (completedPayment) {
+        // Allow status update - payment is completed
+      } else {
+        // Check if there's a pending payment (and no completed payment)
+        const pendingPayment = await Payment.findOne({
+          where: {
+            case_id: caseId,
+            status: 'pending'
+          }
+        });
+
+        // Block status update if payment is pending and no completed payment exists
+        if (pendingPayment) {
+          return NextResponse.json(
+            { success: false, message: 'Cannot update case status. Payment is still pending. Please wait for payment completion or mark payment as paid.' },
+            { status: 400 }
+          );
+        }
       }
     }
 

@@ -63,6 +63,20 @@ module.exports = function(sequelize, DataTypes) {
     metadata: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    transaction_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: 'Transaction ID or reference number for manual payments'
+    },
+    marked_by: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id'
+      },
+      comment: 'User ID of admin who manually marked this payment as paid'
     }
   }, {
     sequelize,

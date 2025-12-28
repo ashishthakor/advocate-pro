@@ -49,6 +49,10 @@ Payment.belongsTo(User, { as: 'user', foreignKey: 'user_id' });
 Case.hasMany(Payment, { as: 'payments', foreignKey: 'case_id' });
 Payment.belongsTo(Case, { as: 'case', foreignKey: 'case_id' });
 
+// Payment marked_by relation (admin who marked payment as paid)
+User.hasMany(Payment, { as: 'markedPayments', foreignKey: 'marked_by' });
+Payment.belongsTo(User, { as: 'markedByUser', foreignKey: 'marked_by' });
+
 module.exports = {
   User,
   Case,
