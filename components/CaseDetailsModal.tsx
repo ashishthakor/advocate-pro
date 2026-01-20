@@ -39,6 +39,7 @@ interface CaseDetails {
   updated_at: string;
   user_id: number;
   advocate_id?: number;
+  tracking_id?: string | null;
   court_name?: string;
   judge_name?: string;
   next_hearing_date?: string | null;
@@ -280,6 +281,17 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 color: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
                 fontWeight: 600,
               }}>{caseDetails.case_number}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                fontWeight: 500,
+                mb: 0.5,
+              }}>Tracking ID</Typography>
+              <Typography variant="body1" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#fff' : '#000',
+                fontWeight: 600,
+              }}>{caseDetails.tracking_id || '-'}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" sx={{ 

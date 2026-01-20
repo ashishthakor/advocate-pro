@@ -10,6 +10,7 @@ export interface CaseItem {
   priority: 'low' | 'medium' | 'high' | 'urgent' | string;
   user_id: number;
   advocate_id: number | null;
+  tracking_id?: string | null;
   court_name: string;
   judge_name: string;
   next_hearing_date: string | null;

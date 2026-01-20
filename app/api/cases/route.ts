@@ -389,6 +389,7 @@ export async function POST(request: NextRequest) {
       end_date,
       user_id, // Allow admin to specify user_id
       advocate_id, // Allow admin to specify advocate_id
+      tracking_id, // Optional tracking ID, admin only
       // Requester
       requester_name,
       requester_email,
@@ -473,7 +474,8 @@ export async function POST(request: NextRequest) {
       sought_monetary_claim: !!sought_monetary_claim,
       sought_settlement: !!sought_settlement,
       sought_other: sought_other || null,
-      attachments_json: attachments_json || null
+      attachments_json: attachments_json || null,
+      tracking_id: (authResult.user.role === 'admin' && tracking_id) ? tracking_id : null
     });
 
     // Fetch the created case with joined user/advocate fields using Sequelize ORM

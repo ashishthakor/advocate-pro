@@ -47,6 +47,7 @@ import {
   Visibility as VisibilityIcon,
   Refresh as RefreshIcon,
   AttachFile as AttachFileIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
@@ -55,6 +56,7 @@ import { apiFetch } from '@/lib/api-client';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import DocumentsModal from '@/components/DocumentsModal';
+import StatusUpdateModal from '@/components/StatusUpdateModal';
 
 interface Case {
   id: number;
@@ -66,6 +68,7 @@ interface Case {
   case_type: string;
   user_id: number;
   advocate_id?: number;
+  tracking_id?: string | null;
   user_name?: string;
   advocate_name?: string;
   created_at: string;
@@ -100,6 +103,8 @@ export default function AdvocateCasesPage() {
   const [selectedCaseForDocuments, setSelectedCaseForDocuments] = useState<Case | null>(null);
   const [caseDocuments, setCaseDocuments] = useState<any[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedCaseForEdit, setSelectedCaseForEdit] = useState<Case | null>(null);
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -254,6 +259,23 @@ export default function AdvocateCasesPage() {
     setDocumentsModalOpen(false);
     setSelectedCaseForDocuments(null);
     setCaseDocuments([]);
+  };
+
+  const handleEditCase = (caseId: number) => {
+    const case_ = cases.find(c => c.id === caseId);
+    if (case_) {
+      setSelectedCaseForEdit(case_);
+      setStatusModalOpen(true);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setStatusModalOpen(false);
+    setSelectedCaseForEdit(null);
+  };
+
+  const handleCaseUpdated = () => {
+    fetchCases(pagination.currentPage);
   };
 
   return (
@@ -413,7 +435,16 @@ export default function AdvocateCasesPage() {
                 ) : (
                   cases.map((c) => (
                     <TableRow key={c.id} hover>
-                      <TableCell>{c.case_number || c.id}</TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2">{c.case_number || c.id}</Typography>
+                          {c.tracking_id && (
+                            <Typography variant="caption" color="primary" display="block" sx={{ mt: 0.5 }}>
+                              Tracking: {c.tracking_id}
+                            </Typography>
+                          )}
+                        </Box>
+                      </TableCell>
                       <TableCell>
                         <Box>
                           <Typography variant="body2" fontWeight={600}>{c.title}</Typography>
@@ -462,6 +493,15 @@ export default function AdvocateCasesPage() {
                               onClick={() => handleViewAttachments(c.id)}
                             >
                               <AttachFileIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit">
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={() => handleEditCase(c.id)}
+                            >
+                              <EditIcon />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Chat">
@@ -525,6 +565,21 @@ export default function AdvocateCasesPage() {
           documents={caseDocuments}
           caseId={selectedCaseForDocuments.id}
           loading={loadingDocuments}
+        />
+      )}
+
+      {/* Edit Case Modal */}
+      {selectedCaseForEdit && (
+        <StatusUpdateModal
+          open={statusModalOpen}
+          onClose={handleCloseEditModal}
+          caseId={selectedCaseForEdit.id}
+          currentStatus={selectedCaseForEdit.status}
+          currentPriority={selectedCaseForEdit.priority}
+          caseTitle={selectedCaseForEdit.title}
+          onStatusUpdated={handleCaseUpdated}
+          currentTrackingId={selectedCaseForEdit.tracking_id}
+          allowTrackingIdEdit={true}
         />
       )}
     </Box>

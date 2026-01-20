@@ -256,7 +256,11 @@ export async function PUT(
     }
 
     // Update case using Sequelize ORM
+    // Admin and advocate can update tracking_id
     const allowedFields = ['title', 'description', 'status', 'priority', 'court_name', 'judge_name', 'next_hearing_date', 'fees', 'fees_paid', 'advocate_id'];
+    if (authResult.user.role === 'admin' || authResult.user.role === 'advocate') {
+      allowedFields.push('tracking_id');
+    }
     const updateData_filtered: any = {};
     
     for (const [key, value] of Object.entries(updateData)) {
