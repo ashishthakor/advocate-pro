@@ -8,6 +8,7 @@ import ReduxProvider from '@/components/ReduxProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ClientPolyfill from '@/components/ClientPolyfill';
 import { NotificationProvider } from '@/components/NotificationProvider';
+import MetaPixel from '@/components/MetaPixel';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -48,6 +49,7 @@ export default function RootLayout({
         <meta name="emotion-insertion-point" content="" />
       </head>
       <body className={inter.className}>
+            <MetaPixel />
             <ErrorBoundary>
               <ClientPolyfill />
               <ThemeProvider>

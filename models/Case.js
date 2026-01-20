@@ -182,6 +182,10 @@ module.exports = function(sequelize, DataTypes) {
     attachments_json: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    tracking_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true
     }
   }, {
     sequelize,

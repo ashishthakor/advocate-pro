@@ -45,6 +45,7 @@ interface Case {
   case_type: string;
   user_id: number;
   advocate_id?: number;
+  tracking_id?: string | null;
   user_name?: string;
   advocate_name?: string;
   payment_status?: string | null;
@@ -479,7 +480,16 @@ export default function UserCasesPage() {
                 ) : (
                   cases.map((c) => (
                     <TableRow key={c.id} hover>
-                      <TableCell>{c.case_number || c.id}</TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2">{c.case_number || c.id}</Typography>
+                          {c.tracking_id && (
+                            <Typography variant="caption" color="primary" display="block" sx={{ mt: 0.5 }}>
+                              Tracking: {c.tracking_id}
+                            </Typography>
+                          )}
+                        </Box>
+                      </TableCell>
                       <TableCell>
                         <Box>
                           <Typography variant="body2" fontWeight={600}>{c.title}</Typography>

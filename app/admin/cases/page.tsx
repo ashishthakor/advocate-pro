@@ -67,6 +67,7 @@ interface Case {
   case_type: string;
   user_id: number;
   advocate_id?: number;
+  tracking_id?: string | null;
   court_name?: string;
   judge_name?: string;
   next_hearing_date?: string;
@@ -348,6 +349,7 @@ export default function CasesPage() {
     setSelectedCaseForFees(null);
     setCustomFees('');
   };
+
 
   // Handle open mark payment modal
   const handleOpenMarkPaymentModal = (case_: Case) => {
@@ -746,6 +748,11 @@ export default function CasesPage() {
                           <Typography variant="caption" color="text.secondary">
                             #{case_.case_number || case_.id}
                           </Typography>
+                          {case_.tracking_id && (
+                            <Typography variant="caption" color="primary" display="block" sx={{ mt: 0.5 }}>
+                              Tracking: {case_.tracking_id}
+                            </Typography>
+                          )}
                         </Box>
                       </TableCell>
                       <TableCell>
@@ -844,7 +851,7 @@ export default function CasesPage() {
                               </IconButton>
                             </Tooltip>
                           )}
-                          <Tooltip title="Update Status">
+                          <Tooltip title="Edit">
                             <IconButton 
                               size="small" 
                               color="primary"
@@ -910,6 +917,8 @@ export default function CasesPage() {
           caseTitle={selectedCase.title}
           onStatusUpdated={handleStatusUpdated}
           paymentStatus={selectedCase.payment_status}
+          currentTrackingId={selectedCase.tracking_id}
+          allowTrackingIdEdit={true}
         />
       )}
 

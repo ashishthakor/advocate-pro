@@ -16,6 +16,7 @@ import {
   Chip,
   CircularProgress,
   Alert,
+  TextField,
 } from '@mui/material';
 import { apiFetch } from '@/lib/api-client';
 import { CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
@@ -29,6 +30,8 @@ interface StatusUpdateModalProps {
   caseTitle: string;
   onStatusUpdated: () => void;
   paymentStatus?: string | null;
+  currentTrackingId?: string | null;
+  allowTrackingIdEdit?: boolean;
 }
 
 export default function StatusUpdateModal({
@@ -40,9 +43,12 @@ export default function StatusUpdateModal({
   caseTitle,
   onStatusUpdated,
   paymentStatus,
+  currentTrackingId,
+  allowTrackingIdEdit = false,
 }: StatusUpdateModalProps) {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [selectedPriority, setSelectedPriority] = useState(currentPriority);
+  const [trackingId, setTrackingId] = useState(currentTrackingId || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,18 +57,23 @@ export default function StatusUpdateModal({
     if (open) {
       setSelectedStatus(currentStatus);
       setSelectedPriority(currentPriority);
+      setTrackingId(currentTrackingId || '');
       setError('');
     }
-  }, [open, currentStatus, currentPriority]);
+  }, [open, currentStatus, currentPriority, currentTrackingId]);
 
   const handleStatusUpdate = async () => {
-    if (selectedStatus === currentStatus && selectedPriority === currentPriority) {
+    const hasStatusChange = selectedStatus !== currentStatus;
+    const hasPriorityChange = selectedPriority !== currentPriority;
+    const hasTrackingIdChange = allowTrackingIdEdit && trackingId !== (currentTrackingId || '');
+    
+    if (!hasStatusChange && !hasPriorityChange && !hasTrackingIdChange) {
       onClose();
       return;
     }
 
     // Prevent status update if payment is pending
-    if (paymentStatus === 'pending') {
+    if (paymentStatus === 'pending' && hasStatusChange) {
       setError('Cannot update case status. Payment is still pending. Please wait for payment completion or mark payment as paid.');
       return;
     }
@@ -71,18 +82,25 @@ export default function StatusUpdateModal({
       setLoading(true);
       setError('');
 
+      const updateData: any = {};
+      if (hasStatusChange) {
+        updateData.status = selectedStatus;
+      }
+      if (hasPriorityChange) {
+        updateData.priority = selectedPriority;
+      }
+      if (hasTrackingIdChange) {
+        updateData.tracking_id = trackingId.trim() || null;
+      }
+
       console.log('Updating case:', {
         caseId,
-        status: selectedStatus,
-        priority: selectedPriority
+        ...updateData
       });
 
       const response = await apiFetch(`/api/cases/${caseId}`, {
         method: 'PUT',
-        body: JSON.stringify({ 
-          status: selectedStatus,
-          priority: selectedPriority
-        }),
+        json: updateData,
       });
 
       console.log('API Response:', response);
@@ -91,11 +109,11 @@ export default function StatusUpdateModal({
         onStatusUpdated();
         onClose();
       } else {
-        setError(response.message || 'Failed to update case status');
+        setError(response.message || 'Failed to update case');
       }
     } catch (err) {
-      console.error('Status update error:', err);
-      setError('Failed to update case status');
+      console.error('Update error:', err);
+      setError('Failed to update case');
     } finally {
       setLoading(false);
     }
@@ -104,6 +122,7 @@ export default function StatusUpdateModal({
   const handleClose = () => {
     setSelectedStatus(currentStatus);
     setSelectedPriority(currentPriority);
+    setTrackingId(currentTrackingId || '');
     setError('');
     onClose();
   };
@@ -111,7 +130,7 @@ export default function StatusUpdateModal({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        Update Case Status & Priority
+        Edit Case
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mb: 2 }}>
@@ -176,6 +195,18 @@ export default function StatusUpdateModal({
           </Select>
         </FormControl>
 
+        {allowTrackingIdEdit && (
+          <TextField
+            fullWidth
+            sx={{ mt: 2 }}
+            label="Tracking ID"
+            placeholder="Enter tracking ID for this case"
+            value={trackingId}
+            onChange={(e) => setTrackingId(e.target.value)}
+            helperText="Optional tracking ID for case management. Leave empty to remove tracking ID."
+          />
+        )}
+
         {error && (
           <Typography color="error" variant="body2" sx={{ mt: 2 }}>
             {error}
@@ -189,7 +220,7 @@ export default function StatusUpdateModal({
         <Button
           onClick={handleStatusUpdate}
           variant="contained"
-          disabled={loading || (selectedStatus === currentStatus && selectedPriority === currentPriority) || paymentStatus === 'pending'}
+          disabled={loading || (selectedStatus === currentStatus && selectedPriority === currentPriority && (!allowTrackingIdEdit || trackingId === (currentTrackingId || ''))) || (paymentStatus === 'pending' && selectedStatus !== currentStatus)}
         >
           {loading ? <CircularProgress size={20} /> : 'Update'}
         </Button>

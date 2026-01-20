@@ -70,6 +70,7 @@ interface CreateCaseForm {
   end_date: string;
   user_id: string;
   advocate_id: string;
+  tracking_id: string;
   // Requesting party
   requester_name: string;
   requester_email: string;
@@ -130,6 +131,7 @@ export default function CreateCasePage() {
     end_date: '',
     user_id: '',
     advocate_id: '',
+    tracking_id: '',
     requester_name: '',
     requester_email: '',
     requester_phone: '',
@@ -452,6 +454,16 @@ export default function CreateCasePage() {
                   placeholder="Provide a detailed description of your case"
                   value={form.description}
                   onChange={handleChange('description')}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Tracking ID (Optional)"
+                  fullWidth
+                  placeholder="Enter tracking ID for this case"
+                  value={form.tracking_id}
+                  onChange={handleChange('tracking_id')}
+                  helperText="Optional tracking ID for case management"
                 />
               </Grid>
             </Grid>
