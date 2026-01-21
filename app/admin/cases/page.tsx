@@ -698,7 +698,7 @@ export default function CasesPage() {
                   >
                     Case {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
-                  <TableCell>Client</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Neutral</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
@@ -1024,7 +1024,7 @@ export default function CasesPage() {
                     <strong>Title:</strong> {selectedCaseForPayment.title}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Client:</strong> {selectedCaseForPayment.user_name || 'N/A'}
+                    <strong>User:</strong> {selectedCaseForPayment.user_name || 'N/A'}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Current Status:</strong> {selectedCaseForPayment.status}

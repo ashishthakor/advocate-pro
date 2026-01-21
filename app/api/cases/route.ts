@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       whereConditions[Op.and].push({ status: { [Op.ne]: 'pending_payment' } });
     }
 
-    // For advocate role with search, also search in user/client fields
+    // For advocate role with search, also search in user fields
     let includeConditions: any[] = [
       {
         model: User,

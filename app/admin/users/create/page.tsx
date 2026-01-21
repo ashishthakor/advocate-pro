@@ -145,7 +145,7 @@ export default function CreateUserPage() {
         <IconButton onClick={() => router.back()} size="small">
           <ArrowBackIcon />
         </IconButton>
-        <Typography variant="h5">Create New Client</Typography>
+        <Typography variant="h5">Create New User</Typography>
       </Stack>
 
       {error && (
@@ -296,7 +296,7 @@ export default function CreateUserPage() {
                 disabled={loading}
                 startIcon={loading ? <CircularProgress size={20} /> : null}
               >
-                {loading ? 'Creating...' : 'Create Client'}
+                {loading ? 'Creating...' : 'Create User'}
               </Button>
             </Box>
           </form>

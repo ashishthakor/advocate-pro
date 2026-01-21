@@ -70,7 +70,7 @@ interface CreateCaseForm {
   respondent_gst_number: string;
 
   // Dispute details
-  relationship_between_parties: 'Client' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
+  relationship_between_parties: 'User' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
   nature_of_dispute: 'Commercial & Business Disputes' | 'E-Commerce & Consumer Complaints' | 'Real Estate & Property' | 'Employment & Workplace' | 'Financial & Banking' | 'Government / Public Sector' | 'Cross-Border / International' | 'Family & Civil' | 'Technology & Digital' | '';
   brief_description_of_dispute: string;
   occurrence_date: string; // yyyy-MM-dd
@@ -704,7 +704,7 @@ export default function CreateCasePage() {
                   value={form.relationship_between_parties}
                   onChange={(e) => setForm((p) => ({ ...p, relationship_between_parties: e.target.value as any }))}
                 >
-                  {['Client','Vendor','Business Partner','Employee','Employer','Family'].map((opt) => (
+                  {['User','Vendor','Business Partner','Employee','Employer','Family'].map((opt) => (
                     <FormControlLabel key={opt} value={opt} control={<Radio required />} label={t(`createCase.${opt.toLowerCase().replace(' ', '')}`)} />
                   ))}
                 </RadioGroup>

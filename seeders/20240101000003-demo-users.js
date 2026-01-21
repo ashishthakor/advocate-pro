@@ -13,7 +13,7 @@ module.exports = {
         role: 'user',
         is_approved: true,
         phone: '+1234567894',
-        address: '100 Client Court, Legal City',
+        address: '100 User Court, Legal City',
         created_at: new Date(),
         updated_at: new Date()
       },

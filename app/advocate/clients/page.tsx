@@ -46,7 +46,7 @@ import { useLanguage } from '@/components/LanguageProvider';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/lib/utils';
 
-interface Client {
+interface User {
   id: number;
   name: string;
   email: string;
@@ -63,7 +63,7 @@ export default function AdvocateClientsPage() {
   const { t } = useLanguage();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [userTypeFilter, setUserTypeFilter] = useState<string>('');
 
@@ -78,9 +78,9 @@ export default function AdvocateClientsPage() {
     try {
       setLoading(true);
       
-      // Fetch clients using users API (same as admin side)
+      // Fetch users using users API (same as admin side)
       const params = new URLSearchParams({
-        role: 'user', // Always fetch only clients
+        role: 'user', // Always fetch only users
       });
       
       if (debouncedSearchTerm) {
@@ -102,11 +102,11 @@ export default function AdvocateClientsPage() {
     }
   };
 
-  const handleChatClient = (clientId: number) => {
+  const handleChatUser = (userId: number) => {
     router.push(`/advocate/chat`);
   };
 
-  const handleViewCases = (clientId: number) => {
+  const handleViewCases = (userId: number) => {
     router.push(`/advocate/cases`);
   };
 
@@ -146,7 +146,7 @@ export default function AdvocateClientsPage() {
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 fullWidth
-                placeholder="Search clients by name or email..."
+                placeholder="Search users by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
@@ -190,7 +190,7 @@ export default function AdvocateClientsPage() {
                     {clients.length}
                   </Typography>
                   <Typography color="text.secondary">
-                    Total Clients
+                    Total Users
                   </Typography>
                 </Box>
               </Box>
@@ -250,7 +250,7 @@ export default function AdvocateClientsPage() {
                     {clients.length > 0 ? Math.round(clients.reduce((sum, client) => sum + (client.cases_count || 0), 0) / clients.length * 10) / 10 : 0}
                   </Typography>
                   <Typography color="text.secondary">
-                    Avg Cases/Client
+                    Avg Cases/User
                   </Typography>
                 </Box>
               </Box>
@@ -263,7 +263,7 @@ export default function AdvocateClientsPage() {
       <Card>
         <CardContent>
           {/* <Typography variant="h6" sx={{ mb: 3 }}>
-            Client List
+            User List
           </Typography> */}
 
           {loading ? (
@@ -273,7 +273,7 @@ export default function AdvocateClientsPage() {
           ) : clients.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="body2" color="text.secondary">
-                {searchTerm || userTypeFilter ? 'No clients found matching your search' : 'No clients assigned yet'}
+                {searchTerm || userTypeFilter ? 'No users found matching your search' : 'No users assigned yet'}
               </Typography>
             </Box>
           ) : (
@@ -281,7 +281,7 @@ export default function AdvocateClientsPage() {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Client</TableCell>
+                    <TableCell>User</TableCell>
                     <TableCell>Type</TableCell>
                     <TableCell>Contact Info</TableCell>
                     <TableCell>Cases</TableCell>
@@ -302,7 +302,7 @@ export default function AdvocateClientsPage() {
                               {client.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                              Client ID: {client.id}
+                              User ID: {client.id}
                             </Typography>
                             {client.user_type === 'corporate' && client.company_name && (
                               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
@@ -373,7 +373,7 @@ export default function AdvocateClientsPage() {
                             <IconButton 
                               size="small" 
                               color="primary"
-                              onClick={() => handleChatClient(client.id)}
+                              onClick={() => handleChatUser(client.id)}
                             >
                               <MessageIcon />
                             </IconButton>

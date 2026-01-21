@@ -733,7 +733,7 @@ export default function AdvocateChatPage({ params }: { params: Promise<{ caseId:
                   {caseData?.case_number} - {caseData?.title}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Client: {caseData?.user_name} | Status: {caseData?.status}
+                  User: {caseData?.user_name} | Status: {caseData?.status}
                 </Typography>
               </Box>
             </Box>

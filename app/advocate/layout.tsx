@@ -16,7 +16,7 @@ export default function AdvocateLayout({
   const getPageTitle = () => {
     if (pathname.includes('/dashboard')) return 'Neutral Dashboard';
     if (pathname.includes('/cases')) return 'Assigned Cases';
-    if (pathname.includes('/clients')) return 'Clients';
+    if (pathname.includes('/clients')) return 'Users';
     if (pathname.includes('/chat')) return 'Chats';
     if (pathname.includes('/profile')) return 'Profile';
     return 'Neutral Dashboard';

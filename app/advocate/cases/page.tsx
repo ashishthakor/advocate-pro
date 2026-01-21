@@ -389,7 +389,7 @@ export default function AdvocateCasesPage() {
                   >
                     Title {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
-                  <TableCell>Client</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('status')}

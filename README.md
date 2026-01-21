@@ -105,7 +105,7 @@ advo-project-v1/
 The system uses JWT tokens with role-based access control:
 
 - **Admin:** Full system access
-- **Advocate:** Case management and client access
+- **Advocate:** Case management and user access
 - **User:** Personal case management
 
 ## 📁 File Management

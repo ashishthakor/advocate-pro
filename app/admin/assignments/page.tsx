@@ -442,7 +442,7 @@ export default function AssignmentsPage() {
                   >
                     Case {sortBy === 'title' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
-                  <TableCell>Client</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Current Advocate</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer' }}

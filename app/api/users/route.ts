@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
 
     const users = await User.findAll(findOptions);
 
-    // For advocates, get cases count for each client
+    // For advocates, get cases count for each user
     let usersWithCaseCount = users;
     if (authResult.user.role === 'advocate' && role === 'user') {
       const userIds = users.map((u: any) => {

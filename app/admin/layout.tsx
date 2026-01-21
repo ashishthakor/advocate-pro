@@ -15,7 +15,7 @@ export default function AdminLayout({
   
   const getPageTitle = () => {
     if (pathname.includes('/dashboard')) return 'Admin Dashboard';
-    if (pathname.includes('/users')) return 'Clients';
+    if (pathname.includes('/users')) return 'Users';
     if (pathname.includes('/advocates')) return 'Advocates';
     if (pathname.includes('/cases')) return 'Cases';
     if (pathname.includes('/notices')) return 'Notices';

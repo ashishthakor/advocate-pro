@@ -41,7 +41,7 @@ const HARDCODED_NOTICE_CONTENT = `
 
   <li>The Service Agreement clearly stipulates that all disputes shall be resolved in accordance with the Arbitration and Conciliation Act, 1996, through the agreed arbitration mechanism. Accordingly, monastic media once again conveys its willingness to proceed through amicable settlement and arbitration, facilitated by ArbiTalk.</li>
 
-  <li>Your continued silence and non-cooperation not only aggravate the dispute but also cause unwarranted delay and financial losses to our client.</li>
+  <li>Your continued silence and non-cooperation not only aggravate the dispute but also cause unwarranted delay and financial losses to our user.</li>
 
   <li>You are hereby called upon to provide your written response within 7 (seven) days from the receipt of this notice, indicating your willingness to: participate in the arbitration proceedings as per the Agreement; or Resolve the matter amicably through ArbiTalk.</li>
 
