@@ -100,7 +100,7 @@ export const Footer: React.FC = () => {
                 Legal Analytics
               </Typography>
               <Typography variant="body2" color="grey.400">
-                Client Portal
+                User Portal
               </Typography>
             </Box>
           </Grid>

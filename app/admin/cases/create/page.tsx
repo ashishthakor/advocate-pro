@@ -86,7 +86,7 @@ interface CreateCaseForm {
   respondent_business_name: string;
   respondent_gst_number: string;
   // Dispute details
-  relationship_between_parties: 'Client' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
+  relationship_between_parties: 'User' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
   nature_of_dispute: 'Commercial & Business Disputes' | 'E-Commerce & Consumer Complaints' | 'Real Estate & Property' | 'Employment & Workplace' | 'Financial & Banking' | 'Government / Public Sector' | 'Cross-Border / International' | 'Family & Civil' | 'Technology & Digital' | '';
   brief_description_of_dispute: string;
   occurrence_date: string;
@@ -210,7 +210,7 @@ export default function CreateCasePage() {
     setForm((prev) => {
       const updated = { ...prev, [field]: value };
       
-      // If client is selected, prefill requesting party data
+      // If user is selected, prefill requesting party data
       if (field === 'user_id' && value) {
         const selectedUser = users.find(u => u.id.toString() === value);
         if (selectedUser) {
@@ -392,10 +392,10 @@ export default function CreateCasePage() {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth required>
-                  <InputLabel>Client</InputLabel>
+                  <InputLabel>User</InputLabel>
                   <Select
                     value={form.user_id}
-                    label="Client"
+                    label="User"
                     onChange={handleSelectChange('user_id')}
                     disabled={loadingUsers}
                   >
@@ -477,7 +477,7 @@ export default function CreateCasePage() {
             <Divider sx={{ mb: 2 }} />
             {form.user_id && (
               <Alert severity="info" sx={{ mb: 2 }}>
-                Requesting party information has been prefilled from the selected client. You can modify these fields if needed.
+                Requesting party information has been prefilled from the selected user. You can modify these fields if needed.
             </Alert>
             )}
             <Grid container spacing={2}>
@@ -613,7 +613,7 @@ export default function CreateCasePage() {
                   value={form.relationship_between_parties}
                   onChange={(e) => setForm((p) => ({ ...p, relationship_between_parties: e.target.value as any }))}
                 >
-                  {['Client','Vendor','Business Partner','Employee','Employer','Family'].map((opt) => (
+                  {['User','Vendor','Business Partner','Employee','Employer','Family'].map((opt) => (
                     <FormControlLabel key={opt} value={opt} control={<Radio required />} label={t(`createCase.${opt.toLowerCase().replace(' ', '')}`)} />
                   ))}
                 </RadioGroup>

@@ -290,7 +290,7 @@ export default function AdvocateDashboardPage() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Case</TableCell>
-                    <TableCell>Client</TableCell>
+                    <TableCell>User</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Priority</TableCell>
                     <TableCell>Created</TableCell>

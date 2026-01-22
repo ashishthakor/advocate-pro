@@ -40,7 +40,7 @@ module.exports = {
       {
         case_number: 'CASE-2024-002',
         title: 'Criminal Defense',
-        description: 'Defense case for client charged with theft.',
+        description: 'Defense case for user charged with theft.',
         case_type: 'criminal',
         status: 'open',
         priority: 'urgent',

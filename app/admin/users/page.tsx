@@ -193,7 +193,7 @@ export default function UsersPage() {
           href="/admin/users/create"
           startIcon={<AddIcon />}
         >
-          Create Client
+          Create User
         </Button>
       </Box>
 
@@ -217,7 +217,7 @@ export default function UsersPage() {
                     {pagination.totalItems}
                   </Typography>
                   <Typography color="text.secondary">
-                    Total Clients
+                    Total Users
                   </Typography>
                 </Box>
               </Box>
@@ -237,7 +237,7 @@ export default function UsersPage() {
                     {users.filter(u => u.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
-                    Approved Clients
+                    Approved Users
                   </Typography>
                 </Box>
               </Box>
@@ -257,7 +257,7 @@ export default function UsersPage() {
                     {users.filter(u => !u.is_approved).length}
                   </Typography>
                   <Typography color="text.secondary">
-                    Pending Clients
+                    Pending Users
                   </Typography>
                 </Box>
               </Box>
@@ -330,7 +330,7 @@ export default function UsersPage() {
                     sx={{ cursor: 'pointer' }}
                     onClick={() => handleSort('name')}
                   >
-                    Client {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                    User {sortBy === 'name' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell>Type</TableCell>
                   <TableCell>Contact</TableCell>

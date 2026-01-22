@@ -156,11 +156,11 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { number: '30+', label: t('home.stat1') },
-    { number: '₹50+ Lakhs', label: t('home.stat2') },
-    { number: '15+', label: t('home.stat3') },
-    { number: '8+ Years', label: t('home.stat4') },
-    { number: '50+', label: t('home.stat5') },
+    { number: '3.8+ Cr', label: t('home.stat1') },
+    { number: '70+%', label: t('home.stat2') },
+    { number: '32+', label: t('home.stat3') },
+    { number: '30+', label: t('home.stat4') },
+    { number: '8+ Years', label: t('home.stat5') },
   ];
 
   return (
