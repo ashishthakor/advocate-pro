@@ -18,10 +18,11 @@ export async function GET(
       );
     }
 
-    // Only admin can access notices
-    if (authResult.user.role !== 'admin') {
+    // Admin, user (for their cases), and advocate (for assigned cases) can access notices
+    const user = authResult.user;
+    if (user.role !== 'admin' && user.role !== 'user' && user.role !== 'advocate') {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied.' },
         { status: 403 }
       );
     }
@@ -56,6 +57,20 @@ export async function GET(
       );
     }
 
+    // Check access: user can only access notices for their cases, advocate for assigned cases
+    if (user.role === 'user' && notice.case.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only access notices for your cases.' },
+        { status: 403 }
+      );
+    }
+    if (user.role === 'advocate' && notice.case.advocate_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only access notices for your assigned cases.' },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       data: notice
@@ -82,10 +97,11 @@ export async function PUT(
       );
     }
 
-    // Only admin can update notices
-    if (authResult.user.role !== 'admin') {
+    // Admin, user (for their cases), and advocate (for assigned cases) can update notices
+    const user = authResult.user;
+    if (user.role !== 'admin' && user.role !== 'user' && user.role !== 'advocate') {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied.' },
         { status: 403 }
       );
     }
@@ -93,7 +109,7 @@ export async function PUT(
     const { id } = await params;
     const noticeId = parseInt(id);
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_number } = body;
 
     // Validation
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
@@ -151,6 +167,20 @@ export async function PUT(
       return NextResponse.json(
         { success: false, message: 'Notice not found' },
         { status: 404 }
+      );
+    }
+
+    // Check access: user can only update notices for their cases, advocate for assigned cases
+    if (user.role === 'user' && existingNotice.case.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only update notices for your cases.' },
+        { status: 403 }
+      );
+    }
+    if (user.role === 'advocate' && existingNotice.case.advocate_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only update notices for your assigned cases.' },
+        { status: 403 }
       );
     }
 
@@ -233,6 +263,22 @@ export async function PUT(
       );
     }
 
+    // Validate notice_number if provided
+    let finalNoticeNumber = notice_number;
+    if (notice_number !== undefined && notice_number !== null) {
+      const noticeNum = parseInt(notice_number);
+      if (isNaN(noticeNum) || noticeNum < 1) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid notice_number. Must be a positive integer.' },
+          { status: 400 }
+        );
+      }
+      finalNoticeNumber = noticeNum;
+    } else {
+      // Keep existing notice_number if not provided
+      finalNoticeNumber = existingNotice.notice_number || 1;
+    }
+
     // Update notice record
     await existingNotice.update({
       case_id,
@@ -244,6 +290,7 @@ export async function PUT(
       date: noticeDateForDB,
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
+      notice_number: finalNoticeNumber,
     });
 
     // Fetch updated notice with relations
@@ -291,10 +338,11 @@ export async function DELETE(
       );
     }
 
-    // Only admin can delete notices
-    if (authResult.user.role !== 'admin') {
+    // Admin, user (for their cases), and advocate (for assigned cases) can delete notices
+    const user = authResult.user;
+    if (user.role !== 'admin' && user.role !== 'user' && user.role !== 'advocate') {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied.' },
         { status: 403 }
       );
     }
@@ -306,12 +354,33 @@ export async function DELETE(
       where: { 
         id: noticeId,
         deleted_at: null // Only allow deleting non-deleted notices
-      } 
+      },
+      include: [
+        {
+          model: Case,
+          as: 'case',
+          attributes: ['id', 'user_id', 'advocate_id']
+        }
+      ]
     });
     if (!notice) {
       return NextResponse.json(
         { success: false, message: 'Notice not found' },
         { status: 404 }
+      );
+    }
+
+    // Check access: user can only delete notices for their cases, advocate for assigned cases
+    if (user.role === 'user' && notice.case.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only delete notices for your cases.' },
+        { status: 403 }
+      );
+    }
+    if (user.role === 'advocate' && notice.case.advocate_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only delete notices for your assigned cases.' },
+        { status: 403 }
       );
     }
 

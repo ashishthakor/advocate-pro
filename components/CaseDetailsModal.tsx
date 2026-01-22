@@ -26,6 +26,8 @@ import {
 import { useLanguage } from '@/components/LanguageProvider';
 import { getCapitalizedString, getStatusConfig } from '@/lib/utils';
 import DocumentsModal from '@/components/DocumentsModal';
+import NoticesSection from '@/components/NoticesSection';
+import { apiFetch } from '@/lib/api-client';
 
 interface CaseDetails {
   id: number;
@@ -89,6 +91,8 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
   const [documents, setDocuments] = useState<any[]>([]);
   const [loadingDocuments, setLoadingDocuments] = useState(false);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
+  const [noticeModalOpen, setNoticeModalOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<any>(null);
 
   useEffect(() => {
     if (open && caseDetails?.id) {
@@ -909,6 +913,42 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
             </Typography>
           )}
         </Paper>
+
+        {/* Notices Section */}
+        {caseDetails && (
+          <NoticesSection
+            caseId={caseDetails.id}
+            caseNumber={caseDetails.case_number}
+            caseTitle={caseDetails.title}
+            onAddNotice={() => {
+              // Navigate to notices page or open create notice modal
+              window.location.href = `/admin/notices?case_id=${caseDetails.id}&action=create`;
+            }}
+            onEditNotice={(notice) => {
+              setEditingNotice(notice);
+              window.location.href = `/admin/notices?notice_id=${notice.id}&action=edit`;
+            }}
+            onDeleteNotice={async (noticeId) => {
+              if (confirm('Are you sure you want to delete this notice?')) {
+                try {
+                  const response = await apiFetch(`/api/notices/${noticeId}`, {
+                    method: 'DELETE',
+                  });
+                  if (response.success) {
+                    // Refresh notices section
+                    window.location.reload();
+                  } else {
+                    alert(response.message || 'Failed to delete notice');
+                  }
+                } catch (err) {
+                  console.error('Error deleting notice:', err);
+                  alert('Failed to delete notice');
+                }
+              }
+            }}
+            showActions={true}
+          />
+        )}
       </DialogContent>
       
       <DialogActions sx={{ 

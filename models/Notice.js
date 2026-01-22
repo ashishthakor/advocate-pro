@@ -62,6 +62,12 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: true
     },
+    notice_number: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+      comment: 'Sequential notice number for the case (1, 2, 3, 4...)'
+    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true

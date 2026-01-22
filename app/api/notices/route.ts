@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 const { Notice, Case, User } = require('@/models/init-models');
+const { sequelize } = require('@/lib/database');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { generateNoticePDF } from '@/lib/pdf-generator';
 import { s3Uploader } from '@/lib/aws-s3';
@@ -15,10 +16,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Only admin can access notices
-    if (authResult.user.role !== 'admin') {
+    // Admin, user (for their cases), and advocate (for assigned cases) can access notices
+    const user = authResult.user;
+    if (user.role !== 'admin' && user.role !== 'user' && user.role !== 'advocate') {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied.' },
         { status: 403 }
       );
     }
@@ -28,11 +30,12 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search');
+    const noticeNumber = searchParams.get('notice_number'); // Filter by notice number
     const sortBy = searchParams.get('sortBy') || 'date';
     const sortOrder = searchParams.get('sortOrder') || 'DESC';
 
     // Validate sort parameters
-    const validSortColumns = ['id', 'respondent_name', 'subject', 'date', 'case_number', 'user_name'];
+    const validSortColumns = ['id', 'respondent_name', 'subject', 'date', 'case_number', 'user_name', 'notice_number'];
     const validSortOrders = ['ASC', 'DESC'];
     
     if (!validSortColumns.includes(sortBy)) {
@@ -54,6 +57,77 @@ export async function GET(request: NextRequest) {
     };
     if (caseId) {
       whereConditions.case_id = parseInt(caseId);
+    }
+    if (noticeNumber) {
+      const noticeNum = parseInt(noticeNumber);
+      if (!isNaN(noticeNum) && noticeNum > 0) {
+        whereConditions.notice_number = noticeNum;
+      }
+    }
+
+    // Filter by user/advocate access
+    if (user.role === 'user') {
+      // User can only see notices for their cases
+      const userCases = await Case.findAll({
+        where: { user_id: user.id },
+        attributes: ['id'],
+        raw: true
+      });
+      const userCaseIds = userCases.map((c: any) => c.id);
+      if (userCaseIds.length === 0) {
+        // User has no cases, return empty result
+        return NextResponse.json({
+          success: true,
+          data: {
+            notices: [],
+            pagination: {
+              currentPage: page,
+              totalPages: 0,
+              totalItems: 0,
+              itemsPerPage: limit,
+              hasNextPage: false,
+              hasPrevPage: false
+            }
+          }
+        });
+      }
+      whereConditions.case_id = { [Op.in]: userCaseIds };
+    } else if (user.role === 'advocate') {
+      // Advocate can only see notices for their assigned cases
+      const advocateCases = await Case.findAll({
+        where: { advocate_id: user.id },
+        attributes: ['id'],
+        raw: true
+      });
+      const advocateCaseIds = advocateCases.map((c: any) => c.id);
+      if (advocateCaseIds.length === 0) {
+        // Advocate has no assigned cases, return empty result
+        return NextResponse.json({
+          success: true,
+          data: {
+            notices: [],
+            pagination: {
+              currentPage: page,
+              totalPages: 0,
+              totalItems: 0,
+              itemsPerPage: limit,
+              hasNextPage: false,
+              hasPrevPage: false
+            }
+          }
+        });
+      }
+      // If caseId is provided, verify it belongs to advocate
+      if (caseId && !advocateCaseIds.includes(parseInt(caseId))) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. Case not assigned to you.' },
+          { status: 403 }
+        );
+      }
+      // Otherwise filter by advocate's cases
+      if (!caseId) {
+        whereConditions.case_id = { [Op.in]: advocateCaseIds };
+      }
     }
 
     const offset = (page - 1) * limit;
@@ -149,6 +223,9 @@ export async function GET(request: NextRequest) {
       orderClause = [[{ model: Case, as: 'case' }, 'case_number', sortOrder.toUpperCase()]];
     } else if (sortBy === 'user_name') {
       orderClause = [[{ model: Case, as: 'case' }, { model: User, as: 'user' }, 'name', sortOrder.toUpperCase()]];
+    } else if (sortBy === 'notice_number') {
+      // Order by notice_number (integer)
+      orderClause = [['notice_number', sortOrder.toUpperCase()]];
     } else {
       orderClause = [[sortBy, sortOrder.toUpperCase()]];
     }
@@ -195,16 +272,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only admin can create notices
-    if (authResult.user.role !== 'admin') {
+    // Admin, user (for their cases), and advocate (for assigned cases) can create notices
+    const user = authResult.user;
+    if (user.role !== 'admin' && user.role !== 'user' && user.role !== 'advocate') {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied.' },
         { status: 403 }
       );
     }
 
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_number } = body;
 
     // Validation
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
@@ -254,6 +332,45 @@ export async function POST(request: NextRequest) {
         { success: false, message: 'Case not found' },
         { status: 404 }
       );
+    }
+
+    // Check access: user can only create notices for their cases, advocate for assigned cases
+    if (user.role === 'user' && caseData.user_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only create notices for your cases.' },
+        { status: 403 }
+      );
+    }
+    if (user.role === 'advocate' && caseData.advocate_id !== user.id) {
+      return NextResponse.json(
+        { success: false, message: 'Access denied. You can only create notices for your assigned cases.' },
+        { status: 403 }
+      );
+    }
+
+    // Auto-determine notice_number if not provided
+    let finalNoticeNumber = notice_number;
+    if (!finalNoticeNumber) {
+      // Count existing notices for this case (excluding deleted)
+      const existingNoticesCount = await Notice.count({
+        where: {
+          case_id,
+          deleted_at: null
+        }
+      });
+
+      // Assign sequential number: next number = count + 1
+      finalNoticeNumber = existingNoticesCount + 1;
+    } else {
+      // Validate notice_number if provided
+      const noticeNum = parseInt(finalNoticeNumber);
+      if (isNaN(noticeNum) || noticeNum < 1) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid notice_number. Must be a positive integer.' },
+          { status: 400 }
+        );
+      }
+      finalNoticeNumber = noticeNum;
     }
 
     // Generate PDF
@@ -313,7 +430,8 @@ export async function POST(request: NextRequest) {
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
       email_sent: false,
-      email_sent_count: 0
+      email_sent_count: 0,
+      notice_number: finalNoticeNumber
     });
 
     // Fetch created notice with relations

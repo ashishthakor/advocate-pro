@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import {
   Box,
   Typography,
@@ -32,6 +32,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Collapse,
+  IconButton as MuiIconButton,
 } from '@mui/material';
 import {
   Folder as FolderIcon,
@@ -48,14 +50,23 @@ import {
   Add as AddIcon,
   CheckCircle as CheckCircleIcon,
   AttachMoney as AttachMoneyIcon,
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+  Description as DescriptionIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 import { useRouter } from 'next/navigation';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
+import { useDispatch } from 'react-redux';
+import { deleteNotice, NoticeItem } from '@/store/slices/noticesSlice';
 import StatusUpdateModal from '@/components/StatusUpdateModal';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import DocumentsModal from '@/components/DocumentsModal';
+import NoticesSection from '@/components/NoticesSection';
+import NoticeStageBadge from '@/components/NoticeStageBadge';
+import NoticeEditModal from '@/components/NoticeEditModal';
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 
 interface Case {
   id: number;
@@ -104,6 +115,7 @@ interface Case {
   advocate_email?: string;
   payment_status?: string | null;
   payment_amount?: number | null;
+  notice_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -167,6 +179,16 @@ export default function CasesPage() {
   const [markPaymentModalOpen, setMarkPaymentModalOpen] = useState(false);
   const [selectedCaseForPayment, setSelectedCaseForPayment] = useState<Case | null>(null);
   const [transactionId, setTransactionId] = useState('');
+  const [expandedCaseId, setExpandedCaseId] = useState<number | null>(null);
+  const dispatch = useDispatch();
+  
+  // Notice modals state
+  const [editNoticeModalOpen, setEditNoticeModalOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<NoticeItem | null>(null);
+  const [deleteNoticeModalOpen, setDeleteNoticeModalOpen] = useState(false);
+  const [noticeToDelete, setNoticeToDelete] = useState<NoticeItem | null>(null);
+  const [deletingNotice, setDeletingNotice] = useState(false);
+  const [casesForModal, setCasesForModal] = useState<Array<{ id: number; case_number: string; title: string }>>([]);
 
   // Debounced search term
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -210,6 +232,29 @@ export default function CasesPage() {
   useEffect(() => {
     fetchCases(1);
   }, [debouncedSearchTerm, statusFilter, priorityFilter, caseTypeFilter, paymentStatusFilter, sortBy, sortOrder, itemsPerPage]);
+
+  // Fetch cases for notice edit modal
+  useEffect(() => {
+    if (editNoticeModalOpen && casesForModal.length === 0) {
+      const fetchCasesForModal = async () => {
+        try {
+          const response = await apiFetch('/api/cases?limit=1000');
+          if (response.success && response.data.cases) {
+            setCasesForModal(
+              response.data.cases.map((c: Case) => ({
+                id: c.id,
+                case_number: c.case_number,
+                title: c.title,
+              }))
+            );
+          }
+        } catch (err) {
+          console.error('Error fetching cases for modal:', err);
+        }
+      };
+      fetchCasesForModal();
+    }
+  }, [editNoticeModalOpen, casesForModal.length]);
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     fetchCases(page);
@@ -719,19 +764,20 @@ export default function CasesPage() {
                     Created {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
                   <TableCell>Payment Status</TableCell>
+                  <TableCell>Notices</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : cases.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         No Cases found
                       </Typography>
@@ -739,8 +785,16 @@ export default function CasesPage() {
                   </TableRow>
                 ) : (
                   cases.map((case_) => (
-                    <TableRow key={case_.id}>
+                    <Fragment key={case_.id}>
+                    <TableRow>
                       <TableCell>
+                        <MuiIconButton
+                          size="small"
+                          onClick={() => setExpandedCaseId(expandedCaseId === case_.id ? null : case_.id)}
+                          sx={{ mr: 1 }}
+                        >
+                          {expandedCaseId === case_.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        </MuiIconButton>
                         <Box>
                           <Typography variant="subtitle2" gutterBottom>
                             {case_.title}
@@ -806,6 +860,24 @@ export default function CasesPage() {
                             ₹{parseFloat(case_.payment_amount.toString()).toFixed(2)}
                           </Typography>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Chip
+                            label={`${case_.notice_count || 0} Notice${(case_.notice_count || 0) !== 1 ? 's' : ''}`}
+                            size="small"
+                            color={case_.notice_count && case_.notice_count > 0 ? 'primary' : 'default'}
+                            variant="outlined"
+                          />
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<DescriptionIcon />}
+                            onClick={() => handleViewCase(case_)}
+                          >
+                            View
+                          </Button>
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -874,6 +946,34 @@ export default function CasesPage() {
                         </Box>
                       </TableCell>
                     </TableRow>
+                    {/* Expanded row for notices */}
+                    <TableRow>
+                      <TableCell colSpan={9} sx={{ py: 0, borderBottom: expandedCaseId === case_.id ? 1 : 0 }}>
+                        <Collapse in={expandedCaseId === case_.id} timeout="auto" unmountOnExit>
+                          <Box sx={{ py: 2 }}>
+                            <NoticesSection
+                              caseId={case_.id}
+                              caseNumber={case_.case_number}
+                              caseTitle={case_.title}
+                              expanded={expandedCaseId === case_.id}
+                              onAddNotice={() => {
+                                window.location.href = `/admin/notices?case_id=${case_.id}&action=create`;
+                              }}
+                              onEditNotice={(notice) => {
+                                setEditingNotice(notice);
+                                setEditNoticeModalOpen(true);
+                              }}
+                              onDeleteNotice={(notice) => {
+                                setNoticeToDelete(notice);
+                                setDeleteNoticeModalOpen(true);
+                              }}
+                              showActions={true}
+                            />
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                    </Fragment>
                   ))
                 )}
               </TableBody>
@@ -1060,6 +1160,52 @@ export default function CasesPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notice Edit Modal */}
+      <NoticeEditModal
+        open={editNoticeModalOpen}
+        notice={editingNotice}
+        cases={casesForModal}
+        onClose={() => {
+          setEditNoticeModalOpen(false);
+          setEditingNotice(null);
+        }}
+        onSuccess={() => {
+          // Optionally refresh cases to update notice count
+          fetchCases(pagination.currentPage);
+        }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        open={deleteNoticeModalOpen}
+        title="Delete Notice"
+        message="Are you sure you want to delete this notice? This action cannot be undone."
+        itemName={noticeToDelete ? `Notice ${noticeToDelete.notice_number} - ${noticeToDelete.subject || 'Untitled'}` : undefined}
+        onConfirm={async () => {
+          if (!noticeToDelete) return;
+          try {
+            setDeletingNotice(true);
+            dispatch(deleteNotice({ caseId: noticeToDelete.case_id, noticeId: noticeToDelete.id }));
+            // Wait a bit for Redux to update, then close modal
+            setTimeout(() => {
+              setDeleteNoticeModalOpen(false);
+              setNoticeToDelete(null);
+              setDeletingNotice(false);
+              // Refresh cases to update notice count
+              fetchCases(pagination.currentPage);
+            }, 500);
+          } catch (err) {
+            console.error('Error deleting notice:', err);
+            setDeletingNotice(false);
+          }
+        }}
+        onCancel={() => {
+          setDeleteNoticeModalOpen(false);
+          setNoticeToDelete(null);
+        }}
+        loading={deletingNotice}
+      />
     </>
   );
 }

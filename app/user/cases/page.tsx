@@ -50,6 +50,7 @@ interface Case {
   advocate_name?: string;
   payment_status?: string | null;
   payment_amount?: number | null;
+  notice_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -459,19 +460,20 @@ export default function UserCasesPage() {
                   >
                     {t('cases.created')} {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
+                  <TableCell>Notices</TableCell>
                   <TableCell>{t('cases.actions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : cases.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         {t('cases.noCases')}
                       </Typography>
@@ -508,6 +510,14 @@ export default function UserCasesPage() {
                         <Typography variant="body2">
                           {new Date(c.created_at).toLocaleDateString()}
                         </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={`${c.notice_count || 0} Notice${(c.notice_count || 0) !== 1 ? 's' : ''}`}
+                          size="small"
+                          color={c.notice_count && c.notice_count > 0 ? 'primary' : 'default'}
+                          variant="outlined"
+                        />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>

@@ -46,6 +46,7 @@ import { apiFetch } from '@/lib/api-client';
 import ReactQuillEditor from '@/components/ReactQuillEditor';
 import { useDebounce } from '@/lib/utils';
 import { InputAdornment } from '@mui/material';
+import NoticeStageBadge from '@/components/NoticeStageBadge';
 
 interface Case {
   id: number;
@@ -81,6 +82,7 @@ interface Notice {
   email_sent_at: string | null;
   email_sent_count: number;
   recipient_email: string | null;
+  notice_number: number;
   created_at: string;
   case?: Case;
 }
@@ -122,6 +124,7 @@ export default function NoticesPage() {
   const [content, setContent] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [date, setDate] = useState('');
+  const [noticeNumber, setNoticeNumber] = useState<number>(1);
   
   // Form validation errors
   const [formErrors, setFormErrors] = useState<{
@@ -151,6 +154,7 @@ export default function NoticesPage() {
 
   // Search and sort states
   const [searchTerm, setSearchTerm] = useState('');
+  const [noticeNumberFilter, setNoticeNumberFilter] = useState('');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('DESC');
 
@@ -163,7 +167,7 @@ export default function NoticesPage() {
 
   useEffect(() => {
     fetchNotices(1);
-  }, [debouncedSearchTerm, sortBy, sortOrder]);
+  }, [debouncedSearchTerm, sortBy, sortOrder, noticeNumberFilter]);
 
   const fetchCases = async () => {
     try {
@@ -191,6 +195,10 @@ export default function NoticesPage() {
       
       if (debouncedSearchTerm) {
         params.append('search', debouncedSearchTerm);
+      }
+      
+      if (noticeNumberFilter) {
+        params.append('notice_number', noticeNumberFilter);
       }
       
       const response = await apiFetch(`/api/notices?${params.toString()}`);
@@ -399,6 +407,7 @@ export default function NoticesPage() {
     setRecipientEmail(notice.recipient_email || '');
     // Set date from notice - convert to YYYY-MM-DD format for date input
     setDate(formatDateForInput(notice.date));
+    setNoticeNumber(notice.notice_number || 1);
     setFormErrors({});
     setEditDialogOpen(true);
   };
@@ -524,6 +533,7 @@ export default function NoticesPage() {
     setContent('');
     setRecipientEmail('');
     setDate('');
+    setNoticeNumber(1);
     setFormErrors({});
   };
 
@@ -577,7 +587,7 @@ export default function NoticesPage() {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 variant="outlined"
@@ -592,6 +602,22 @@ export default function NoticesPage() {
                   ),
                 }}
               />
+            </Grid>
+            <Grid item xs={12} md={2}>
+              <FormControl fullWidth>
+                <InputLabel>Notice Stage</InputLabel>
+                <Select
+                  value={noticeNumberFilter}
+                  label="Notice Number"
+                  onChange={(e) => setNoticeNumberFilter(e.target.value)}
+                >
+                  <MenuItem value="">All Notices</MenuItem>
+                  <MenuItem value="1">Notice 1</MenuItem>
+                  <MenuItem value="2">Notice 2</MenuItem>
+                  <MenuItem value="3">Notice 3</MenuItem>
+                  <MenuItem value="4">Notice 4+</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </CardContent>
@@ -629,19 +655,25 @@ export default function NoticesPage() {
                   >
                     Notice Date {sortBy === 'date' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('notice_number')}
+                  >
+                    Notice # {sortBy === 'notice_number' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : notices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         {searchTerm ? 'No notices found matching your search' : 'No notices found'}
                       </Typography>
@@ -708,6 +740,9 @@ export default function NoticesPage() {
                         <Typography variant="body2">
                           {formatDateForDisplay(notice.date)}
                         </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <NoticeStageBadge number={notice.notice_number || 1} />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -1247,6 +1282,23 @@ export default function NoticesPage() {
                 error={!!formErrors.recipientEmail}
                 helperText={formErrors.recipientEmail}
               />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Notice Number</InputLabel>
+                <Select
+                  value={noticeNumber}
+                  label="Notice Number"
+                  onChange={(e) => setNoticeNumber(parseInt(e.target.value as string) || 1)}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <MenuItem key={num} value={num}>
+                      Notice {num}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12}>

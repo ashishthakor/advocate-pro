@@ -71,6 +71,7 @@ interface Case {
   tracking_id?: string | null;
   user_name?: string;
   advocate_name?: string;
+  notice_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -408,19 +409,20 @@ export default function AdvocateCasesPage() {
                   >
                     Created {sortBy === 'created_at' && (sortOrder === 'ASC' ? '↑' : '↓')}
                   </TableCell>
+                  <TableCell>Notices</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : cases.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <Box textAlign="center" py={4}>
                         <AssignmentIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
                         <Typography variant="h6" color="text.secondary" gutterBottom>
@@ -475,6 +477,14 @@ export default function AdvocateCasesPage() {
                         <Typography variant="body2">
                           {formatDate(c.created_at)}
                         </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={`${c.notice_count || 0} Notice${(c.notice_count || 0) !== 1 ? 's' : ''}`}
+                          size="small"
+                          color={c.notice_count && c.notice_count > 0 ? 'primary' : 'default'}
+                          variant="outlined"
+                        />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>

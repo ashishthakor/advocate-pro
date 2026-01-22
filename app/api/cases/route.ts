@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { Case, User, Payment, sequelize } = require('@/models/init-models');
+const { Case, User, Payment, Notice, sequelize } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseCreated } from '@/lib/activity-logger';
 import { Op, col, literal } from 'sequelize';
@@ -167,6 +167,13 @@ export async function GET(request: NextRequest) {
       LIMIT 1
     )`);
 
+    // Get notice count for each case
+    const noticeCountSubquery = literal(`(
+      SELECT COUNT(*) FROM notices 
+      WHERE notices.case_id = cases.id 
+      AND notices.deleted_at IS NULL
+    )`);
+
     const cases = await Case.findAll({
       where: whereConditions,
       attributes: {
@@ -183,7 +190,8 @@ export async function GET(request: NextRequest) {
           [paymentStatusSubquery, 'payment_status'],
           [paymentAmountSubquery, 'payment_amount'],
           [transactionIdSubquery, 'transaction_id'],
-          [markedByNameSubquery, 'marked_by_name']
+          [markedByNameSubquery, 'marked_by_name'],
+          [noticeCountSubquery, 'notice_count']
         ]
       },
       include: includeConditions,
@@ -328,6 +336,8 @@ export async function GET(request: NextRequest) {
         // Payment transaction and marked by fields (from subquery)
         transaction_id: caseData.transaction_id || null,
         marked_by_name: caseData.marked_by_name || null,
+        // Notice count (from subquery)
+        notice_count: parseInt(caseData.notice_count) || 0,
       };
     });
 
