@@ -556,15 +556,18 @@ export default function FeesPage() {
                 <Stack spacing={1.5}>
                   <Typography variant="body2" color="text.secondary">
                     <strong>{t('fees.mediation.inrRegistrationFee')}</strong> – {t('fees.mediation.inrRegistrationAmount')};
+                    </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrUpto2Lakh')}</strong> – {t('fees.mediation.inrUpto2LakhAmount')};
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrAdminFee')}</strong> – {t('fees.mediation.inrAdminAmount')};
+                    <strong>{t('fees.mediation.inrAbove2Lakh')}</strong> – {t('fees.mediation.inrAbove2LakhAmount')};
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    <strong>{t('fees.mediation.inrAdminFees')}</strong> – {t('fees.mediation.inrAdminFeesAmount')};
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     <strong>{t('fees.mediation.inrPerSession')}</strong> – {t('fees.mediation.inrPerSessionAmount')};
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrMediatorFee')}</strong> – {t('fees.mediation.inrMediatorAmount')}.
                   </Typography>
                 </Stack>
               </Box>
@@ -616,7 +619,7 @@ export default function FeesPage() {
             </Paper>
 
             {/* Service Charges Section */}
-            {/* <Paper
+            <Paper
               elevation={0}
               sx={{
                 p: { xs: 3, md: 4 },
@@ -651,21 +654,21 @@ export default function FeesPage() {
                 >
                   <tbody>
                     <tr>
-                      <td>{t('fees.serviceCharges.caseFillingCharge')}</td>
-                      <td>{t('fees.serviceCharges.caseFillingAmount')}</td>
+                      <td>{t('fees.serviceCharges.upto2Lakh')}</td>
+                      <td>{t('fees.serviceCharges.upto2LakhAmount')}</td>
                     </tr>
                     <tr>
-                      <td>{t('fees.serviceCharges.administrationCost')}</td>
-                      <td>{t('fees.serviceCharges.administrationAmount')}</td>
+                      <td>{t('fees.serviceCharges.above2Lakh')}</td>
+                      <td>{t('fees.serviceCharges.above2LakhAmount')}</td>
                     </tr>
                     <tr>
-                      <td>{t('fees.serviceCharges.perSession')}</td>
-                      <td>{t('fees.serviceCharges.perSessionAmount')}</td>
+                      <td>{t('fees.serviceCharges.adminFees')}</td>
+                      <td>{t('fees.serviceCharges.adminFeesAmount')}</td>
                     </tr>
                   </tbody>
                 </Box>
               </Box>
-            </Paper> */}
+            </Paper>
 
             {/* Special Projects Section */}
             <Paper
