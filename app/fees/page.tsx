@@ -132,6 +132,7 @@ export default function FeesPage() {
             <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
             <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
             <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
+            <Button color="inherit" component={Link} href="/faq" sx={{ fontSize: '0.9rem' }}>{t('nav.faq')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -252,6 +253,11 @@ export default function FeesPage() {
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
               <ListItemText primary={t('nav.contact')} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/faq" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary={t('nav.faq')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -548,26 +554,79 @@ export default function FeesPage() {
                 {t('fees.mediation.description')}
               </Typography>
 
-              {/* Domestic Mediation/Conciliation */}
+              {/* Domestic Mediation & Conciliation – Fee Structure */}
               <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.mediation.domestic.title')}
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  {t('fees.mediation.domestic.intro')}
+                </Typography>
+                <Box sx={{ overflowX: 'auto', mb: 3 }}>
+                  <Box
+                    component="table"
+                    sx={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      '& th, & td': {
+                        border: (theme) => `1px solid ${theme.palette.divider}`,
+                        padding: 2,
+                        textAlign: 'left',
+                      },
+                      '& th': {
+                        bgcolor: 'background.default',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th>{t('fees.mediation.domestic.colDispute')}</th>
+                        <th>{t('fees.mediation.domestic.adminCharge')}</th>
+                        <th>{t('fees.mediation.domestic.successFee')}</th>
+                        <th>{t('fees.mediation.domestic.sessionFee')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier1.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier1.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier1.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier2.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier2.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier2.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier3.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier3.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier3.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                    </tbody>
+                  </Box>
+                </Box>
                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                  {t('fees.mediation.inrTitle')}
+                  {t('fees.mediation.domestic.notesTitle')}
                 </Typography>
                 <Stack spacing={1.5}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrRegistrationFee')}</strong> – {t('fees.mediation.inrRegistrationAmount')};
-                    </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrUpto2Lakh')}</strong> – {t('fees.mediation.inrUpto2LakhAmount')};
+                    • {t('fees.mediation.domestic.note1')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrAbove2Lakh')}</strong> – {t('fees.mediation.inrAbove2LakhAmount')};
+                    • {t('fees.mediation.domestic.note2')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrAdminFees')}</strong> – {t('fees.mediation.inrAdminFeesAmount')};
+                    • {t('fees.mediation.domestic.note3')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrPerSession')}</strong> – {t('fees.mediation.inrPerSessionAmount')};
+                    • {t('fees.mediation.domestic.note4')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    • {t('fees.mediation.domestic.note5')}
                   </Typography>
                 </Stack>
               </Box>
@@ -619,7 +678,7 @@ export default function FeesPage() {
             </Paper>
 
             {/* Service Charges Section */}
-            <Paper
+            {/* <Paper
               elevation={0}
               sx={{
                 p: { xs: 3, md: 4 },
@@ -668,7 +727,7 @@ export default function FeesPage() {
                   </tbody>
                 </Box>
               </Box>
-            </Paper>
+            </Paper> */}
 
             {/* Special Projects Section */}
             <Paper
@@ -874,6 +933,7 @@ export default function FeesPage() {
                 <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('common.services')}</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/faq" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.faq')}</Button>
                 <Button color="inherit" component={Link} href="/privacy-policy" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Privacy Policy</Button>
                 <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
                 <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
@@ -884,6 +944,7 @@ export default function FeesPage() {
                 <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/faq" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.faq')}</Button>
                 <Button color="inherit" component={Link} href="/privacy-policy" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Privacy Policy</Button>
                 <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
                 <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>

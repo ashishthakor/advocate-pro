@@ -26,6 +26,9 @@ import {
   alpha,
   Drawer,
   ListItemButton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -44,6 +47,7 @@ import {
   Support as SupportIcon,
   Menu as MenuIcon,
   Close as CloseIcon,
+  ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -54,7 +58,7 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/components/AuthProvider';
 import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
-import constitutionalMandateImage from '@/assets/images/constitutional-mandate-adr.png';
+import constitutionalMandateImage from '@/assets/images/constitutional-mandate-odr.png';
 import peaceQuoteImage from '@/assets/images/krishna-peace-quote.png';
 
 // Get image source string
@@ -65,6 +69,17 @@ const constitutionalMandateImageSrc = typeof constitutionalMandateImage === 'str
 const peaceQuoteImageSrc = typeof peaceQuoteImage === 'string' 
   ? peaceQuoteImage 
   : (peaceQuoteImage as any).src || peaceQuoteImage;
+
+// Landing page FAQ keys (from official FAQ doc); translations in languages/en, hi, gu, mr
+const LANDING_FAQ: { q: string; a: string }[] = [
+  { q: 'faq.l1.q', a: 'faq.l1.a' }, { q: 'faq.l2.q', a: 'faq.l2.a' }, { q: 'faq.l3.q', a: 'faq.l3.a' },
+  { q: 'faq.l4.q', a: 'faq.l4.a' }, { q: 'faq.l5.q', a: 'faq.l5.a' }, { q: 'faq.l6.q', a: 'faq.l6.a' },
+  { q: 'faq.l7.q', a: 'faq.l7.a' }, { q: 'faq.l8.q', a: 'faq.l8.a' }, { q: 'faq.l9.q', a: 'faq.l9.a' },
+  { q: 'faq.l10.q', a: 'faq.l10.a' }, { q: 'faq.l11.q', a: 'faq.l11.a' }, { q: 'faq.l12.q', a: 'faq.l12.a' },
+  { q: 'faq.l13.q', a: 'faq.l13.a' }, { q: 'faq.l14.q', a: 'faq.l14.a' }, { q: 'faq.l15.q', a: 'faq.l15.a' },
+  { q: 'faq.l16.q', a: 'faq.l16.a' }, { q: 'faq.l17.q', a: 'faq.l17.a' }, { q: 'faq.l18.q', a: 'faq.l18.a' },
+  { q: 'faq.l19.q', a: 'faq.l19.a' },
+];
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -183,6 +198,7 @@ export default function LandingPage() {
             <Button color="inherit" component={Link} href="/services" sx={{ fontSize: '0.9rem' }}>{t('common.services')}</Button>
             <Button color="inherit" component={Link} href="/about" sx={{ fontSize: '0.9rem' }}>{t('nav.about')}</Button>
             <Button color="inherit" component={Link} href="/contact" sx={{ fontSize: '0.9rem' }}>{t('nav.contact')}</Button>
+            <Button color="inherit" component={Link} href="/faq" sx={{ fontSize: '0.9rem' }}>{t('nav.faq')}</Button>
             <LanguageSelector />
             <motion.div
               whileHover={{ scale: 1.1 }}
@@ -303,6 +319,11 @@ export default function LandingPage() {
           <ListItem disablePadding>
             <ListItemButton component={Link} href="/contact" onClick={() => setMobileMenuOpen(false)}>
               <ListItemText primary={t('nav.contact')} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/faq" onClick={() => setMobileMenuOpen(false)}>
+              <ListItemText primary={t('nav.faq')} />
             </ListItemButton>
           </ListItem>
         </List>
@@ -1030,6 +1051,51 @@ export default function LandingPage() {
         </Container>
       </Box>
 
+      {/* Frequently Asked Questions (exact text from official FAQ document) */}
+      <Box sx={{ bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'background.default' : 'grey.50'), py: 8 }}>
+        <Container maxWidth="md">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+              {t('faq.landing.title')}
+            </Typography>
+            <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 4 }}>
+              {t('faq.landing.subtitle')}
+            </Typography>
+            <Paper elevation={0} sx={{ border: (t) => `1px solid ${t.palette.divider}`, borderRadius: 2, overflow: 'hidden' }}>
+              {LANDING_FAQ.map((item, idx) => (
+                <Accordion
+                  key={idx}
+                  disableGutters
+                  elevation={0}
+                  sx={{ '&:before': { display: 'none' }, borderBottom: idx < LANDING_FAQ.length - 1 ? (t) => `1px solid ${t.palette.divider}` : 'none' }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2, py: 1.5 }}>
+                    <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {t(item.q)}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails sx={{ px: 2, pb: 2, pt: 0 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
+                      {t(item.a)}
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Paper>
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Button component={Link} href="/faq" variant="outlined" sx={{ borderRadius: 2 }}>
+                {t('faq.viewAll')}
+              </Button>
+            </Box>
+          </motion.div>
+        </Container>
+      </Box>
+
       {/* CTA Section */}
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="md" sx={{ textAlign: 'center' }}>
@@ -1117,6 +1183,7 @@ export default function LandingPage() {
               <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.about')}</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/faq" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('nav.faq')}</Button>
                 <Button color="inherit" component={Link} href="/privacy-policy" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>Privacy Policy</Button>
                 <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.termsConditions')}</Button>
                 <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.875rem' }}>{t('home.fees')}</Button>
@@ -1146,6 +1213,7 @@ export default function LandingPage() {
                 <Button color="inherit" component={Link} href="/services" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('common.services')}</Button>
                 <Button color="inherit" component={Link} href="/about" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.about')}</Button>
                 <Button color="inherit" component={Link} href="/contact" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.contact')}</Button>
+                <Button color="inherit" component={Link} href="/faq" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('nav.faq')}</Button>
                 <Button color="inherit" component={Link} href="/privacy-policy" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>Privacy Policy</Button>
                 <Button color="inherit" component={Link} href="/terms-conditions" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.termsConditions')}</Button>
                 <Button color="inherit" component={Link} href="/fees" sx={{ justifyContent: 'flex-start', fontSize: '0.85rem', py: 0.5 }}>{t('home.fees')}</Button>

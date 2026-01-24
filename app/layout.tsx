@@ -13,9 +13,9 @@ import MetaPixel from '@/components/MetaPixel';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ADR Platform',
-  description: 'ARBITALK is a leading ADR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
-  keywords: 'ADR, ADR Platform, Mediation, Arbitration, Expert Determination, Business Disputes, Resolve Business Disputes faster',
+  title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ODR Platform',
+  description: 'ARBITALK is a leading ODR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
+  keywords: 'ODR, ODR Platform, Mediation, Arbitration, Expert Determination, Business Disputes, Resolve Business Disputes faster',
   authors: [{ name: 'ARBITALK', url: 'https://arbitalk.com' }],
   creator: 'ARBITALK',
   publisher: 'ARBITALK',
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
     apple: '/favicon.ico',
   },
   openGraph: {
-    title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ADR Platform',
-    description: 'ARBITALK is a leading ADR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
+    title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ODR Platform',
+    description: 'ARBITALK is a leading ODR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ADR Platform',
-    description: 'ARBITALK is a leading ADR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
+    title: 'ARBITALK - Resolve Business Disputes faster | Arbitalk ODR Platform',
+    description: 'ARBITALK is a leading ODR platform that provides a comprehensive suite of tools for resolving business disputes. We offer a range of services including mediation, arbitration, and expert determination.',
   },
   alternates: {
     canonical: 'https://arbitalk.com',
