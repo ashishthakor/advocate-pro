@@ -70,27 +70,15 @@ const peaceQuoteImageSrc = typeof peaceQuoteImage === 'string'
   ? peaceQuoteImage 
   : (peaceQuoteImage as any).src || peaceQuoteImage;
 
-// Exact FAQs from the official FAQ document (landing page only; /faq page is unchanged)
-const LANDING_FAQ: { question: string; answer: string }[] = [
-  { question: 'What is Arbitalk?', answer: 'Arbitalk is a technology-enabled Online Dispute Resolution (ODR) platform that helps individuals and businesses resolve disputes outside court through mediation, conciliation, arbitration, and structured negotiation.\n\nOur focus is simple: faster resolution, lower cost, confidentiality, and legally enforceable outcomes.' },
-  { question: 'Is Arbitalk a law firm?', answer: 'No.\n\nArbitalk is a neutral dispute resolution institution, not a traditional law firm. We do not represent either party. We facilitate a fair, structured, and lawful resolution process through independent neutrals and trained case managers.' },
-  { question: 'What types of disputes does Arbitalk handle?', answer: 'Arbitalk handles a wide range of disputes, including:\n• Commercial and contractual disputes\n• MSME and payment recovery matters\n• Service provider and client disputes\n• Employment and HR disputes\n• Startup and founder disputes\n• Consumer and service-related disputes\n\nCriminal and non-compoundable matters are not handled.' },
-  { question: 'How does the Arbitalk process start?', answer: 'The process starts with case understanding, not pressure. You share basic dispute details and documents. We assess feasibility, risks, and suitability before recommending the best resolution path. Not every dispute should be escalated—and we\'ll tell you that honestly.' },
-  { question: 'Will Arbitalk take every case?', answer: 'No.\n\nWe evaluate: Legal maintainability; Cost vs outcome practicality; Enforceability; Willingness of parties to engage. If a dispute is not sensible to pursue, we say so upfront.' },
-  { question: 'What resolution methods are available?', answer: 'Based on your dispute, we may suggest: Mediation—voluntary, collaborative, non-binding; Conciliation—assisted settlement with neutral guidance; Arbitration—binding and enforceable decision; Hybrid approaches—step-by-step escalation when required.\n\nYou are informed and involved at every stage.' },
-  { question: 'Is participation voluntary?', answer: 'Mediation and conciliation are voluntary. Arbitration may be voluntary or contractual. Clear consent is taken from all parties before proceedings begin.' },
-  { question: 'Are settlements legally valid and enforceable?', answer: 'Yes.\n\nMediated and conciliated settlements are legally enforceable. Arbitral awards carry the same legal weight as a court decree. All outcomes are properly documented and digitally authenticated.' },
-  { question: 'Are online proceedings legally recognised in India?', answer: 'Yes. Indian law recognises electronic records, digital signatures, and online dispute resolution proceedings. Arbitalk follows all applicable legal and procedural requirements.' },
-  { question: 'What if the other party does not respond or refuses?', answer: 'We follow a structured notice and follow-up process. If the opposite party does not cooperate: A formal closure or failure report is issued; You are guided on next legal options; Your documents and strategy remain protected.' },
-  { question: 'How long does the process usually take?', answer: 'Most disputes are resolved within 15 to 45 days, depending on: Complexity of the matter; Cooperation of parties; Chosen resolution method. We avoid unnecessary delays.' },
-  { question: 'Is Arbitalk expensive?', answer: 'Compared to traditional litigation—no. Our fees are: Transparent; Proportionate to dispute value; Explained upfront. No hidden costs. No surprises.' },
-  { question: 'How does Arbitalk ensure neutrality and fairness?', answer: 'Independent and impartial neutrals; Mandatory conflict-of-interest disclosures; Case managers handle only administrative facilitation; No guarantees or outcome pressure. Neutrality is non-negotiable for us.' },
-  { question: 'Is my information kept confidential?', answer: 'Absolutely.\n\nAll communications are confidential; Sessions are private and secure; Data is protected under applicable IT and privacy laws. What happens on Arbitalk stays on Arbitalk.' },
-  { question: 'Will Arbitalk or its neutrals give legal advice?', answer: 'No. Neutrals facilitate resolution; they do not act as legal advisors. You are free to consult your own lawyer at any stage.' },
-  { question: 'Do I need to be tech-savvy to use Arbitalk?', answer: 'Not at all. Our team assists with account setup, document uploads, and session scheduling. The process is designed for clarity, not complexity.' },
-  { question: 'Can I still go to court if resolution fails?', answer: 'Yes. Using Arbitalk does not restrict your legal rights. If resolution fails, you remain free to pursue arbitration or litigation.' },
-  { question: 'Does Arbitalk guarantee results?', answer: 'No—and anyone who promises that is being dishonest. What we guarantee is: A fair and lawful process; Clear strategy and transparency; Enforceable documentation. Outcomes depend on facts, law, and willingness of parties.' },
-  { question: 'Why should I choose Arbitalk instead of going straight to court?', answer: 'Courts decide cases. We resolve disputes. If your priority is speed, cost-efficiency, confidentiality, and practical closure—Arbitalk is the smarter first step.' },
+// Landing page FAQ keys (from official FAQ doc); translations in languages/en, hi, gu, mr
+const LANDING_FAQ: { q: string; a: string }[] = [
+  { q: 'faq.l1.q', a: 'faq.l1.a' }, { q: 'faq.l2.q', a: 'faq.l2.a' }, { q: 'faq.l3.q', a: 'faq.l3.a' },
+  { q: 'faq.l4.q', a: 'faq.l4.a' }, { q: 'faq.l5.q', a: 'faq.l5.a' }, { q: 'faq.l6.q', a: 'faq.l6.a' },
+  { q: 'faq.l7.q', a: 'faq.l7.a' }, { q: 'faq.l8.q', a: 'faq.l8.a' }, { q: 'faq.l9.q', a: 'faq.l9.a' },
+  { q: 'faq.l10.q', a: 'faq.l10.a' }, { q: 'faq.l11.q', a: 'faq.l11.a' }, { q: 'faq.l12.q', a: 'faq.l12.a' },
+  { q: 'faq.l13.q', a: 'faq.l13.a' }, { q: 'faq.l14.q', a: 'faq.l14.a' }, { q: 'faq.l15.q', a: 'faq.l15.a' },
+  { q: 'faq.l16.q', a: 'faq.l16.a' }, { q: 'faq.l17.q', a: 'faq.l17.a' }, { q: 'faq.l18.q', a: 'faq.l18.a' },
+  { q: 'faq.l19.q', a: 'faq.l19.a' },
 ];
 
 export default function LandingPage() {
@@ -1073,10 +1061,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
           >
             <Typography variant="h3" component="h2" textAlign="center" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-              Frequently Asked Questions
+              {t('faq.landing.title')}
             </Typography>
             <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 4 }}>
-              Clear answers about Arbitalk’s process, neutrality, and outcomes.
+              {t('faq.landing.subtitle')}
             </Typography>
             <Paper elevation={0} sx={{ border: (t) => `1px solid ${t.palette.divider}`, borderRadius: 2, overflow: 'hidden' }}>
               {LANDING_FAQ.map((item, idx) => (
@@ -1088,12 +1076,12 @@ export default function LandingPage() {
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2, py: 1.5 }}>
                     <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {item.question}
+                      {t(item.q)}
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails sx={{ px: 2, pb: 2, pt: 0 }}>
                     <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                      {item.answer}
+                      {t(item.a)}
                     </Typography>
                   </AccordionDetails>
                 </Accordion>
@@ -1101,7 +1089,7 @@ export default function LandingPage() {
             </Paper>
             <Box sx={{ textAlign: 'center', mt: 3 }}>
               <Button component={Link} href="/faq" variant="outlined" sx={{ borderRadius: 2 }}>
-                View all FAQs
+                {t('faq.viewAll')}
               </Button>
             </Box>
           </motion.div>

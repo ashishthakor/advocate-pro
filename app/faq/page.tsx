@@ -48,9 +48,11 @@ export default function FAQPage() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-  // FAQPage JSON-LD for search engines
+  // FAQPage JSON-LD for search engines (translated Q&A)
+  const faqPairs = FAQ_DATA.flatMap((c) => c.items).map((i) => ({ question: t(i.q), answer: t(i.a) }));
   const faqSchema = buildFAQSchema(
-    typeof window !== 'undefined' ? window.location.origin : 'https://arbitalk.com'
+    typeof window !== 'undefined' ? window.location.origin : 'https://arbitalk.com',
+    faqPairs
   );
 
   return (
@@ -366,7 +368,7 @@ export default function FAQPage() {
                   variant="h5"
                   sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}
                 >
-                  {category.title}
+                  {t(category.titleKey)}
                 </Typography>
                 <Paper
                   elevation={0}
@@ -396,7 +398,7 @@ export default function FAQPage() {
                         sx={{ px: 2, py: 1.5 }}
                       >
                         <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {item.question}
+                          {t(item.q)}
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails sx={{ px: 2, pb: 2, pt: 0 }}>
@@ -405,7 +407,7 @@ export default function FAQPage() {
                           color="text.secondary"
                           sx={{ whiteSpace: 'pre-line' }}
                         >
-                          {item.answer}
+                          {t(item.a)}
                         </Typography>
                         {/* Items with legalReview: true in lib/faq-data.ts are flagged for legal sign-off. */}
                       </AccordionDetails>
