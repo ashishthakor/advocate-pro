@@ -4,6 +4,7 @@ export default {
     'nav.home': 'Home',
     'nav.about': 'About',
     'nav.contact': 'Contact',
+    'nav.faq': 'FAQ',
     'nav.userLogin': 'User Login',
     'nav.advocateLogin': 'Neutral Login',
     'nav.adminLogin': 'Admin Login',
@@ -708,6 +709,12 @@ export default {
     'fees.importantLinks.cookie': 'Cookie Policy',
     'fees.importantLinks.standards': 'Standards',
     'fees.importantLinks.contact': 'Contact Us',
+
+    // FAQ Page
+    'faq.title': 'Frequently Asked Questions',
+    'faq.subtitle': 'Clear answers about Arbitalk’s dispute resolution process, fees, neutrals, legal validity, payments, and data protection.',
+    'faq.contactPrompt': 'Can’t find what you’re looking for?',
+    'faq.contactCta': 'Contact Us',
     
     // Stay Connected
     'fees.stayConnected.title': 'Stay Connected',

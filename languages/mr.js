@@ -4,6 +4,7 @@ export default {
     'nav.home': 'होम',
     'nav.about': 'आमच्याबद्दल',
     'nav.contact': 'संपर्क',
+    'nav.faq': 'FAQ',
     'nav.userLogin': 'वापरकर्ता लॉगिन',
     'nav.advocateLogin': 'वकील लॉगिन',
     'nav.adminLogin': 'प्रशासक लॉगिन',
