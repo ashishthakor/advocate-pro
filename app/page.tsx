@@ -58,7 +58,7 @@ import Logo from '@/components/Logo';
 import { useAuth } from '@/components/AuthProvider';
 import { Logout as LogoutIcon } from '@mui/icons-material';
 import "@/app/globals.css";
-import constitutionalMandateImage from '@/assets/images/constitutional-mandate-adr.png';
+import constitutionalMandateImage from '@/assets/images/constitutional-mandate-odr.png';
 import peaceQuoteImage from '@/assets/images/krishna-peace-quote.png';
 
 // Get image source string

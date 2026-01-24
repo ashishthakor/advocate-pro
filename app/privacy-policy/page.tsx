@@ -324,7 +324,7 @@ export default function PrivacyPolicyPage() {
                       1. Introduction
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
-                      Welcome to Arbitalk ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Alternative Dispute Resolution (ADR) platform.
+                      Welcome to Arbitalk ("we," "our," or "us"). We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Online Dispute Resolution (ODR) platform.
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
                       By accessing or using our services, you agree to the collection and use of information in accordance with this Privacy Policy. If you do not agree with our policies and practices, please do not use our services.
@@ -502,7 +502,7 @@ export default function PrivacyPolicyPage() {
                       10. Shipping Policy
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
-                      Arbitalk is a digital Alternative Dispute Resolution (ADR) platform. As we are a service-based platform, we do not ship physical products. All our services, including dispute case management, document storage, and case-related communications, are delivered electronically through our secure online platform.
+                      Arbitalk is a digital Online Dispute Resolution (ODR) platform. As we are a service-based platform, we do not ship physical products. All our services, including dispute case management, document storage, and case-related communications, are delivered electronically through our secure online platform.
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
                       Upon successful registration and payment, you will receive immediate access to our platform through your registered account. All case documents and communications are accessible through your secure account dashboard.
@@ -515,7 +515,7 @@ export default function PrivacyPolicyPage() {
                       11. Cancellation and Refunds Policy
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                      <strong>11.1 Payment and Service Description:</strong> Arbitalk charges a case registration fee of ₹3,000 for dispute case registration. This fee covers case registration, access to our ADR platform, document storage, and communication tools.
+                      <strong>11.1 Payment and Service Description:</strong> Arbitalk charges a case registration fee of ₹3,000 for dispute case registration. This fee covers case registration, access to our ODR platform, document storage, and communication tools.
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
                       <strong>11.2 Cancellation Policy:</strong> If you wish to cancel your case registration or request a refund, please contact us at {renderTextWithEmailLinks('support@arbitalk.com')} with your case number, payment transaction ID, and reason for cancellation. All cancellation and refund requests will be reviewed on a case-by-case basis.

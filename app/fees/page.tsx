@@ -554,26 +554,79 @@ export default function FeesPage() {
                 {t('fees.mediation.description')}
               </Typography>
 
-              {/* Domestic Mediation/Conciliation */}
+              {/* Domestic Mediation & Conciliation – Fee Structure */}
               <Box sx={{ mb: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+                  {t('fees.mediation.domestic.title')}
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                  {t('fees.mediation.domestic.intro')}
+                </Typography>
+                <Box sx={{ overflowX: 'auto', mb: 3 }}>
+                  <Box
+                    component="table"
+                    sx={{
+                      width: '100%',
+                      borderCollapse: 'collapse',
+                      '& th, & td': {
+                        border: (theme) => `1px solid ${theme.palette.divider}`,
+                        padding: 2,
+                        textAlign: 'left',
+                      },
+                      '& th': {
+                        bgcolor: 'background.default',
+                        fontWeight: 'bold',
+                      },
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th>{t('fees.mediation.domestic.colDispute')}</th>
+                        <th>{t('fees.mediation.domestic.adminCharge')}</th>
+                        <th>{t('fees.mediation.domestic.successFee')}</th>
+                        <th>{t('fees.mediation.domestic.sessionFee')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier1.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier1.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier1.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier2.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier2.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier2.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                      <tr>
+                        <td>{t('fees.mediation.domestic.tier3.heading')}</td>
+                        <td>{t('fees.mediation.domestic.tier3.admin')}</td>
+                        <td>{t('fees.mediation.domestic.tier3.success')}</td>
+                        <td>{t('fees.mediation.domestic.sessionAmount')}</td>
+                      </tr>
+                    </tbody>
+                  </Box>
+                </Box>
                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                  {t('fees.mediation.inrTitle')}
+                  {t('fees.mediation.domestic.notesTitle')}
                 </Typography>
                 <Stack spacing={1.5}>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrRegistrationFee')}</strong> – {t('fees.mediation.inrRegistrationAmount')};
-                    </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrUpto2Lakh')}</strong> – {t('fees.mediation.inrUpto2LakhAmount')};
+                    • {t('fees.mediation.domestic.note1')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrAbove2Lakh')}</strong> – {t('fees.mediation.inrAbove2LakhAmount')};
+                    • {t('fees.mediation.domestic.note2')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrAdminFees')}</strong> – {t('fees.mediation.inrAdminFeesAmount')};
+                    • {t('fees.mediation.domestic.note3')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    <strong>{t('fees.mediation.inrPerSession')}</strong> – {t('fees.mediation.inrPerSessionAmount')};
+                    • {t('fees.mediation.domestic.note4')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    • {t('fees.mediation.domestic.note5')}
                   </Typography>
                 </Stack>
               </Box>
@@ -625,7 +678,7 @@ export default function FeesPage() {
             </Paper>
 
             {/* Service Charges Section */}
-            <Paper
+            {/* <Paper
               elevation={0}
               sx={{
                 p: { xs: 3, md: 4 },
@@ -674,7 +727,7 @@ export default function FeesPage() {
                   </tbody>
                 </Box>
               </Box>
-            </Paper>
+            </Paper> */}
 
             {/* Special Projects Section */}
             <Paper

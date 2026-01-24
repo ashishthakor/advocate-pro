@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Frequently Asked Questions | Arbitalk',
   description:
     'Find answers about Arbitalk’s dispute resolution process, fees, neutral assignment, legal validity, payments, refunds, and confidentiality.',
-  keywords: 'FAQ, dispute resolution, arbitration, mediation, conciliation, Arbitalk, ADR',
+  keywords: 'FAQ, dispute resolution, arbitration, mediation, conciliation, Arbitalk, ODR',
   openGraph: {
     title: 'FAQ | Arbitalk – Dispute Resolution',
     description:
