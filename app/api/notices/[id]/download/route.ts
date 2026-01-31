@@ -80,7 +80,7 @@ export async function GET(
       // Use uploaded file
       s3Key = notice.uploaded_file_path;
       // Extract filename from path
-      const pathParts = s3Key.split('/');
+      const pathParts = (s3Key || "").split('/');
       fileName = pathParts[pathParts.length - 1];
       // Determine content type from file extension
       const ext = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));

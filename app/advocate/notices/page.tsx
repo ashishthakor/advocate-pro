@@ -53,6 +53,7 @@ interface Case {
   id: number;
   case_number: string;
   title: string;
+  advocate_id: number;
   user?: {
     id: number;
     name: string;
