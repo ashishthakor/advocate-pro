@@ -32,6 +32,8 @@ import {
   Snackbar,
   Pagination,
   useTheme,
+  Backdrop,
+  LinearProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -40,7 +42,12 @@ import {
   Delete as DeleteIcon,
   Description as DescriptionIcon,
   Edit as EditIcon,
+  Info as InfoIcon,
   Search as SearchIcon,
+  Upload as UploadIcon,
+  CloudUpload as CloudUploadIcon,
+  DeleteOutline as DeleteOutlineIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { apiFetch } from '@/lib/api-client';
 import ReactQuillEditor from '@/components/ReactQuillEditor';
@@ -81,6 +88,9 @@ interface Notice {
   email_sent_at: string | null;
   email_sent_count: number;
   recipient_email: string | null;
+  notice_stage: string | null;
+  tracking_id: string | null;
+  uploaded_file_path: string | null;
   created_at: string;
   case?: Case;
 }
@@ -122,6 +132,8 @@ export default function NoticesPage() {
   const [content, setContent] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [date, setDate] = useState('');
+  const [noticeStage, setNoticeStage] = useState('');
+  const [trackingId, setTrackingId] = useState('');
   
   // Form validation errors
   const [formErrors, setFormErrors] = useState<{
@@ -133,6 +145,7 @@ export default function NoticesPage() {
     content?: string;
     recipientEmail?: string;
     date?: string;
+    noticeStage?: string;
   }>({});
 
   // Email dialog states
@@ -146,12 +159,24 @@ export default function NoticesPage() {
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const [editFormLoading, setEditFormLoading] = useState(false);
   
+  // Upload dialog states
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  
+  // Delete confirmation dialog states
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noticeToDelete, setNoticeToDelete] = useState<Notice | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  
   // Track dialog open state for ReactQuill key
   const [createDialogKey, setCreateDialogKey] = useState(0);
 
   // Search and sort states
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
+  const [sortBy, setSortBy] = useState('updated_at');
   const [sortOrder, setSortOrder] = useState('DESC');
 
   // Debounced search term
@@ -173,6 +198,36 @@ export default function NoticesPage() {
       }
     } catch (err) {
       console.error('Failed to fetch cases:', err);
+    }
+  };
+
+  // Calculate next notice stage for a case
+  const calculateNextNoticeStage = async (caseId: number) => {
+    try {
+      const response = await apiFetch(`/api/notices?case_id=${caseId}&limit=1000`);
+      if (response.success) {
+        const notices = response.data.notices || [];
+        const count = notices.length;
+        // Return only the number part (next stage number)
+        return (count + 1).toString();
+      }
+    } catch (err) {
+      console.error('Failed to calculate notice stage:', err);
+    }
+    return '1';
+  };
+
+  // Handle case selection - auto-calculate notice stage
+  const handleCaseSelection = async (caseId: number | '') => {
+    setSelectedCaseId(caseId);
+    if (formErrors.selectedCaseId) {
+      setFormErrors({ ...formErrors, selectedCaseId: undefined });
+    }
+    if (caseId && typeof caseId === 'number') {
+      const nextStage = await calculateNextNoticeStage(caseId);
+      setNoticeStage(nextStage);
+    } else {
+      setNoticeStage('');
     }
   };
 
@@ -278,6 +333,12 @@ export default function NoticesPage() {
   };
 
   const handleCreateNotice = async () => {
+    if (uploadDialogOpen) {
+      // Handle file upload
+      await handleUploadNotice();
+      return;
+    }
+
     if (!validateForm()) {
       return;
     }
@@ -298,12 +359,15 @@ export default function NoticesPage() {
           content: content, // Don't trim HTML content - it may contain meaningful whitespace
           date: date.trim() || undefined,
           recipient_email: recipientEmail.trim() || null,
+          notice_stage: noticeStage.trim() ? `Notice-${noticeStage.trim()}` : undefined,
+          tracking_id: trackingId.trim() || null,
         }),
       });
 
       if (response.success) {
         setSuccess('Notice created successfully');
         setFormOpen(false);
+        setUploadDialogOpen(false);
         resetForm();
         // Increment key when dialog closes to force fresh mount on next open
         setCreateDialogKey(prev => prev + 1);
@@ -315,6 +379,56 @@ export default function NoticesPage() {
       setError('Failed to create notice');
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const handleUploadNotice = async () => {
+    if (!selectedCaseId || !uploadFile) {
+      setError('Please select a case and upload a file');
+      return;
+    }
+
+    try {
+      setUploadLoading(true);
+      setError('');
+      setFormErrors({});
+
+      const formData = new FormData();
+      formData.append('case_id', selectedCaseId.toString());
+      formData.append('file', uploadFile);
+      if (noticeStage.trim()) {
+        // Combine "Notice-" prefix with the number
+        formData.append('notice_stage', `Notice-${noticeStage.trim()}`);
+      }
+      if (trackingId.trim()) {
+        formData.append('tracking_id', trackingId.trim());
+      }
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/notices/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccess('Notice uploaded successfully');
+        setFormOpen(false);
+        setUploadDialogOpen(false);
+        handleFileRemove();
+        resetForm();
+        fetchNotices();
+      } else {
+        setError(data.message || 'Failed to upload notice');
+      }
+    } catch (err) {
+      setError('Failed to upload notice');
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -379,6 +493,7 @@ export default function NoticesPage() {
   };
 
   const handleEditNotice = async (notice: Notice) => {
+    if (notice.uploaded_file_path) return;
     // Reset form first to clear any previous data
     resetForm();
     
@@ -399,6 +514,10 @@ export default function NoticesPage() {
     setRecipientEmail(notice.recipient_email || '');
     // Set date from notice - convert to YYYY-MM-DD format for date input
     setDate(formatDateForInput(notice.date));
+    // Extract number from "Notice-X" format
+    const stageNumber = notice.notice_stage ? notice.notice_stage.replace(/^Notice-/, '') : '';
+    setNoticeStage(stageNumber);
+    setTrackingId(notice.tracking_id || '');
     setFormErrors({});
     setEditDialogOpen(true);
   };
@@ -424,6 +543,8 @@ export default function NoticesPage() {
           content: content, // Don't trim HTML content - it may contain meaningful whitespace
           date: date.trim() || undefined,
           recipient_email: recipientEmail.trim() || null,
+          notice_stage: noticeStage.trim() ? `Notice-${noticeStage.trim()}` : null,
+          tracking_id: trackingId.trim() || null,
         }),
       });
 
@@ -443,24 +564,32 @@ export default function NoticesPage() {
     }
   };
 
-  const handleDeleteNotice = async (notice: Notice) => {
-    if (!confirm('Are you sure you want to delete this notice?')) {
-      return;
-    }
+  const handleDeleteNotice = (notice: Notice) => {
+    setNoticeToDelete(notice);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteNotice = async () => {
+    if (!noticeToDelete || deleteLoading) return;
 
     try {
-      const response = await apiFetch(`/api/notices/${notice.id}`, {
+      setDeleteLoading(true);
+      const response = await apiFetch(`/api/notices/${noticeToDelete.id}`, {
         method: 'DELETE',
       });
 
       if (response.success) {
         setSuccess('Notice deleted successfully');
         fetchNotices();
+        setDeleteDialogOpen(false);
+        setNoticeToDelete(null);
       } else {
         setError(response.message || 'Failed to delete notice');
       }
     } catch (err) {
       setError('Failed to delete notice');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -515,6 +644,46 @@ export default function NoticesPage() {
     }
   };
 
+  // Handle file selection with preview
+  const handleFileSelect = (file: File) => {
+    setUploadFile(file);
+    // Create preview URL for PDF
+    if (file.type === 'application/pdf') {
+      const url = URL.createObjectURL(file);
+      setFilePreviewUrl(url);
+    } else {
+      setFilePreviewUrl(null);
+    }
+  };
+
+  // Handle file removal
+  const handleFileRemove = () => {
+    if (filePreviewUrl) {
+      URL.revokeObjectURL(filePreviewUrl);
+    }
+    setUploadFile(null);
+    setFilePreviewUrl(null);
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file && (file.type === 'application/pdf' || file.name.endsWith('.doc') || file.name.endsWith('.docx'))) {
+      handleFileSelect(file);
+    }
+  };
+
   const resetForm = () => {
     setSelectedCaseId('');
     setRespondentName('');
@@ -524,12 +693,17 @@ export default function NoticesPage() {
     setContent('');
     setRecipientEmail('');
     setDate('');
+    setNoticeStage('');
+    setTrackingId('');
+    handleFileRemove();
     setFormErrors({});
   };
 
   const handleCancelForm = () => {
     resetForm();
     setFormOpen(false);
+    setUploadDialogOpen(false);
+    setUploadFile(null);
     // Increment key when dialog closes to force fresh mount on next open
     setCreateDialogKey(prev => prev + 1);
   };
@@ -549,9 +723,24 @@ export default function NoticesPage() {
             Refresh
           </Button>
           <Button
+            variant="outlined"
+            startIcon={<UploadIcon />}
+            onClick={() => {
+              resetForm();
+              setFormOpen(true);
+              setUploadDialogOpen(true);
+            }}
+          >
+            Upload Notice
+          </Button>
+          <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={() => setFormOpen(true)}
+            onClick={() => {
+              resetForm();
+              setFormOpen(true);
+              setUploadDialogOpen(false);
+            }}
           >
             Create Notice
           </Button>
@@ -625,6 +814,18 @@ export default function NoticesPage() {
                   <TableCell>File Name</TableCell>
                   <TableCell 
                     sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('notice_stage')}
+                  >
+                    Notice Stage {sortBy === 'notice_stage' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
+                    onClick={() => handleSort('tracking_id')}
+                  >
+                    Tracking ID {sortBy === 'tracking_id' && (sortOrder === 'ASC' ? '↑' : '↓')}
+                  </TableCell>
+                  <TableCell 
+                    sx={{ cursor: 'pointer', userSelect: 'none' }}
                     onClick={() => handleSort('date')}
                   >
                     Notice Date {sortBy === 'date' && (sortOrder === 'ASC' ? '↑' : '↓')}
@@ -635,13 +836,13 @@ export default function NoticesPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
                 ) : notices.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} sx={{ textAlign: 'center', py: 4 }}>
+                    <TableCell colSpan={8} sx={{ textAlign: 'center', py: 4 }}>
                       <Typography variant="body2" color="text.secondary">
                         {searchTerm ? 'No notices found matching your search' : 'No notices found'}
                       </Typography>
@@ -683,7 +884,22 @@ export default function NoticesPage() {
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {notice.pdf_filename ? (
+                        {notice.uploaded_file_path ? (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: 'primary.main',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              '&:hover': {
+                                textDecoration: 'none',
+                              },
+                            }}
+                            onClick={() => handleDownloadPDF(notice)}
+                          >
+                            {notice.uploaded_file_path.split('/').pop() || 'Uploaded File'}
+                          </Typography>
+                        ) : notice.pdf_filename ? (
                           <Typography
                             variant="body2"
                             sx={{
@@ -706,20 +922,38 @@ export default function NoticesPage() {
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
+                          {notice.notice_stage || 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {notice.tracking_id || 'N/A'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
                           {formatDateForDisplay(notice.date)}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Tooltip title="Edit Notice">
-                            <IconButton
-                              size="small"
-                              color="primary"
-                              onClick={() => handleEditNotice(notice)}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
+                          {notice.uploaded_file_path ? (
+                            <Tooltip title="This is uploaded notice you can't edit">
+                              <IconButton size="small" color="info">
+                                <InfoIcon />
+                              </IconButton>
+                            </Tooltip>
+                          ) : (
+                            <Tooltip title="Edit Notice">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => handleEditNotice(notice)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                           {/* <Tooltip title="Send Email">
                             <IconButton
                               size="small"
@@ -769,10 +1003,10 @@ export default function NoticesPage() {
         open={formOpen} 
         onClose={(event, reason) => {
           // Prevent closing when loading or when clicking backdrop during API call
-          if (formLoading) {
+          if (formLoading || uploadLoading) {
             return;
           }
-          if (reason === 'backdropClick' && formLoading) {
+          if (reason === 'backdropClick' && (formLoading || uploadLoading)) {
             return;
           }
           handleCancelForm();
@@ -785,25 +1019,206 @@ export default function NoticesPage() {
           }
         }}
       >
-        <DialogTitle>Create Notice</DialogTitle>
+        <DialogTitle>{uploadDialogOpen ? 'Upload Notice' : 'Create Notice'}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
+            {uploadDialogOpen ? (
+              <>
+                {/* Upload mode - only show file upload, case, notice stage, and tracking ID */}
+                <Grid item xs={12}>
+                  {/* File Upload Area */}
+                  <Box
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    sx={{
+                      p: 3,
+                      textAlign: 'center',
+                      border: '2px dashed',
+                      borderColor: isDragging ? 'primary.main' : 'primary.light',
+                      borderRadius: 2,
+                      bgcolor: isDragging ? 'primary.light' : 'action.hover',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      position: 'relative',
+                      mb: uploadFile ? 2 : 0,
+                    }}
+                    onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file';
+                  input.accept = '.pdf,.doc,.docx';
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      handleFileSelect(file);
+                    }
+                  };
+                  input.click();
+                }}
+                  >
+                    {!uploadFile ? (
+                      <>
+                        <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="h6" gutterBottom>
+                          {isDragging ? 'Drop File Here' : 'Click to Select File or Drag & Drop'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Only PDF, DOC, and DOCX files are allowed. Max size: 10MB
+                        </Typography>
+                      </>
+                    ) : (
+                      <Box sx={{ textAlign: 'left' }}>
+                        <Card variant="outlined" sx={{ p: 2 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <DescriptionIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle1">{uploadFile.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {(uploadFile.size / 1024 / 1024).toFixed(2)} MB
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              {filePreviewUrl && (
+                                <Tooltip title="Preview">
+                                  <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(filePreviewUrl, '_blank');
+                                    }}
+                                    color="primary"
+                                  >
+                                    <VisibilityIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
+                              <Tooltip title="Remove">
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFileRemove();
+                                  }}
+                                  color="error"
+                                >
+                                  <DeleteOutlineIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </Box>
+                        </Card>
+                      </Box>
+                    )}
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl 
+                    fullWidth 
+                    required 
+                    error={!!formErrors.selectedCaseId}
+                    disabled={uploadLoading}
+                  >
+                    <InputLabel>Select Case</InputLabel>
+                    <Select
+                      value={selectedCaseId}
+                      label="Select Case"
+                      onChange={(e) => {
+                        handleCaseSelection(e.target.value as number);
+                      }}
+                      disabled={uploadLoading}
+                      sx={{
+                        bgcolor: isDarkMode ? '#383838' : 'background.paper',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: isDarkMode ? theme.palette.divider : undefined,
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: isDarkMode ? theme.palette.divider : undefined,
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: isDarkMode ? theme.palette.primary.main : undefined,
+                        },
+                      }}
+                    >
+                      {cases.map((case_) => (
+                        <MenuItem key={case_.id} value={case_.id}>
+                          {case_.title} (#{case_.case_number})
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {formErrors.selectedCaseId && (
+                      <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>
+                        {formErrors.selectedCaseId}
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Notice Stage"
+                    value={noticeStage}
+                    onChange={(e) => {
+                      // Only allow numbers
+                      const value = e.target.value.replace(/\D/g, '');
+                      setNoticeStage(value);
+                      if (formErrors.noticeStage) {
+                        setFormErrors({ ...formErrors, noticeStage: undefined });
+                      }
+                    }}
+                    disabled={uploadLoading}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                            Notice-
+                          </Typography>
+                        </InputAdornment>
+                      ),
+                    }}
+                    error={!!formErrors.noticeStage}
+                    helperText={formErrors.noticeStage || 'Auto-filled based on existing notices. You can edit the number if needed.'}
+                    placeholder="1"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Tracking ID (Optional)"
+                    value={trackingId}
+                    onChange={(e) => {
+                      setTrackingId(e.target.value);
+                    }}
+                    disabled={uploadLoading}
+                    helperText="Optional tracking ID for the sent notice"
+                  />
+                </Grid>
+                {uploadLoading && (
+                  <Grid item xs={12}>
+                    <LinearProgress />
+                    <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 1 }}>
+                      Uploading notice file...
+                    </Typography>
+                  </Grid>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Create mode - show all fields */}
             <Grid item xs={12}>
               <FormControl 
                 fullWidth 
                 required 
                 error={!!formErrors.selectedCaseId}
+                disabled={formLoading || uploadLoading}
               >
                 <InputLabel>Select Case</InputLabel>
                 <Select
                   value={selectedCaseId}
                   label="Select Case"
                   onChange={(e) => {
-                    setSelectedCaseId(e.target.value as number);
-                    if (formErrors.selectedCaseId) {
-                      setFormErrors({ ...formErrors, selectedCaseId: undefined });
-                    }
+                    handleCaseSelection(e.target.value as number);
                   }}
+                  disabled={formLoading || uploadLoading}
                   sx={{
                     bgcolor: isDarkMode ? '#383838' : 'background.paper',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -831,174 +1246,225 @@ export default function NoticesPage() {
               </FormControl>
             </Grid>
 
-            {selectedCase && (
-              <Grid item xs={12}>
-                <Card 
-                  variant="outlined" 
-                  sx={{ 
-                    p: 2, 
-                    bgcolor: (theme) => theme.palette.mode === 'dark' 
-                      ? 'rgba(255, 255, 255, 0.05)' 
-                      : 'grey.50'
-                  }}
-                >
-                  <Typography variant="subtitle2" gutterBottom>
-                    Applicant Details (Auto-populated from Case)
+                {selectedCase && (
+                  <Grid item xs={12}>
+                    <Card 
+                      variant="outlined" 
+                      sx={{ 
+                        p: 2, 
+                        bgcolor: (theme) => theme.palette.mode === 'dark' 
+                          ? 'rgba(255, 255, 255, 0.05)' 
+                          : 'grey.50'
+                      }}
+                    >
+                      <Typography variant="subtitle2" gutterBottom>
+                        Applicant Details (Auto-populated from Case)
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 0.5 }}>
+                        <strong>Name:</strong> {selectedCase.user?.name || selectedCase.user_name || 'N/A'}
+                      </Typography>
+                      {selectedCase.user?.user_type === 'corporate' && selectedCase.user?.company_name && (
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                          <strong>Company:</strong> {selectedCase.user.company_name}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" sx={{ mb: 0.5 }}>
+                        <strong>Address:</strong> {selectedCase.user?.address || selectedCase.user_address || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 0.5 }}>
+                        <strong>Email:</strong> {selectedCase.user?.email || selectedCase.user_email || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Phone:</strong> {selectedCase.user?.phone || selectedCase.user_phone || 'N/A'}
+                      </Typography>
+                    </Card>
+                  </Grid>
+                )}
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Respondent Name"
+                    value={respondentName}
+                    onChange={(e) => {
+                      setRespondentName(e.target.value);
+                      if (formErrors.respondentName) {
+                        setFormErrors({ ...formErrors, respondentName: undefined });
+                      }
+                    }}
+                    required
+                    error={!!formErrors.respondentName}
+                    helperText={formErrors.respondentName}
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Respondent Address"
+                    value={respondentAddress}
+                    onChange={(e) => {
+                      setRespondentAddress(e.target.value);
+                      if (formErrors.respondentAddress) {
+                        setFormErrors({ ...formErrors, respondentAddress: undefined });
+                      }
+                    }}
+                    multiline
+                    rows={3}
+                    required
+                    error={!!formErrors.respondentAddress}
+                    helperText={formErrors.respondentAddress}
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Respondent Pincode"
+                    value={respondentPincode}
+                    onChange={(e) => {
+                      setRespondentPincode(e.target.value);
+                      if (formErrors.respondentPincode) {
+                        setFormErrors({ ...formErrors, respondentPincode: undefined });
+                      }
+                    }}
+                    required
+                    error={!!formErrors.respondentPincode}
+                    helperText={formErrors.respondentPincode || 'Must be 6 digits'}
+                    inputProps={{ maxLength: 6 }}
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Subject"
+                    value={subject}
+                    onChange={(e) => {
+                      setSubject(e.target.value);
+                      if (formErrors.subject) {
+                        setFormErrors({ ...formErrors, subject: undefined });
+                      }
+                    }}
+                    required
+                    error={!!formErrors.subject}
+                    helperText={formErrors.subject || 'Subject line for the notice'}
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Date (Optional)"
+                    value={date}
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      if (formErrors.date) {
+                        setFormErrors({ ...formErrors, date: undefined });
+                      }
+                    }}
+                    error={!!formErrors.date}
+                    helperText={formErrors.date || 'Format: DD-MM-YYYY (e.g., 06-11-2025). Leave empty to use current date.'}
+                    placeholder="DD-MM-YYYY"
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Recipient Email (Optional)"
+                    value={recipientEmail}
+                    onChange={(e) => {
+                      setRecipientEmail(e.target.value);
+                      if (formErrors.recipientEmail) {
+                        setFormErrors({ ...formErrors, recipientEmail: undefined });
+                      }
+                    }}
+                    type="email"
+                    error={!!formErrors.recipientEmail}
+                    helperText={formErrors.recipientEmail}
+                    disabled={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                    Content <span style={{ color: 'red' }}>*</span>
                   </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Name:</strong> {selectedCase.user?.name || selectedCase.user_name || 'N/A'}
-                  </Typography>
-                  {selectedCase.user?.user_type === 'corporate' && selectedCase.user?.company_name && (
-                    <Typography variant="body2" sx={{ mb: 0.5 }}>
-                      <strong>Company:</strong> {selectedCase.user.company_name}
-                    </Typography>
-                  )}
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Address:</strong> {selectedCase.user?.address || selectedCase.user_address || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>Email:</strong> {selectedCase.user?.email || selectedCase.user_email || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Phone:</strong> {selectedCase.user?.phone || selectedCase.user_phone || 'N/A'}
-                  </Typography>
-                </Card>
-              </Grid>
+                  <ReactQuillEditor
+                    key={`create-${createDialogKey}`} // Stable key that only changes when dialog opens/closes
+                    value={content}
+                    onChange={(value) => {
+                      setContent(value);
+                      if (formErrors.content) {
+                        setFormErrors({ ...formErrors, content: undefined });
+                      }
+                    }}
+                    placeholder="Enter notice content..."
+                    error={!!formErrors.content}
+                    helperText={formErrors.content || 'This content will be included in the notice PDF'}
+                    readOnly={formLoading || uploadLoading}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Notice Stage"
+                    value={noticeStage}
+                    onChange={(e) => {
+                      // Only allow numbers
+                      const value = e.target.value.replace(/\D/g, '');
+                      setNoticeStage(value);
+                      if (formErrors.noticeStage) {
+                        setFormErrors({ ...formErrors, noticeStage: undefined });
+                      }
+                    }}
+                    disabled={formLoading || uploadLoading}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                            Notice-
+                          </Typography>
+                        </InputAdornment>
+                      ),
+                    }}
+                    error={!!formErrors.noticeStage}
+                    helperText={formErrors.noticeStage || 'Auto-filled based on existing notices. You can edit the number if needed.'}
+                    placeholder="1"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Tracking ID (Optional)"
+                    value={trackingId}
+                    onChange={(e) => {
+                      setTrackingId(e.target.value);
+                    }}
+                    disabled={formLoading || uploadLoading}
+                    helperText="Optional tracking ID for the sent notice"
+                  />
+                </Grid>
+              </>
             )}
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Respondent Name"
-                value={respondentName}
-                onChange={(e) => {
-                  setRespondentName(e.target.value);
-                  if (formErrors.respondentName) {
-                    setFormErrors({ ...formErrors, respondentName: undefined });
-                  }
-                }}
-                required
-                error={!!formErrors.respondentName}
-                helperText={formErrors.respondentName}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Respondent Address"
-                value={respondentAddress}
-                onChange={(e) => {
-                  setRespondentAddress(e.target.value);
-                  if (formErrors.respondentAddress) {
-                    setFormErrors({ ...formErrors, respondentAddress: undefined });
-                  }
-                }}
-                multiline
-                rows={3}
-                required
-                error={!!formErrors.respondentAddress}
-                helperText={formErrors.respondentAddress}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Respondent Pincode"
-                value={respondentPincode}
-                onChange={(e) => {
-                  setRespondentPincode(e.target.value);
-                  if (formErrors.respondentPincode) {
-                    setFormErrors({ ...formErrors, respondentPincode: undefined });
-                  }
-                }}
-                required
-                error={!!formErrors.respondentPincode}
-                helperText={formErrors.respondentPincode || 'Must be 6 digits'}
-                inputProps={{ maxLength: 6 }}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Subject"
-                value={subject}
-                onChange={(e) => {
-                  setSubject(e.target.value);
-                  if (formErrors.subject) {
-                    setFormErrors({ ...formErrors, subject: undefined });
-                  }
-                }}
-                required
-                error={!!formErrors.subject}
-                helperText={formErrors.subject || 'Subject line for the notice'}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Date (Optional)"
-                value={date}
-                onChange={(e) => {
-                  setDate(e.target.value);
-                  if (formErrors.date) {
-                    setFormErrors({ ...formErrors, date: undefined });
-                  }
-                }}
-                error={!!formErrors.date}
-                helperText={formErrors.date || 'Format: DD-MM-YYYY (e.g., 06-11-2025). Leave empty to use current date.'}
-                placeholder="DD-MM-YYYY"
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Recipient Email (Optional)"
-                value={recipientEmail}
-                onChange={(e) => {
-                  setRecipientEmail(e.target.value);
-                  if (formErrors.recipientEmail) {
-                    setFormErrors({ ...formErrors, recipientEmail: undefined });
-                  }
-                }}
-                type="email"
-                error={!!formErrors.recipientEmail}
-                helperText={formErrors.recipientEmail}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                Content <span style={{ color: 'red' }}>*</span>
-              </Typography>
-              <ReactQuillEditor
-                key={`create-${createDialogKey}`} // Stable key that only changes when dialog opens/closes
-                value={content}
-                onChange={(value) => {
-                  setContent(value);
-                  if (formErrors.content) {
-                    setFormErrors({ ...formErrors, content: undefined });
-                  }
-                }}
-                placeholder="Enter notice content..."
-                error={!!formErrors.content}
-                helperText={formErrors.content || 'This content will be included in the notice PDF'}
-              />
-            </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancelForm} disabled={formLoading}>Cancel</Button>
+          <Button onClick={handleCancelForm} disabled={formLoading || uploadLoading}>Cancel</Button>
           <Button
             onClick={handleCreateNotice}
             variant="contained"
-            disabled={formLoading}
+            disabled={formLoading || uploadLoading}
           >
-            {formLoading ? <CircularProgress size={24} /> : 'Create Notice'}
+            {(formLoading || uploadLoading) ? <CircularProgress size={24} /> : (uploadDialogOpen ? 'Upload Notice' : 'Create Notice')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1008,10 +1474,10 @@ export default function NoticesPage() {
         open={editDialogOpen} 
         onClose={(event, reason) => {
           // Prevent closing when loading or when clicking backdrop during API call
-          if (editFormLoading) {
+          if (editFormLoading || uploadLoading) {
             return;
           }
-          if (reason === 'backdropClick' && editFormLoading) {
+          if (reason === 'backdropClick' && (editFormLoading || uploadLoading)) {
             return;
           }
           setEditDialogOpen(false);
@@ -1030,7 +1496,7 @@ export default function NoticesPage() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
-              <FormControl fullWidth required error={!!formErrors.selectedCaseId}>
+              <FormControl fullWidth required error={!!formErrors.selectedCaseId} disabled={editFormLoading || uploadLoading}>
                 <InputLabel>Select Case</InputLabel>
                 <Select
                   value={selectedCaseId}
@@ -1040,6 +1506,7 @@ export default function NoticesPage() {
                       setFormErrors({ ...formErrors, selectedCaseId: undefined });
                     }
                   }}
+                  disabled={formLoading || uploadLoading}
                   label="Select Case"
                   sx={{
                     bgcolor: isDarkMode ? '#383838' : 'background.paper',
@@ -1155,6 +1622,7 @@ export default function NoticesPage() {
                 required
                 error={!!formErrors.respondentName}
                 helperText={formErrors.respondentName}
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1173,6 +1641,7 @@ export default function NoticesPage() {
                 error={!!formErrors.respondentPincode}
                 helperText={formErrors.respondentPincode || 'Must be 6 digits'}
                 inputProps={{ maxLength: 6 }}
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1192,6 +1661,7 @@ export default function NoticesPage() {
                 required
                 error={!!formErrors.respondentAddress}
                 helperText={formErrors.respondentAddress}
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1209,6 +1679,7 @@ export default function NoticesPage() {
                 required
                 error={!!formErrors.subject}
                 helperText={formErrors.subject || 'Subject line for the notice'}
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1229,6 +1700,7 @@ export default function NoticesPage() {
                 }}
                 error={!!formErrors.date}
                 helperText={formErrors.date || 'Leave empty to use current date'}
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1246,6 +1718,49 @@ export default function NoticesPage() {
                 type="email"
                 error={!!formErrors.recipientEmail}
                 helperText={formErrors.recipientEmail}
+                disabled={formLoading || uploadLoading}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Notice Stage"
+                value={noticeStage}
+                onChange={(e) => {
+                  // Only allow numbers
+                  const value = e.target.value.replace(/\D/g, '');
+                  setNoticeStage(value);
+                  if (formErrors.noticeStage) {
+                    setFormErrors({ ...formErrors, noticeStage: undefined });
+                  }
+                }}
+                disabled={formLoading || uploadLoading}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+                        Notice-
+                      </Typography>
+                    </InputAdornment>
+                  ),
+                }}
+                error={!!formErrors.noticeStage}
+                helperText={formErrors.noticeStage || 'Auto-filled based on existing notices. You can edit the number if needed.'}
+                placeholder="1"
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Tracking ID (Optional)"
+                value={trackingId}
+                onChange={(e) => {
+                  setTrackingId(e.target.value);
+                }}
+                helperText="Optional tracking ID for the sent notice"
+                disabled={formLoading || uploadLoading}
               />
             </Grid>
 
@@ -1265,6 +1780,7 @@ export default function NoticesPage() {
                 placeholder="Enter notice content..."
                 error={!!formErrors.content}
                 helperText={formErrors.content || 'This content will be included in the notice PDF'}
+                readOnly={editFormLoading || uploadLoading}
               />
             </Grid>
           </Grid>
@@ -1272,20 +1788,20 @@ export default function NoticesPage() {
         <DialogActions>
           <Button 
             onClick={() => {
-              if (!editFormLoading) {
+              if (!editFormLoading && !uploadLoading) {
                 setEditDialogOpen(false);
                 setEditingNotice(null);
                 resetForm();
               }
             }}
-            disabled={editFormLoading}
+            disabled={editFormLoading || uploadLoading}
           >
             Cancel
           </Button>
           <Button
             onClick={handleUpdateNotice}
             variant="contained"
-            disabled={editFormLoading}
+            disabled={editFormLoading || uploadLoading}
           >
             {editFormLoading ? <CircularProgress size={24} /> : 'Update Notice'}
           </Button>
@@ -1323,6 +1839,59 @@ export default function NoticesPage() {
             disabled={emailLoading || !emailAddress}
           >
             {emailLoading ? <CircularProgress size={24} /> : 'Send Email'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => {
+          if (!deleteLoading) {
+            setDeleteDialogOpen(false);
+            setNoticeToDelete(null);
+          }
+        }}
+        PaperProps={{
+          sx: {
+            bgcolor: 'background.paper',
+          }
+        }}
+      >
+        <DialogTitle>Delete Notice</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this notice?
+            {noticeToDelete && (
+              <>
+                <br />
+                <strong>Notice Stage:</strong> {noticeToDelete.notice_stage || 'N/A'}
+                <br />
+                <strong>Case:</strong> {noticeToDelete.case?.title || noticeToDelete.case_id}
+              </>
+            )}
+          </Typography>
+          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+            This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => {
+              setDeleteDialogOpen(false);
+              setNoticeToDelete(null);
+            }}
+            disabled={deleteLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDeleteNotice}
+            variant="contained"
+            color="error"
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -17,10 +17,11 @@ export async function GET(
       );
     }
 
-    // Only admin can download notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin, advocate, and user roles
+    const allowedRoles = ['admin', 'advocate', 'user'];
+    if (!allowedRoles.includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Invalid role.' },
         { status: 403 }
       );
     }
@@ -32,7 +33,14 @@ export async function GET(
       where: { 
         id: noticeId,
         deleted_at: null // Only allow downloading non-deleted notices
-      } 
+      },
+      include: [
+        {
+          model: require('@/models/init-models').Case,
+          as: 'case',
+          required: true
+        }
+      ]
     });
 
     if (!notice) {
@@ -42,17 +50,60 @@ export async function GET(
       );
     }
 
-    if (!notice.pdf_filename) {
+    // Role-based access restrictions
+    // For user role: only allow downloading notices for their own cases
+    if (authResult.user.role === 'user') {
+      if (notice.case.user_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. This notice does not belong to your cases.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // For advocate role: only allow downloading notices for cases assigned to them
+    if (authResult.user.role === 'advocate') {
+      if (notice.case.advocate_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. You are not assigned to this case.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Determine which file to download (uploaded file takes priority)
+    let s3Key: string | null = null;
+    let fileName: string | null = null;
+    let contentType = 'application/pdf';
+
+    if (notice.uploaded_file_path) {
+      // Use uploaded file
+      s3Key = notice.uploaded_file_path;
+      // Extract filename from path
+      const pathParts = s3Key.split('/');
+      fileName = pathParts[pathParts.length - 1];
+      // Determine content type from file extension
+      const ext = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+      if (ext === '.doc' || ext === '.docx') {
+        contentType = ext === '.doc' ? 'application/msword' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      }
+    } else if (notice.pdf_filename) {
+      // Fallback to generated PDF
+      const { bucketName, pathPrefix } = parseBucketConfig();
+      const noticesPrefix = `${pathPrefix}notices/`;
+      s3Key = `${noticesPrefix}${notice.pdf_filename}`;
+      fileName = notice.pdf_filename;
+    }
+
+    if (!s3Key || !fileName) {
       return NextResponse.json(
-        { success: false, message: 'PDF not found for this notice' },
+        { success: false, message: 'File not found for this notice' },
         { status: 404 }
       );
     }
 
-    // Get PDF from S3
+    // Get file from S3
     const { bucketName, pathPrefix } = parseBucketConfig();
-    const noticesPrefix = `${pathPrefix}notices/`;
-    const s3Key = `${noticesPrefix}${notice.pdf_filename}`;
     
     const s3 = new AWS.S3({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -66,13 +117,13 @@ export async function GET(
         Key: s3Key,
       }).promise();
 
-      const pdfBuffer = Buffer.from(s3Object.Body as any);
+      const fileBuffer = Buffer.from(s3Object.Body as any);
 
-      // Return PDF as response
-      return new NextResponse(pdfBuffer, {
+      // Return file as response
+      return new NextResponse(fileBuffer, {
         headers: {
-          'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="${notice.pdf_filename}"`,
+          'Content-Type': contentType,
+          'Content-Disposition': `attachment; filename="${fileName}"`,
         },
       });
     } catch (error: any) {

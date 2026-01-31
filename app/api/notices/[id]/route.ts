@@ -4,6 +4,7 @@ import { verifyTokenFromRequest } from '@/lib/auth';
 import { generateNoticePDF } from '@/lib/pdf-generator';
 import { s3Uploader, parseBucketConfig } from '@/lib/aws-s3';
 import AWS from 'aws-sdk';
+import { logNoticeUpdated, logNoticeDeleted } from '@/lib/activity-logger';
 
 export async function GET(
   request: NextRequest,
@@ -18,10 +19,11 @@ export async function GET(
       );
     }
 
-    // Only admin can access notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin, advocate, and user roles
+    const allowedRoles = ['admin', 'advocate', 'user'];
+    if (!allowedRoles.includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Invalid role.' },
         { status: 403 }
       );
     }
@@ -38,6 +40,7 @@ export async function GET(
         {
           model: Case,
           as: 'case',
+          required: true,
           include: [
             {
               model: User,
@@ -54,6 +57,27 @@ export async function GET(
         { success: false, message: 'Notice not found' },
         { status: 404 }
       );
+    }
+
+    // Role-based access restrictions
+    // For user role: only show notices for their own cases
+    if (authResult.user.role === 'user') {
+      if (notice.case.user_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. This notice does not belong to your cases.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // For advocate role: only show notices for cases assigned to them
+    if (authResult.user.role === 'advocate') {
+      if (notice.case.advocate_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. You are not assigned to this case.' },
+          { status: 403 }
+        );
+      }
     }
 
     return NextResponse.json({
@@ -82,10 +106,10 @@ export async function PUT(
       );
     }
 
-    // Only admin can update notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin and advocate to update notices
+    if (!['admin', 'advocate'].includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Admin or Advocate only.' },
         { status: 403 }
       );
     }
@@ -93,7 +117,7 @@ export async function PUT(
     const { id } = await params;
     const noticeId = parseInt(id);
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_stage, tracking_id } = body;
 
     // Validation
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
@@ -152,6 +176,16 @@ export async function PUT(
         { success: false, message: 'Notice not found' },
         { status: 404 }
       );
+    }
+
+    // For advocate role: verify they are assigned to this case
+    if (authResult.user.role === 'advocate') {
+      if (existingNotice.case.advocate_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. You are not assigned to this case.' },
+          { status: 403 }
+        );
+      }
     }
 
     // Get case with user details for new PDF generation
@@ -234,7 +268,7 @@ export async function PUT(
     }
 
     // Update notice record
-    await existingNotice.update({
+    const updateData: any = {
       case_id,
       respondent_name,
       respondent_address,
@@ -244,7 +278,22 @@ export async function PUT(
       date: noticeDateForDB,
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
-    });
+    };
+
+    // Update notice_stage if provided
+    if (notice_stage !== undefined) {
+      updateData.notice_stage = notice_stage ? notice_stage.trim() : null;
+    }
+
+    // Update tracking_id if provided
+    if (tracking_id !== undefined) {
+      updateData.tracking_id = tracking_id ? tracking_id.trim() : null;
+    }
+
+    // Update updated_by
+    updateData.updated_by = authResult.user.userId;
+
+    await existingNotice.update(updateData);
 
     // Fetch updated notice with relations
     const updatedNotice = await Notice.findOne({
@@ -263,6 +312,16 @@ export async function PUT(
         }
       ]
     });
+
+    // Log activity
+    const currentUser = await User.findByPk(authResult.user.userId, {
+      attributes: ['name']
+    });
+    await logNoticeUpdated(
+      updatedNotice.toJSON ? updatedNotice.toJSON() : updatedNotice,
+      authResult.user.userId,
+      currentUser?.name || 'Unknown User'
+    );
 
     return NextResponse.json({
       success: true,
@@ -291,10 +350,10 @@ export async function DELETE(
       );
     }
 
-    // Only admin can delete notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin and advocate to delete notices
+    if (!['admin', 'advocate'].includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Admin or Advocate only.' },
         { status: 403 }
       );
     }
@@ -306,7 +365,14 @@ export async function DELETE(
       where: { 
         id: noticeId,
         deleted_at: null // Only allow deleting non-deleted notices
-      } 
+      },
+      include: [
+        {
+          model: Case,
+          as: 'case',
+          required: true
+        }
+      ]
     });
     if (!notice) {
       return NextResponse.json(
@@ -315,8 +381,36 @@ export async function DELETE(
       );
     }
 
+    // For advocate role: verify they are assigned to this case
+    if (authResult.user.role === 'advocate') {
+      if (notice.case.advocate_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. You are not assigned to this case.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Store notice data for activity logging before deletion
+    const noticeData = notice.toJSON ? notice.toJSON() : notice;
+
+    // Update updated_by before soft delete
+    await notice.update({
+      updated_by: authResult.user.userId
+    });
+
     // Soft delete: destroy() with paranoid mode will set deleted_at timestamp
     await notice.destroy();
+
+    // Log activity
+    const currentUser = await User.findByPk(authResult.user.userId, {
+      attributes: ['name']
+    });
+    await logNoticeDeleted(
+      noticeData,
+      authResult.user.userId,
+      currentUser?.name || 'Unknown User'
+    );
 
     return NextResponse.json({
       success: true,
