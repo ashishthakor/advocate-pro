@@ -28,7 +28,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { Search as SearchIcon, Refresh as RefreshIcon, Message as MessageIcon, Visibility as VisibilityIcon, Payment as PaymentIcon } from '@mui/icons-material';
+import { Search as SearchIcon, Refresh as RefreshIcon, Message as MessageIcon, Visibility as VisibilityIcon, Payment as PaymentIcon, Edit as EditIcon } from '@mui/icons-material';
 import { useLanguage } from '@/components/LanguageProvider';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import { useRouter } from 'next/navigation';
@@ -50,6 +50,8 @@ interface Case {
   advocate_name?: string;
   payment_status?: string | null;
   payment_amount?: number | null;
+  dispute_date?: string | null;
+  dispute_amount?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -527,6 +529,11 @@ export default function UserCasesPage() {
                               </IconButton>
                             </Tooltip>
                           )}
+                          <Tooltip title="Edit case">
+                            <IconButton size="small" onClick={() => router.push(`/user/cases/${c.id}/edit`)}>
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
                           <Tooltip title={t('cases.viewDetails')}>
                             <IconButton size="small" onClick={() => handleViewDetails(c)}>
                               <VisibilityIcon />
@@ -586,6 +593,7 @@ export default function UserCasesPage() {
           caseDetails={selectedCase}
         />
       )}
+
     </Box>
   );
 }

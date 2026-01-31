@@ -186,6 +186,14 @@ module.exports = function(sequelize, DataTypes) {
     tracking_id: {
       type: DataTypes.STRING(255),
       allowNull: true
+    },
+    dispute_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    dispute_amount: {
+      type: DataTypes.DECIMAL(15, 2),
+      allowNull: true
     }
   }, {
     sequelize,

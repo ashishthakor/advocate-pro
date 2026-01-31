@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const { Case, User, Payment } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseAssigned, logCaseStatusChanged } from '@/lib/activity-logger';
+import { calculateFeeWithGst } from '@/lib/fee-calculator';
 import { col } from 'sequelize';
 
 export async function GET(
@@ -191,14 +192,6 @@ export async function PUT(
       }
     }
 
-    // Prevent users from updating cases with pending_payment status
-    if (authResult.user.role === 'user' && existingCase.status === 'pending_payment') {
-      return NextResponse.json(
-        { success: false, message: 'Cannot update case until payment is completed' },
-        { status: 400 }
-      );
-    }
-
     // Prevent admin from updating case status if payment is pending
     // Only block if there's a pending payment AND no completed payment exists
     if (authResult.user.role === 'admin' && updateData.hasOwnProperty('status')) {
@@ -255,22 +248,54 @@ export async function PUT(
       // If no completed payment exists, allow the status change to pending_payment
     }
 
-    // Update case using Sequelize ORM
-    // Admin and advocate can update tracking_id
-    const allowedFields = ['title', 'description', 'status', 'priority', 'court_name', 'judge_name', 'next_hearing_date', 'fees', 'fees_paid', 'advocate_id'];
+    // Update case using Sequelize ORM – allow all create-case fields for full edit
+    const allowedFields = [
+      'title', 'description', 'status', 'priority', 'case_type', 'court_name', 'judge_name',
+      'next_hearing_date', 'fees', 'fees_paid', 'start_date', 'end_date', 'advocate_id',
+      'dispute_date', 'dispute_amount',
+      'requester_name', 'requester_email', 'requester_phone', 'requester_address',
+      'requester_business_name', 'requester_gst_number',
+      'respondent_name', 'respondent_email', 'respondent_phone', 'respondent_address',
+      'respondent_business_name', 'respondent_gst_number',
+      'relationship_between_parties', 'nature_of_dispute', 'brief_description_of_dispute',
+      'occurrence_date', 'prior_communication', 'prior_communication_other',
+      'sought_monetary_claim', 'sought_settlement', 'sought_other'
+    ];
     if (authResult.user.role === 'admin' || authResult.user.role === 'advocate') {
       allowedFields.push('tracking_id');
     }
+    if (authResult.user.role === 'admin') {
+      allowedFields.push('user_id');
+    }
     const updateData_filtered: any = {};
-    
+
+    // If dispute_amount is being updated and no completed payment, recalc fees (base + 18% GST)
+    if (updateData.hasOwnProperty('dispute_amount') && updateData.dispute_amount != null && Number(updateData.dispute_amount) > 0) {
+      const completedPayment = await Payment.findOne({ where: { case_id: caseId, status: 'completed' } });
+      if (!completedPayment) {
+        const { total } = calculateFeeWithGst(Number(updateData.dispute_amount));
+        updateData_filtered.fees = total;
+      }
+    }
+
+    const dateFields = ['next_hearing_date', 'start_date', 'end_date', 'occurrence_date', 'dispute_date'];
     for (const [key, value] of Object.entries(updateData)) {
-      // Allow null values for advocate_id (to unassign), but exclude undefined
       if (allowedFields.includes(key) && value !== undefined) {
-        if (key === 'advocate_id' && value === null) {
+        if (key === 'advocate_id' && (value === null || value === '')) {
           updateData_filtered[key] = null;
-        } else if (key === 'advocate_id' && value === '') {
-          // Allow empty string to be converted to null for unassignment
-          updateData_filtered[key] = null;
+        } else if (key === 'user_id' && (value === null || value === '')) {
+          // user_id is required; only admin can set it – don't allow clearing
+          if (value !== null && value !== '') {
+            updateData_filtered[key] = typeof value === 'number' ? value : parseInt(String(value), 10);
+          }
+        } else if (key === 'dispute_amount') {
+          updateData_filtered[key] = value === '' || value == null ? null : parseFloat(String(value));
+        } else if (dateFields.includes(key)) {
+          updateData_filtered[key] = value === '' || value == null ? null : value;
+        } else if (key === 'sought_monetary_claim' || key === 'sought_settlement') {
+          updateData_filtered[key] = Boolean(value);
+        } else if (key === 'fees' || key === 'fees_paid') {
+          updateData_filtered[key] = value === '' || value == null ? 0 : parseFloat(String(value));
         } else {
           updateData_filtered[key] = value;
         }

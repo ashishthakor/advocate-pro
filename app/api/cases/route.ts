@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const { Case, User, Payment, sequelize } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseCreated } from '@/lib/activity-logger';
+import { calculateFeeWithGst } from '@/lib/fee-calculator';
 import { Op, col, literal } from 'sequelize';
 
 export async function GET(request: NextRequest) {
@@ -390,6 +391,8 @@ export async function POST(request: NextRequest) {
       user_id, // Allow admin to specify user_id
       advocate_id, // Allow admin to specify advocate_id
       tracking_id, // Optional tracking ID, admin only
+      dispute_date,
+      dispute_amount,
       // Requester
       requester_name,
       requester_email,
@@ -433,8 +436,16 @@ export async function POST(request: NextRequest) {
     // Determine status: For regular users, create draft case pending payment
     // For admins, create case directly (they can mark payment manually)
     const caseStatus = (authResult.user.role === 'user') ? 'pending_payment' : 'waiting_for_action';
-    const caseFees = fees || (authResult.user.role === 'user' ? 3000.00 : 0.00);
-    const caseFeesPaid = fees_paid || (authResult.user.role === 'user' ? 0.00 : 0.00);
+    let caseFees: number;
+    if (fees != null && fees !== '') {
+      caseFees = parseFloat(String(fees));
+    } else if (dispute_amount != null && dispute_amount > 0) {
+      const { total } = calculateFeeWithGst(Number(dispute_amount));
+      caseFees = total;
+    } else {
+      caseFees = authResult.user.role === 'user' ? 3000.00 : 0.00;
+    }
+    const caseFeesPaid = fees_paid != null && fees_paid !== '' ? parseFloat(String(fees_paid)) : (authResult.user.role === 'user' ? 0.00 : 0.00);
 
     // Create new case using Sequelize ORM
     const newCase = await Case.create({
@@ -475,7 +486,9 @@ export async function POST(request: NextRequest) {
       sought_settlement: !!sought_settlement,
       sought_other: sought_other || null,
       attachments_json: attachments_json || null,
-      tracking_id: (authResult.user.role === 'admin' && tracking_id) ? tracking_id : null
+      tracking_id: (authResult.user.role === 'admin' && tracking_id) ? tracking_id : null,
+      dispute_date: dispute_date || null,
+      dispute_amount: dispute_amount != null && dispute_amount !== '' ? parseFloat(String(dispute_amount)) : null,
     });
 
     // Fetch the created case with joined user/advocate fields using Sequelize ORM

@@ -42,6 +42,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { useLanguage } from '@/components/LanguageProvider';
+import { calculateFeeWithGst } from '@/lib/fee-calculator';
 
 const NATURE_OF_DISPUTE_OPTIONS = [
   'Commercial & Business Disputes',
@@ -71,6 +72,8 @@ interface CreateCaseForm {
   user_id: string;
   advocate_id: string;
   tracking_id: string;
+  dispute_date: string;
+  dispute_amount: string;
   // Requesting party
   requester_name: string;
   requester_email: string;
@@ -132,6 +135,8 @@ export default function CreateCasePage() {
     user_id: '',
     advocate_id: '',
     tracking_id: '',
+    dispute_date: '',
+    dispute_amount: '',
     requester_name: '',
     requester_email: '',
     requester_phone: '',
@@ -464,6 +469,35 @@ export default function CreateCasePage() {
                   value={form.tracking_id}
                   onChange={handleChange('tracking_id')}
                   helperText="Optional tracking ID for case management"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Dispute Date"
+                  fullWidth
+                  type="date"
+                  value={form.dispute_date}
+                  onChange={handleChange('dispute_date')}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Dispute Amount (₹)"
+                  fullWidth
+                  type="number"
+                  placeholder="Amount in dispute (INR)"
+                  value={form.dispute_amount}
+                  onChange={(e) => {
+                    handleChange('dispute_amount')(e);
+                    const v = parseFloat(e.target.value);
+                    if (!isNaN(v) && v > 0) {
+                      const { total } = calculateFeeWithGst(v);
+                      setForm((prev) => ({ ...prev, fees: total.toFixed(2) }));
+                    }
+                  }}
+                  // helperText="Fees (incl. 18% GST) auto-calculated from Fees page structure"
+                  inputProps={{ min: 0, step: 0.01 }}
                 />
               </Grid>
             </Grid>

@@ -38,6 +38,7 @@ import { apiFetch } from '@/lib/api-client';
 import { RadioGroup, FormControlLabel, Radio, FormGroup, Checkbox, InputLabel } from '@mui/material';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useAuth } from '@/components/AuthProvider';
+import { calculateFeeWithGst } from '@/lib/fee-calculator';
 
 interface CreateCaseForm {
   // Case basic info
@@ -69,6 +70,8 @@ interface CreateCaseForm {
   respondent_business_name: string;
   respondent_gst_number: string;
 
+  dispute_date: string;
+  dispute_amount: string;
   // Dispute details
   relationship_between_parties: 'User' | 'Vendor' | 'Business Partner' | 'Employee' | 'Employer' | 'Family' | '';
   nature_of_dispute: 'Commercial & Business Disputes' | 'E-Commerce & Consumer Complaints' | 'Real Estate & Property' | 'Employment & Workplace' | 'Financial & Banking' | 'Government / Public Sector' | 'Cross-Border / International' | 'Family & Civil' | 'Technology & Digital' | '';
@@ -116,6 +119,8 @@ export default function CreateCasePage() {
     fees_paid: '0.00',
     start_date: '',
     end_date: '',
+    dispute_date: '',
+    dispute_amount: '',
     requester_name: '',
     requester_email: '',
     requester_phone: '',
@@ -744,6 +749,36 @@ export default function CreateCasePage() {
                 />
               </Grid>
 
+              {/* Dispute Date & Dispute Amount */}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Dispute Date"
+                  type="date"
+                  fullWidth
+                  InputLabelProps={{ shrink: true }}
+                  value={form.dispute_date}
+                  onChange={handleChange('dispute_date')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Dispute Amount (₹)"
+                  type="number"
+                  fullWidth
+                  placeholder="Amount in dispute (INR)"
+                  value={form.dispute_amount}
+                  onChange={(e) => {
+                    handleChange('dispute_amount')(e);
+                    const v = parseFloat((e.target as HTMLInputElement).value);
+                    if (!isNaN(v) && v > 0) {
+                      const { total } = calculateFeeWithGst(v);
+                      setForm((prev) => ({ ...prev, fees: total.toFixed(2) }));
+                    }
+                  }}
+                  // helperText="Fees (incl. 18% GST) auto-calculated from Fees page"
+                  inputProps={{ min: 0, step: 0.01 }}
+                />
+              </Grid>
               {/* Date of occurrence */}
               <Grid item xs={12} md={6}>
                 <TextField

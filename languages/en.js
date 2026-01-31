@@ -221,7 +221,7 @@ export default {
     'createCase.natureOfDispute.crossborderinternational': 'Cross-Border / International',
     'createCase.natureOfDispute.familycivil': 'Family & Civil',
     'createCase.natureOfDispute.technologydigital': 'Technology & Digital',
-    'createCase.client': 'User',
+    'createCase.User': 'User',
     'createCase.vendor': 'Vendor',
     'createCase.businesspartner': 'Business Partner',
     'createCase.employee': 'Employee',
