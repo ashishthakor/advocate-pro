@@ -229,7 +229,7 @@ export default {
     'createCase.natureOfDispute.crossborderinternational': 'सीमापार / आंतरराष्ट्रीय',
     'createCase.natureOfDispute.familycivil': 'कौटुंबिक आणि नागरी',
     'createCase.natureOfDispute.technologydigital': 'तंत्रज्ञान आणि डिजिटल',
-    'createCase.client': 'वापरकर्ता',
+    'createCase.User': 'वापरकर्ता',
     'createCase.vendor': 'विक्रेता',
     'createCase.businesspartner': 'व्यवसाय भागीदार',
     'createCase.employee': 'कर्मचारी',

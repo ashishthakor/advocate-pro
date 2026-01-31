@@ -62,6 +62,30 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(255),
       allowNull: true
     },
+    notice_stage: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: 'Stage of the notice (e.g., Notice-1, Notice-2, etc.). Auto-incremented but editable.'
+    },
+    tracking_id: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: 'Optional tracking ID for the sent notice'
+    },
+    uploaded_file_path: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      comment: 'S3 path for uploaded notice files (PDF/DOC format)'
+    },
+    updated_by: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id'
+      },
+      comment: 'User ID who created/updated/deleted the notice'
+    },
     deleted_at: {
       type: DataTypes.DATE,
       allowNull: true

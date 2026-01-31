@@ -40,6 +40,8 @@ interface CaseDetails {
   user_id: number;
   advocate_id?: number;
   tracking_id?: string | null;
+  dispute_date?: string | null;
+  dispute_amount?: number | string | null;
   court_name?: string;
   judge_name?: string;
   next_hearing_date?: string | null;
@@ -314,6 +316,26 @@ export default function CaseDetailsModal({ open, onClose, caseDetails }: CaseDet
                 color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
                 lineHeight: 1.6,
               }}>{caseDetails.description || '-'}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                fontWeight: 500,
+                mb: 0.5,
+              }}>Dispute Date</Typography>
+              <Typography variant="body1" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+              }}>{caseDetails.dispute_date ? new Date(caseDetails.dispute_date).toLocaleDateString() : '-'}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="body2" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#b0b0b0' : '#666',
+                fontWeight: 500,
+                mb: 0.5,
+              }}>Dispute Amount</Typography>
+              <Typography variant="body1" sx={{ 
+                color: (theme) => theme.palette.mode === 'dark' ? '#e0e0e0' : '#333',
+              }}>{caseDetails.dispute_amount != null && caseDetails.dispute_amount !== '' ? `₹${Number(caseDetails.dispute_amount).toLocaleString('en-IN')}` : '-'}</Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="body2" sx={{ 

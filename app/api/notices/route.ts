@@ -4,6 +4,8 @@ import { verifyTokenFromRequest } from '@/lib/auth';
 import { generateNoticePDF } from '@/lib/pdf-generator';
 import { s3Uploader } from '@/lib/aws-s3';
 import { Op, col } from 'sequelize';
+import { getNextNoticeStage } from '@/lib/notice-helpers';
+import { logNoticeCreated } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,10 +17,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Only admin can access notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin, advocate, and user roles
+    const allowedRoles = ['admin', 'advocate', 'user'];
+    if (!allowedRoles.includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Invalid role.' },
         { status: 403 }
       );
     }
@@ -28,11 +31,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search');
-    const sortBy = searchParams.get('sortBy') || 'date';
+    const sortBy = searchParams.get('sortBy') || 'updated_at';
     const sortOrder = searchParams.get('sortOrder') || 'DESC';
 
     // Validate sort parameters
-    const validSortColumns = ['id', 'respondent_name', 'subject', 'date', 'case_number', 'user_name'];
+    const validSortColumns = ['id', 'respondent_name', 'subject', 'date', 'updated_at', 'case_number', 'user_name', 'notice_stage', 'tracking_id'];
     const validSortOrders = ['ASC', 'DESC'];
     
     if (!validSortColumns.includes(sortBy)) {
@@ -56,9 +59,7 @@ export async function GET(request: NextRequest) {
       whereConditions.case_id = parseInt(caseId);
     }
 
-    const offset = (page - 1) * limit;
-
-    // Build include conditions
+    // Role-based access restrictions
     const includeConditions: any = [
       {
         model: Case,
@@ -74,6 +75,24 @@ export async function GET(request: NextRequest) {
       }
     ];
 
+    // For user role: only show notices for their own cases
+    if (authResult.user.role === 'user') {
+      includeConditions[0].where = {
+        user_id: authResult.user.userId
+      };
+    }
+
+    // For advocate role: only show notices for cases assigned to them
+    if (authResult.user.role === 'advocate') {
+      includeConditions[0].where = {
+        advocate_id: authResult.user.userId
+      };
+    }
+
+    // For admin role: show all notices (no restrictions)
+
+    const offset = (page - 1) * limit;
+
     // Add search conditions - search across notice fields and related case/user fields
     if (search && search.trim() !== '') {
       const searchTerm = search.trim();
@@ -83,7 +102,9 @@ export async function GET(request: NextRequest) {
         { respondent_name: { [Op.like]: `%${searchTerm}%` } },
         { subject: { [Op.like]: `%${searchTerm}%` } },
         { respondent_address: { [Op.like]: `%${searchTerm}%` } },
-        { pdf_filename: { [Op.like]: `%${searchTerm}%` } }
+        { pdf_filename: { [Op.like]: `%${searchTerm}%` } },
+        { notice_stage: { [Op.like]: `%${searchTerm}%` } },
+        { tracking_id: { [Op.like]: `%${searchTerm}%` } }
       ];
 
       try {
@@ -195,16 +216,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Only admin can create notices
-    if (authResult.user.role !== 'admin') {
+    // Allow admin and advocate to create notices
+    if (!['admin', 'advocate'].includes(authResult.user.role)) {
       return NextResponse.json(
-        { success: false, message: 'Access denied. Admin only.' },
+        { success: false, message: 'Access denied. Admin or Advocate only.' },
         { status: 403 }
       );
     }
 
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_stage, tracking_id } = body;
 
     // Validation
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
@@ -254,6 +275,22 @@ export async function POST(request: NextRequest) {
         { success: false, message: 'Case not found' },
         { status: 404 }
       );
+    }
+
+    // For advocate role: verify they are assigned to this case
+    if (authResult.user.role === 'advocate') {
+      if (caseData.advocate_id !== authResult.user.userId) {
+        return NextResponse.json(
+          { success: false, message: 'Access denied. You are not assigned to this case.' },
+          { status: 403 }
+        );
+      }
+    }
+
+    // Auto-calculate notice_stage if not provided
+    let finalNoticeStage = notice_stage;
+    if (!finalNoticeStage || finalNoticeStage.trim() === '') {
+      finalNoticeStage = await getNextNoticeStage(case_id);
     }
 
     // Generate PDF
@@ -313,7 +350,10 @@ export async function POST(request: NextRequest) {
       pdf_filename: fileName,
       recipient_email: recipient_email || null,
       email_sent: false,
-      email_sent_count: 0
+      email_sent_count: 0,
+      notice_stage: finalNoticeStage || null,
+      tracking_id: tracking_id || null,
+      updated_by: authResult.user.userId
     });
 
     // Fetch created notice with relations
@@ -333,6 +373,16 @@ export async function POST(request: NextRequest) {
         }
       ]
     });
+
+    // Log activity
+    const currentUser = await User.findByPk(authResult.user.userId, {
+      attributes: ['name']
+    });
+    await logNoticeCreated(
+      createdNotice.toJSON ? createdNotice.toJSON() : createdNotice,
+      authResult.user.userId,
+      currentUser?.name || 'Unknown User'
+    );
 
     return NextResponse.json({
       success: true,

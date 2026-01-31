@@ -48,6 +48,7 @@ import {
   Add as AddIcon,
   CheckCircle as CheckCircleIcon,
   AttachMoney as AttachMoneyIcon,
+  EditNote as EditNoteIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
@@ -104,6 +105,8 @@ interface Case {
   advocate_email?: string;
   payment_status?: string | null;
   payment_amount?: number | null;
+  dispute_date?: string | null;
+  dispute_amount?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -851,13 +854,22 @@ export default function CasesPage() {
                               </IconButton>
                             </Tooltip>
                           )}
-                          <Tooltip title="Edit">
+                          <Tooltip title="Edit status & priority">
                             <IconButton 
                               size="small" 
                               color="primary"
                               onClick={() => handleStatusUpdate(case_)}
                             >
                               <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Edit case details">
+                            <IconButton 
+                              size="small" 
+                              color="default"
+                              onClick={() => router.push(`/admin/cases/${case_.id}/edit`)}
+                            >
+                              <EditNoteIcon />
                             </IconButton>
                           </Tooltip>
                           {case_.status !== 'pending_payment' && (
@@ -939,6 +951,13 @@ export default function CasesPage() {
           documents={caseDocuments}
           caseId={selectedCaseForDocuments.id}
           loading={loadingDocuments}
+          onDocumentsUpdated={async () => {
+            if (!selectedCaseForDocuments) return;
+            try {
+              const data = await apiFetch(`/api/documents/${selectedCaseForDocuments.id}`);
+              if (data.success) setCaseDocuments(data.data);
+            } catch (_) {}
+          }}
         />
       )}
 

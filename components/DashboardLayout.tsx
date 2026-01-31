@@ -112,6 +112,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/advocate/dashboard' },
           { text: t('layout.assignedCases'), icon: <FolderIcon />, path: '/advocate/cases' },
           { text: t('layout.clients'), icon: <PeopleIcon />, path: '/advocate/clients' },
+          { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/advocate/notices' },
           { text: t('layout.updates'), icon: <MessageIcon />, path: '/advocate/chat' },
           { text: t('common.profile'), icon: <PersonIcon />, path: '/advocate/profile' },
         ];
@@ -120,6 +121,7 @@ export default function DashboardLayout({ children, userType, title, subtitle }:
           { text: t('layout.dashboard'), icon: <DashboardIcon />, path: '/user/dashboard' },
           { text: t('layout.myCases'), icon: <FolderIcon />, path: '/user/cases' },
           { text: t('layout.createCase'), icon: <AddBoxIcon />, path: '/user/create-case' },
+          { text: t('layout.notices'), icon: <DescriptionIcon />, path: '/user/notices' },
           { text: t('layout.updates'), icon: <MessageIcon />, path: '/user/chat' },
           { text: t('common.profile'), icon: <PersonIcon />, path: '/user/profile' },
         ];
