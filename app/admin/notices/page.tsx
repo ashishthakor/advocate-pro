@@ -42,7 +42,6 @@ import {
   Delete as DeleteIcon,
   Description as DescriptionIcon,
   Edit as EditIcon,
-  Info as InfoIcon,
   Search as SearchIcon,
   Upload as UploadIcon,
   CloudUpload as CloudUploadIcon,
@@ -170,6 +169,13 @@ export default function NoticesPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [noticeToDelete, setNoticeToDelete] = useState<Notice | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Uploaded notice: edit stage & tracking ID only
+  const [uploadedNoticeEditOpen, setUploadedNoticeEditOpen] = useState(false);
+  const [uploadedNoticeEditNotice, setUploadedNoticeEditNotice] = useState<Notice | null>(null);
+  const [uploadedNoticeEditStage, setUploadedNoticeEditStage] = useState('');
+  const [uploadedNoticeEditTrackingId, setUploadedNoticeEditTrackingId] = useState('');
+  const [uploadedNoticeEditLoading, setUploadedNoticeEditLoading] = useState(false);
   
   // Track dialog open state for ReactQuill key
   const [createDialogKey, setCreateDialogKey] = useState(0);
@@ -489,6 +495,42 @@ export default function NoticesPage() {
       }
     } catch (err) {
       setError('Failed to download PDF');
+    }
+  };
+
+  const handleEditUploadedNotice = (notice: Notice) => {
+    setUploadedNoticeEditNotice(notice);
+    const stageNumber = notice.notice_stage ? notice.notice_stage.replace(/^Notice-/, '') : '';
+    setUploadedNoticeEditStage(stageNumber);
+    setUploadedNoticeEditTrackingId(notice.tracking_id || '');
+    setUploadedNoticeEditOpen(true);
+  };
+
+  const handleSaveUploadedNoticeEdit = async () => {
+    if (!uploadedNoticeEditNotice) return;
+    try {
+      setUploadedNoticeEditLoading(true);
+      setError('');
+      const response = await apiFetch(`/api/notices/${uploadedNoticeEditNotice.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          uploaded_notice_partial_edit: true,
+          notice_stage: uploadedNoticeEditStage.trim() ? uploadedNoticeEditStage.trim() : null,
+          tracking_id: uploadedNoticeEditTrackingId.trim() || null,
+        }),
+      });
+      if (response.success) {
+        setSuccess('Notice stage and tracking ID updated.');
+        setUploadedNoticeEditOpen(false);
+        setUploadedNoticeEditNotice(null);
+        fetchNotices();
+      } else {
+        setError(response.message || 'Failed to update');
+      }
+    } catch (err) {
+      setError('Failed to update notice stage and tracking ID');
+    } finally {
+      setUploadedNoticeEditLoading(false);
     }
   };
 
@@ -938,9 +980,13 @@ export default function NoticesPage() {
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           {notice.uploaded_file_path ? (
-                            <Tooltip title="This is uploaded notice you can't edit">
-                              <IconButton size="small" color="info">
-                                <InfoIcon />
+                            <Tooltip title="Edit notice stage & tracking ID">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => handleEditUploadedNotice(notice)}
+                              >
+                                <EditIcon />
                               </IconButton>
                             </Tooltip>
                           ) : (
@@ -1892,6 +1938,71 @@ export default function NoticesPage() {
             disabled={deleteLoading}
           >
             {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Uploaded Notice: Stage & Tracking ID only */}
+      <Dialog
+        open={uploadedNoticeEditOpen}
+        onClose={() => {
+          if (!uploadedNoticeEditLoading) {
+            setUploadedNoticeEditOpen(false);
+            setUploadedNoticeEditNotice(null);
+          }
+        }}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { bgcolor: 'background.paper' } }}
+      >
+        <DialogTitle>Edit Notice Stage & Tracking ID</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            This notice was uploaded. You can only edit the notice stage and tracking ID.
+          </Typography>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Notice Stage"
+                value={uploadedNoticeEditStage}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  setUploadedNoticeEditStage(value);
+                }}
+                disabled={uploadedNoticeEditLoading}
+                helperText="Number only (e.g. 1, 2). Will be saved as Notice-1, Notice-2, etc."
+                placeholder="1"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Tracking ID"
+                value={uploadedNoticeEditTrackingId}
+                onChange={(e) => setUploadedNoticeEditTrackingId(e.target.value)}
+                disabled={uploadedNoticeEditLoading}
+                helperText="Optional tracking ID for the sent notice"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setUploadedNoticeEditOpen(false);
+              setUploadedNoticeEditNotice(null);
+            }}
+            disabled={uploadedNoticeEditLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveUploadedNoticeEdit}
+            variant="contained"
+            disabled={uploadedNoticeEditLoading}
+          >
+            {uploadedNoticeEditLoading ? <CircularProgress size={24} /> : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>

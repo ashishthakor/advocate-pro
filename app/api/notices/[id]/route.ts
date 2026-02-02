@@ -117,9 +117,40 @@ export async function PUT(
     const { id } = await params;
     const noticeId = parseInt(id);
     const body = await request.json();
-    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_stage, tracking_id } = body;
+    const { case_id, respondent_name, respondent_address, respondent_pincode, subject, content, date, recipient_email, notice_stage, tracking_id, uploaded_notice_partial_edit } = body;
 
-    // Validation
+    // Get existing notice first (needed for partial-edit check)
+    const existingNoticeForCheck = await Notice.findOne({
+      where: { id: noticeId, deleted_at: null },
+    });
+    if (!existingNoticeForCheck) {
+      return NextResponse.json(
+        { success: false, message: 'Notice not found' },
+        { status: 404 }
+      );
+    }
+
+    // For uploaded notices: allow admin to update only notice_stage and tracking_id
+    if (uploaded_notice_partial_edit === true && existingNoticeForCheck.uploaded_file_path) {
+      const updateData: any = { updated_by: authResult.user.userId };
+      if (notice_stage !== undefined) {
+        updateData.notice_stage = notice_stage && String(notice_stage).trim() ? String(notice_stage).trim() : null;
+        if (updateData.notice_stage && !updateData.notice_stage.startsWith('Notice-')) {
+          updateData.notice_stage = `Notice-${updateData.notice_stage}`;
+        }
+      }
+      if (tracking_id !== undefined) {
+        updateData.tracking_id = tracking_id && String(tracking_id).trim() ? String(tracking_id).trim() : null;
+      }
+      await existingNoticeForCheck.update(updateData);
+      const updated = await Notice.findOne({
+        where: { id: noticeId },
+        include: [{ model: Case, as: 'case', include: [{ model: User, as: 'user', attributes: ['id', 'name', 'email', 'phone', 'address'] }] }],
+      });
+      return NextResponse.json({ success: true, message: 'Notice stage and tracking ID updated.', data: updated });
+    }
+
+    // Validation for full update
     if (!case_id || !respondent_name || !respondent_address || !respondent_pincode || !subject || !content) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
