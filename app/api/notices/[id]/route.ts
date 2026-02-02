@@ -130,8 +130,21 @@ export async function PUT(
       );
     }
 
-    // For uploaded notices: allow admin to update only notice_stage and tracking_id
+    // For uploaded notices: allow admin and advocate to update only notice_stage and tracking_id
     if (uploaded_notice_partial_edit === true && existingNoticeForCheck.uploaded_file_path) {
+      // Advocate: only allow if assigned to this notice's case
+      if (authResult.user.role === 'advocate') {
+        const noticeWithCase = await Notice.findOne({
+          where: { id: noticeId },
+          include: [{ model: Case, as: 'case', attributes: ['advocate_id'] }],
+        });
+        if (!noticeWithCase?.case || noticeWithCase.case.advocate_id !== authResult.user.userId) {
+          return NextResponse.json(
+            { success: false, message: 'Access denied. You are not assigned to this case.' },
+            { status: 403 }
+          );
+        }
+      }
       const updateData: any = { updated_by: authResult.user.userId };
       if (notice_stage !== undefined) {
         updateData.notice_stage = notice_stage && String(notice_stage).trim() ? String(notice_stage).trim() : null;

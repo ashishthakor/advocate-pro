@@ -1,21 +1,16 @@
 /**
- * Fee calculation based on Fees page arbitration structure (INR).
- * Final amount = base fee + 18% GST (i.e. baseFee * 1.18).
+ * Fee calculation based on Domestic Mediation & Conciliation – Fee Structure (Fees page).
+ * Administration Charge is payable at case registration; then 18% GST is added.
+ * Final amount = administration charge (base fee) + 18% GST (i.e. baseFee * 1.18).
  */
 
 const GST_RATE = 0.18;
 
-/** Arbitration fee tiers (INR): max amount (inclusive), base fee, [percent on excess above threshold]. */
-const FEE_TIERS: { maxAmount: number; baseFee: number; percent?: number; threshold?: number }[] = [
-  { maxAmount: 100000, baseFee: 4500 },
-  { maxAmount: 500000, baseFee: 18000 },
-  { maxAmount: 2500000, baseFee: 18000, percent: 3, threshold: 500000 },
-  { maxAmount: 5000000, baseFee: 72000, percent: 2, threshold: 2500000 },
-  { maxAmount: 10000000, baseFee: 117000, percent: 1, threshold: 5000000 },
-  { maxAmount: 50000000, baseFee: 162000, percent: 0.75, threshold: 10000000 },
-  { maxAmount: 100000000, baseFee: 432000, percent: 0.6, threshold: 50000000 },
-  { maxAmount: 200000000, baseFee: 702000, percent: 0.5, threshold: 100000000 },
-  { maxAmount: Infinity, baseFee: 3000000 }, // cap as per Fees page
+/** Domestic Mediation & Conciliation – Administration Charge tiers (INR). */
+const FEE_TIERS: { maxAmount: number; baseFee: number }[] = [
+  { maxAmount: 200000, baseFee: 3000 },       // Tier 1: Disputes up to ₹2,00,000 → ₹3,000
+  { maxAmount: 2500000, baseFee: 4500 },     // Tier 2: Above ₹2,00,000 up to ₹25,00,000 → ₹4,500
+  { maxAmount: Infinity, baseFee: 9500 },     // Tier 3: Above ₹25,00,000 → ₹9,500
 ];
 
 export function calculateBaseFeeFromDisputeAmount(amountInr: number): number {
@@ -23,14 +18,10 @@ export function calculateBaseFeeFromDisputeAmount(amountInr: number): number {
   const amt = Math.floor(amountInr);
   for (const tier of FEE_TIERS) {
     if (amt <= tier.maxAmount) {
-      let base = tier.baseFee;
-      if (tier.percent != null && tier.threshold != null && amt > tier.threshold) {
-        base += (amt - tier.threshold) * (tier.percent / 100);
-      }
-      return Math.round(base * 100) / 100;
+      return Math.round(tier.baseFee * 100) / 100;
     }
   }
-  return 3000000;
+  return 9500;
 }
 
 export function calculateFeeWithGst(disputeAmountInr: number): { baseFee: number; gst: number; total: number } {
