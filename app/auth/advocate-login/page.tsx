@@ -92,8 +92,8 @@ export default function AdvocateLoginPage() {
         bgcolor: 'background.default',
         backgroundImage: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'radial-gradient(1000px 400px at 10% -10%, rgba(103, 80, 164, 0.15), transparent), radial-gradient(800px 400px at 110% 10%, rgba(25, 118, 210, 0.12), transparent)'
-            : 'radial-gradient(1000px 400px at 10% -10%, rgba(103, 80, 164, 0.08), transparent), radial-gradient(800px 400px at 110% 10%, rgba(25, 118, 210, 0.06), transparent)',
+            ? 'radial-gradient(1000px 400px at 10% -10%, rgba(255, 152, 0, 0.18), transparent), radial-gradient(800px 400px at 110% 10%, rgba(245, 124, 0, 0.14), transparent)'
+            : 'radial-gradient(1000px 400px at 10% -10%, rgba(255, 152, 0, 0.12), transparent), radial-gradient(800px 400px at 110% 10%, rgba(245, 124, 0, 0.08), transparent)',
         py: 4,
       }}
     >
@@ -180,12 +180,13 @@ export default function AdvocateLoginPage() {
                 type="submit"
                 fullWidth
                 variant="contained"
+                color="secondary"
                 size="large"
                 disabled={loading}
                 sx={{
                   py: 1.5,
                   mb: 2,
-                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
+                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(255, 152, 0, 0.35)' : '0 6px 16px rgba(255, 152, 0, 0.35)'),
                 }}
               >
                 {loading ? <CircularProgress size={24} color="inherit" /> : t('auth.signInAdvocate')}
@@ -201,7 +202,7 @@ export default function AdvocateLoginPage() {
                 <Link
                   href="/auth/advocate-register"
                   underline="hover"
-                  sx={{ fontWeight: 500 }}
+                  sx={{ fontWeight: 500, color: 'secondary.main' }}
                 >
                   {t('auth.registerHere')}
                 </Link>

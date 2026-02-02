@@ -55,10 +55,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         light: '#64B5F6',
         dark: '#1976D2',
       },
+      // Neutral (advocate) theme — amber, highly visible so neutrals can easily find it (distinct from User blue)
       secondary: {
-        main: '#9C27B0',
-        light: '#BA68C8',
-        dark: '#7B1FA2',
+        main: '#FF9800',
+        light: '#FFB74D',
+        dark: '#F57C00',
       },
       error: {
         main: '#F44336',

@@ -275,8 +275,8 @@ export default function AdvocateRegisterPage() {
         bgcolor: 'background.default',
         backgroundImage: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'radial-gradient(1000px 400px at 10% -10%, rgba(156, 39, 176, 0.15), transparent), radial-gradient(800px 400px at 110% 10%, rgba(103, 80, 164, 0.12), transparent)'
-            : 'radial-gradient(1000px 400px at 10% -10%, rgba(156, 39, 176, 0.08), transparent), radial-gradient(800px 400px at 110% 10%, rgba(103, 80, 164, 0.06), transparent)',
+            ? 'radial-gradient(1000px 400px at 10% -10%, rgba(0, 150, 136, 0.12), transparent), radial-gradient(800px 400px at 110% 10%, rgba(0, 121, 107, 0.10), transparent)'
+            : 'radial-gradient(1000px 400px at 10% -10%, rgba(0, 150, 136, 0.08), transparent), radial-gradient(800px 400px at 110% 10%, rgba(0, 121, 107, 0.06), transparent)',
         py: 4,
       }}
     >
@@ -324,7 +324,7 @@ export default function AdvocateRegisterPage() {
 
               <Grid container spacing={{ xs: 2, sm: 3 }}>
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 1 }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'secondary.main', fontWeight: 600, mt: 1 }}>
                     {t('auth.personalInformation')}
                   </Typography>
                 </Grid>
@@ -390,7 +390,7 @@ export default function AdvocateRegisterPage() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'secondary.main', fontWeight: 600, mt: 2 }}>
                     {t('auth.professionalInformation')}
                   </Typography>
                 </Grid>
@@ -458,7 +458,7 @@ export default function AdvocateRegisterPage() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'secondary.main', fontWeight: 600, mt: 2 }}>
                     KYC Documents (Required)
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -481,7 +481,7 @@ export default function AdvocateRegisterPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       '&:hover': {
-                        borderColor: 'primary.main',
+                        borderColor: 'secondary.main',
                         bgcolor: 'action.hover',
                       },
                     }}
@@ -581,7 +581,7 @@ export default function AdvocateRegisterPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       '&:hover': {
-                        borderColor: 'primary.main',
+                        borderColor: 'secondary.main',
                         bgcolor: 'action.hover',
                       },
                     }}
@@ -681,7 +681,7 @@ export default function AdvocateRegisterPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       '&:hover': {
-                        borderColor: 'primary.main',
+                        borderColor: 'secondary.main',
                         bgcolor: 'action.hover',
                       },
                     }}
@@ -767,7 +767,7 @@ export default function AdvocateRegisterPage() {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600, mt: 2 }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: 'secondary.main', fontWeight: 600, mt: 2 }}>
                     {t('auth.accountSecurity')}
                   </Typography>
                 </Grid>
@@ -816,7 +816,7 @@ export default function AdvocateRegisterPage() {
                   py: 1.5,
                   mt: 3,
                   mb: 2,
-                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(0,0,0,0.45)' : '0 6px 16px rgba(156,39,176,0.24)'),
+                  boxShadow: (theme) => (theme.palette.mode === 'dark' ? '0 6px 16px rgba(255, 152, 0, 0.35)' : '0 6px 16px rgba(255, 152, 0, 0.35)'),
                 }}
               >
                 {loading ? (
@@ -839,7 +839,7 @@ export default function AdvocateRegisterPage() {
                 <Link
                   href="/auth/advocate-login"
                   underline="hover"
-                  sx={{ fontWeight: 500 }}
+                  sx={{ fontWeight: 500, color: 'secondary.main' }}
                 >
                   {t('auth.signInHere')}
                 </Link>
