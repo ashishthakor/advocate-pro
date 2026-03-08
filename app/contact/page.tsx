@@ -659,7 +659,7 @@ export default function ContactPage() {
                 Revolutionizing arbitration and legal case management with AI-powered solutions.
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                A product of Gentlefolk Consulting Private Limited
+                {t('footer.companyName')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>

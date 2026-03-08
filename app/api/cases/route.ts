@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const { Case, User, Payment, sequelize } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseCreated } from '@/lib/activity-logger';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
+import { calculateMediationFeeWithGst } from '@/lib/fee-calculator';
 import { Op, col, literal } from 'sequelize';
 
 export async function GET(request: NextRequest) {
@@ -57,9 +57,19 @@ export async function GET(request: NextRequest) {
     }
     // Admin can see all cases, so no additional where condition
 
-    // Add filters
+    // Add filters - support status groups for dashboard redirects
     if (status) {
-      whereConditions.status = status;
+      if (status === 'closed') {
+        whereConditions.status = { [Op.in]: ['closed_no_consent', 'settled', 'withdrawn'] };
+      } else if (status === 'pending') {
+        whereConditions.status = { [Op.in]: ['neutrals_needs_to_be_assigned', 'waiting_for_action'] };
+      } else if (status === 'active') {
+        whereConditions.status = 'consented';
+      } else if (status === 'notice') {
+        whereConditions.status = { [Op.in]: ['notice_1', 'notice_2', 'notice_3'] };
+      } else {
+        whereConditions.status = status;
+      }
     }
     if (caseType) {
       whereConditions.case_type = caseType;
@@ -80,13 +90,17 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    // For user role, by default exclude cases in pending_payment status
-    // (so update modules/lists don't show unpaid drafts)
+    // For user role, by default exclude cases without completed payment when from=updates
     if (from === 'updates') {
       if (!whereConditions[Op.and]) {
         whereConditions[Op.and] = [];
       }
-      whereConditions[Op.and].push({ status: { [Op.ne]: 'pending_payment' } });
+      whereConditions[Op.and].push(literal(`(
+        EXISTS (
+          SELECT 1 FROM payments p
+          WHERE p.case_id = cases.id AND p.status = 'completed'
+        )
+      )`));
     }
 
     // For advocate role with search, also search in user fields
@@ -293,6 +307,14 @@ export async function GET(request: NextRequest) {
         include: includeForStats
       });
 
+      const noticeCases = await Case.count({
+        where: {
+          ...baseWhereConditions,
+          status: { [Op.in]: ['notice_1', 'notice_2', 'notice_3'] }
+        },
+        include: includeForStats
+      });
+
       const totalFromStats = await Case.count({ where: baseWhereConditions, include: includeForStats });
 
       statistics = {
@@ -302,7 +324,8 @@ export async function GET(request: NextRequest) {
         consented: consented,
         hold: hold,
         temporary_non_starter: temporaryNonStarter,
-        completed: completedCases
+        completed: completedCases,
+        notice: noticeCases
       };
     }
 
@@ -433,14 +456,14 @@ export async function POST(request: NextRequest) {
     // Generate case number
     const caseNumber = `CASE-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
 
-    // Determine status: For regular users, create draft case pending payment
-    // For admins, create case directly (they can mark payment manually)
-    const caseStatus = (authResult.user.role === 'user') ? 'pending_payment' : 'waiting_for_action';
+    // Determine status: For regular users, create case as waiting_for_action (payment tracked separately)
+    // For admins, create case directly
+    const caseStatus = 'waiting_for_action';
     let caseFees: number;
     if (fees != null && fees !== '') {
       caseFees = parseFloat(String(fees));
     } else if (dispute_amount != null && dispute_amount > 0) {
-      const { total } = calculateFeeWithGst(Number(dispute_amount));
+      const { total } = calculateMediationFeeWithGst(Number(dispute_amount));
       caseFees = total;
     } else {
       caseFees = authResult.user.role === 'user' ? 3000.00 : 0.00;

@@ -42,10 +42,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if case is in pending_payment status
-    if (case_.status !== 'pending_payment') {
+    // Allow mark paid only when case has no completed payment yet
+    const completedPayment = await Payment.findOne({
+      where: { case_id: case_.id, status: 'completed' }
+    });
+    if (completedPayment) {
       return NextResponse.json(
-        { success: false, message: PAYMENT_CONSTANTS.ERRORS.CASE_NOT_PENDING },
+        { success: false, message: 'Payment already completed for this case.' },
         { status: 400 }
       );
     }
@@ -75,9 +78,9 @@ export async function POST(request: NextRequest) {
       metadata: notes ? JSON.stringify({ notes, marked_at: new Date().toISOString() }) : null
     });
 
-    // Update case status and fees
-    case_.status = 'waiting_for_action';
+    // Update case fees_paid and ensure status is waiting_for_action (e.g. for legacy data)
     case_.fees_paid = paymentAmount;
+    case_.status = 'waiting_for_action';
     await case_.save();
 
     // Fetch the updated case with joined user fields for logging

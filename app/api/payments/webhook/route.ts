@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           // Update case status if case exists
           if (payment.case_id) {
             const case_ = await Case.findByPk(payment.case_id);
-            if (case_ && case_.status === 'pending_payment') {
+            if (case_) {
               case_.status = 'waiting_for_action';
               case_.fees_paid = payment.amount;
               await case_.save();

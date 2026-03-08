@@ -13,7 +13,7 @@ if (!fs.existsSync('.env.local')) {
 }
 
 // Load environment variables
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config({ path: '.env.local', quiet: true });
 
 // Check required environment variables
 const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];

@@ -48,6 +48,7 @@ export default {
     // Footer
     'footer.description': 'AI-संचालित समाधानों और बहु-भाषा समर्थन के साथ उन्नत मध्यस्थता और कानूनी मामला प्रबंधन प्लेटफॉर्म।',
     'footer.quickLinks': 'त्वरित लिंक',
+    'footer.companyName': 'ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637',
     'footer.copyright': `© ${new Date().getFullYear()} ARBITALK। सभी अधिकार सुरक्षित।`,
 
     // Auth Pages
@@ -344,7 +345,7 @@ export default {
     'layout.createCase': 'मामला बनाएं',
 
     // About Page Additional
-    'about.productOf': 'Gentlefolk Consulting Private Limited का एक उत्पाद',
+    'about.productOf': 'ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637 का एक उत्पाद',
     'about.empowering': 'भारत के MSMEs को व्यावसायिक विवादों को तेजी से, निष्पक्ष रूप से और अदालती परेशानियों के बिना हल करने में सशक्त बनाना। गति, निष्पक्षता और विश्वास के लिए निर्मित एक डिजिटल मध्यस्थता और विवाद समाधान प्लेटफॉर्म।',
     'about.stats.activeAdvocates': 'सक्रिय न्युट्रल',
     'about.stats.casesManaged': 'प्रबंधित मामले',
@@ -517,7 +518,7 @@ export default {
     'home.advocateFeatures5': 'बिल योग्य घंटे ट्रैक करें',
     'home.getStarted': 'शुरू करें',
     'home.statsTitle': 'भारत भर के व्यवसायों द्वारा विश्वसनीय',
-    'home.stat1': 'अनुभवी न्युट्रल',
+    'home.stat1': 'विवाद मूल्य',
     'home.stat2': 'बचाया',
     'home.stat3': 'उपयोगकर्ता',
     'home.stat4': 'औसत अनुभव',
@@ -603,10 +604,10 @@ export default {
     'fees.mediation.domestic.tier1.heading': '1. ₹2,00,000 तक के विवाद',
     'fees.mediation.domestic.tier1.admin': '₹3,000',
     'fees.mediation.domestic.tier1.success': 'सुलझी राशि का 2%',
-    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 से ऊपर ₹25,00,000 तक के विवाद',
+    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 से ऊपर ₹15,00,000 तक के विवाद',
     'fees.mediation.domestic.tier2.admin': '₹4,500',
     'fees.mediation.domestic.tier2.success': 'सुलझी राशि का 4.5%',
-    'fees.mediation.domestic.tier3.heading': '3. ₹25,00,000 से ऊपर के विवाद',
+    'fees.mediation.domestic.tier3.heading': '3. ₹15,00,000 से ऊपर के विवाद',
     'fees.mediation.domestic.tier3.admin': '₹9,500',
     'fees.mediation.domestic.tier3.success': 'सुलझी राशि का 9.5%',
     'fees.mediation.domestic.colDispute': 'विवाद की सीमा',
@@ -726,7 +727,7 @@ export default {
     'faq.cat.pay': 'भुगतान और रिफंड',
     'faq.cat.con': 'गोपनीयता और डेटा सुरक्षा',
     'faq.gen.1.q': 'Arbitalk क्या है?',
-    'faq.gen.1.a': 'Arbitalk एक डिजिटल ऑनलाइन विवाद समाधान (ODR) प्लेटफॉर्म है जो व्यवसायों और व्यक्तियों को मध्यस्थता, सुलह और मध्यस्थता के माध्यम से वाणिज्यिक विवादों को हल करने में मदद करता है। हम पक्षों को तटस्थ विशेषज्ञों से जोड़ते हैं और संचार, दस्तावेज़ साझाकरण और मामला प्रबंधन के लिए एक सुरक्षित ऑनलाइन वातावरण प्रदान करते हैं। Arbitalk का संचालन Gentlefolk Consulting Private Limited द्वारा किया जाता है।',
+    'faq.gen.1.a': 'Arbitalk एक डिजिटल ऑनलाइन विवाद समाधान (ODR) प्लेटफॉर्म है जो व्यवसायों और व्यक्तियों को मध्यस्थता, सुलह और मध्यस्थता के माध्यम से वाणिज्यिक विवादों को हल करने में मदद करता है। हम पक्षों को तटस्थ विशेषज्ञों से जोड़ते हैं और संचार, दस्तावेज़ साझाकरण और मामला प्रबंधन के लिए एक सुरक्षित ऑनलाइन वातावरण प्रदान करते हैं। Arbitalk का संचालन ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637 द्वारा किया जाता है।',
     'faq.gen.2.q': 'Arbitalk कौन उपयोग कर सकता है?',
     'faq.gen.2.a': 'Arbitalk उन व्यक्तियों और इकाइयों के लिए उपलब्ध है जो भारतीय कानून के तहत बाध्यकारी अनुबंध कर सकते हैं। आपकी उम्र कम से कम 18 वर्ष होनी चाहिए। 18 से कम उम्र के लिए, माता-पिता या कानूनी अभिभावक को पंजीकरण, हमारी शर्तें स्वीकार करनी होंगी और उपयोग की निगरानी करनी होगी। हमारी सेवाएं MSMEs, विक्रेताओं, आपूर्तिकर्ताओं और पारंपरिक अदालतों की तुलना में तेज विवाद समाधान चाहने वाले व्यवसायों के लिए हैं।',
     'faq.gen.3.q': 'Arbitalk किस प्रकार के विवादों को संभालता है?',

@@ -26,6 +26,7 @@ import {
   Add as AddIcon,
   Schedule as ScheduleIcon,
   Message as MessageIcon,
+  Description as NoticeIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/components/LanguageProvider';
@@ -37,6 +38,7 @@ interface UserStats {
   activeCases: number;
   closedCases: number;
   pendingCases: number;
+  noticeCases?: number;
   recentCases: Array<{
     id: number;
     case_number: string;
@@ -88,6 +90,7 @@ export default function UserDashboard() {
     activeCases: 0,
     closedCases: 0,
     pendingCases: 0,
+    noticeCases: 0,
     recentCases: [],
   });
   const [loading, setLoading] = useState(true);
@@ -183,10 +186,10 @@ export default function UserDashboard() {
         {t('dashboard.subtitle')}
       </Typography>
 
-      <Grid container spacing={3} sx={{ mt: 2 }}>
+      <Grid container spacing={2} sx={{ mt: 2 }}>
         {/* Statistics Cards */}
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box display="flex" alignItems="center">
                 <AssignmentIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
@@ -201,8 +204,8 @@ export default function UserDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box display="flex" alignItems="center">
                 <ScheduleIcon sx={{ fontSize: 40, color: 'warning.main', mr: 2 }} />
@@ -217,8 +220,8 @@ export default function UserDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box display="flex" alignItems="center">
                 <MessageIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
@@ -233,8 +236,8 @@ export default function UserDashboard() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box display="flex" alignItems="center">
                 <AssignmentIcon sx={{ fontSize: 40, color: 'info.main', mr: 2 }} />
@@ -243,6 +246,22 @@ export default function UserDashboard() {
                     {t('dashboard.pendingCases')}
                   </Typography>
                   <Typography variant="h4">{stats.pendingCases}</Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center">
+                <NoticeIcon sx={{ fontSize: 40, color: 'secondary.main', mr: 2 }} />
+                <Box>
+                  <Typography color="textSecondary" gutterBottom variant="h6">
+                    Notice
+                  </Typography>
+                  <Typography variant="h4">{stats.noticeCases ?? 0}</Typography>
                 </Box>
               </Box>
             </CardContent>

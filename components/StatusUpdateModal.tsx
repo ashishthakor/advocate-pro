@@ -160,24 +160,14 @@ export default function StatusUpdateModal({
             onChange={(e) => setSelectedStatus(e.target.value)}
             disabled={paymentStatus === 'pending'}
           >
-            {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => {
-              // Only disable pending_payment option if payment is already completed
-              // Allow changing to pending_payment if payment is not completed (null, undefined, 'pending', 'failed', etc.)
-              const isDisabled = value === 'pending_payment' && paymentStatus === 'completed';
-              return (
-                <MenuItem key={value} value={value} disabled={isDisabled}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{config.icon}</span>
-                    <span>{config.label}</span>
-                    {isDisabled && (
-                      <Typography variant="caption" color="error" sx={{ ml: 'auto' }}>
-                        (Payment completed - cannot revert)
-                      </Typography>
-                    )}
-                  </Box>
-                </MenuItem>
-              );
-            })}
+            {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
+              <MenuItem key={value} value={value} disabled={paymentStatus === 'pending'}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span>{config.icon}</span>
+                  <span>{config.label}</span>
+                </Box>
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 

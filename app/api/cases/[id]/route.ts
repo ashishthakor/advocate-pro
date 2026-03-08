@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const { Case, User, Payment } = require('@/models/init-models');
 import { verifyTokenFromRequest } from '@/lib/auth';
 import { logCaseAssigned, logCaseStatusChanged } from '@/lib/activity-logger';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
+import { calculateMediationFeeWithGst } from '@/lib/fee-calculator';
 import { col } from 'sequelize';
 
 export async function GET(
@@ -227,27 +227,6 @@ export async function PUT(
       }
     }
 
-    // Prevent admin from updating status to pending_payment if payment is already completed
-    // Allow changing to pending_payment only if no completed payment exists
-    if (updateData.hasOwnProperty('status') && updateData.status === 'pending_payment') {
-      const { Payment } = require('@/models/init-models');
-      const completedPayment = await Payment.findOne({
-        where: {
-          case_id: caseId,
-          status: 'completed'
-        }
-      });
-
-      // Only block if payment is already completed
-      if (completedPayment) {
-        return NextResponse.json(
-          { success: false, message: 'Cannot change status to pending_payment. Payment has already been completed for this case.' },
-          { status: 400 }
-        );
-      }
-      // If no completed payment exists, allow the status change to pending_payment
-    }
-
     // Update case using Sequelize ORM – allow all create-case fields for full edit
     const allowedFields = [
       'title', 'description', 'status', 'priority', 'case_type', 'court_name', 'judge_name',
@@ -273,7 +252,7 @@ export async function PUT(
     if (updateData.hasOwnProperty('dispute_amount') && updateData.dispute_amount != null && Number(updateData.dispute_amount) > 0) {
       const completedPayment = await Payment.findOne({ where: { case_id: caseId, status: 'completed' } });
       if (!completedPayment) {
-        const { total } = calculateFeeWithGst(Number(updateData.dispute_amount));
+        const { total } = calculateMediationFeeWithGst(Number(updateData.dispute_amount));
         updateData_filtered.fees = total;
       }
     }

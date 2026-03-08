@@ -47,7 +47,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { useLanguage } from '@/components/LanguageProvider';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
+import { calculateMediationFeeWithGst } from '@/lib/fee-calculator';
 
 const NATURE_OF_DISPUTE_OPTIONS = [
   'Commercial & Business Disputes',
@@ -592,7 +592,7 @@ export default function AdminEditCasePage({ params }: { params: Promise<{ id: st
                     handleChange('dispute_amount')(e);
                     const v = parseFloat(e.target.value);
                     if (!isNaN(v) && v > 0) {
-                      const { total } = calculateFeeWithGst(v);
+                      const { total } = calculateMediationFeeWithGst(v);
                       setForm((prev) => ({ ...prev, fees: total.toFixed(2) }));
                     }
                   }}
@@ -619,7 +619,9 @@ export default function AdminEditCasePage({ params }: { params: Promise<{ id: st
                 <FormControl fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select value={form.status} label="Status" onChange={handleChange('status') as any}>
-                    <MenuItem value="pending_payment">Pending Payment</MenuItem>
+                    <MenuItem value="notice_1">Notice-1</MenuItem>
+                    <MenuItem value="notice_2">Notice-2</MenuItem>
+                    <MenuItem value="notice_3">Notice-3</MenuItem>
                     <MenuItem value="waiting_for_action">Waiting for Action</MenuItem>
                     <MenuItem value="neutrals_needs_to_be_assigned">Neutrals to be Assigned</MenuItem>
                     <MenuItem value="consented">Consented</MenuItem>

@@ -553,7 +553,7 @@ export default function PrivacyPolicyPage() {
                       <strong>Support Email:</strong> {renderTextWithEmailLinks('support@arbitalk.com')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                      <strong>Company:</strong> Gentlefolk Consulting Private Limited
+                      <strong>Company:</strong> {t('footer.companyName')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
                       <strong>Contact Page:</strong> <Link href="/contact" style={{ color: 'inherit', textDecoration: 'underline' }}>Visit our Contact Us page</Link>
@@ -578,7 +578,7 @@ export default function PrivacyPolicyPage() {
                   {t('footer.description')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                  {t('about.productOf')}
+                  {t('footer.companyName')}
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6}>

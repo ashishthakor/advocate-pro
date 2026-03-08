@@ -1,6 +1,6 @@
 // Load environment variables from .env.local first, then .env
-require('dotenv').config({ path: '.env.local' });
-require('dotenv').config();
+require('dotenv').config({ path: '.env.local', quiet: true });
+require('dotenv').config({ quiet: true });
 
 module.exports = {
   development: {

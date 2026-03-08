@@ -94,10 +94,10 @@ export async function PUT(
       );
     }
 
-    // Build update query
+    // Build update query - admin can update user details including client-specific fields
     const allowedFields = [
-      'name', 'phone', 'address', 'specialization', 
-      'experience_years', 'bar_number', 'license_number', 'is_approved',
+      'name', 'email', 'phone', 'address', 'user_type', 'company_name',
+      'specialization', 'experience_years', 'bar_number', 'license_number', 'is_approved',
       'aadhar_file_path', 'pan_file_path', 'cancelled_cheque_file_path'
     ];
     const updateFields = [];

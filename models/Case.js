@@ -27,9 +27,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     status: {
       type: DataTypes.ENUM(
-        'pending_payment',
+        'notice_1',
+        'notice_2',
+        'notice_3',
         'waiting_for_action',
-        'neutrals_needs_to_be_assigned', 
+        'neutrals_needs_to_be_assigned',
         'consented',
         'closed_no_consent',
         'close_no_settlement',

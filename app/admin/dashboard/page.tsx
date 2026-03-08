@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   Box,
   Grid,
@@ -17,6 +18,7 @@ import {
   Button,
   Alert,
   CircularProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -27,6 +29,9 @@ import {
   Schedule as ScheduleIcon,
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
+  Message as MessageIcon,
+  Visibility as VisibilityIcon,
+  Description as NoticeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
 import { apiFetch } from '@/lib/api-client';
@@ -36,6 +41,7 @@ interface DashboardStats {
   activeCases: number;
   closedCases: number;
   pendingCases: number;
+  noticeCases: number;
   statusBreakdown: {
     waiting_for_action: number;
     neutrals_needs_to_be_assigned: number;
@@ -46,6 +52,9 @@ interface DashboardStats {
     settled: number;
     hold: number;
     withdrawn: number;
+    notice_1: number;
+    notice_2: number;
+    notice_3: number;
   };
 }
 
@@ -63,6 +72,7 @@ export default function AdminDashboard() {
     activeCases: 0,
     closedCases: 0,
     pendingCases: 0,
+    noticeCases: 0,
     statusBreakdown: {
       waiting_for_action: 0,
       neutrals_needs_to_be_assigned: 0,
@@ -73,6 +83,9 @@ export default function AdminDashboard() {
       settled: 0,
       hold: 0,
       withdrawn: 0,
+      notice_1: 0,
+      notice_2: 0,
+      notice_3: 0,
     }
   });
   const [recentCases, setRecentCases] = useState<any[]>([]);
@@ -89,10 +102,10 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       setError('');
-      
+
       // Fetch dashboard data from the dashboard API
       const dashboardResponse = await apiFetch('/api/dashboard');
-      
+
       if (dashboardResponse.success) {
         const data = dashboardResponse.data;
         setStats({
@@ -100,10 +113,11 @@ export default function AdminDashboard() {
           activeCases: data.activeCases,
           closedCases: data.closedCases,
           pendingCases: data.pendingCases,
+          noticeCases: data.noticeCases ?? 0,
           statusBreakdown: data.statusBreakdown,
         });
         setRecentCases(data.recentCases || []);
-        
+
         // Use real recent activities from database
         if (data.recentActivities && Array.isArray(data.recentActivities)) {
           const activities = data.recentActivities.map((activity: any) => ({
@@ -172,90 +186,291 @@ export default function AdminDashboard() {
         </Alert>
       )}
 
-      {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                  <FolderIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats.totalCases}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Total Cases
-                  </Typography>
-                </Box>
+      {/* Summary / Statistics - same style as case status breakdown in admin cases module */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        {/* <Grid item xs={6} sm={3} md={3}>
+          <Card component={Link} href="/admin/cases" sx={{ height: '100%', bgcolor: 'background.paper', textDecoration: 'none', color: 'inherit' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold">
+                  {stats.totalCases}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Total Cases
+                </Typography>
               </Box>
             </CardContent>
           </Card>
+        </Grid> */}
+
+        {/* <Grid item xs={12} sm={6} md={3}>
+          <Tooltip title="Active: Consented" arrow>
+            <Card
+              component={Link}
+              href="/admin/cases?status=active"
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  elevation: 8,
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                    <TrendingUpIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.activeCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Active Cases
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Tooltip>
+        </Grid> */}
+
+        {/* <Grid item xs={12} sm={6} md={3}>
+          <Tooltip title="Closed: Closed no consent, Settled, Withdrawn" arrow>
+            <Card
+              component={Link}
+              href="/admin/cases?status=closed"
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  elevation: 8,
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                    <CheckCircleIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.closedCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Closed Cases
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Tooltip>
+        </Grid> */}
+
+        {/* <Grid item xs={12} sm={6} md={3}>
+          <Tooltip title="Pending: Need assignment, Waiting for action" arrow>
+            <Card
+              component={Link}
+              href="/admin/cases?status=pending"
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  elevation: 8,
+                  transform: 'translateY(-2px)',
+                  boxShadow: 4,
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+                    <PendingIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.pendingCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Pending Cases
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Tooltip>
+        </Grid> */}
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Tooltip title="All cases in the system" arrow>
+            <Card
+              sx={{
+                bgcolor: 'background.paper',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  cursor: 'pointer',
+                  transform: 'scale(1.03)',
+                  boxShadow: (theme) => theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                    <AssignmentIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.totalCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Total Cases
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Tooltip>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
-                  <TrendingUpIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats.activeCases}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Active Cases
-                  </Typography>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Tooltip title="Active: Consented" arrow>
+            <Card
+              sx={{
+                bgcolor: 'background.paper',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  cursor: 'pointer',
+                  transform: 'scale(1.03)',
+                  boxShadow: (theme) => theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                    <TrendingUpIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.activeCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Active Cases
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Tooltip>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <CheckCircleIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats.closedCases}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Closed Cases
-                  </Typography>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Tooltip title="Closed: Closed no consent, settled, withdrawn" arrow>
+            <Card
+              sx={{
+                bgcolor: 'background.paper',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  cursor: 'pointer',
+                  transform: 'scale(1.03)',
+                  boxShadow: (theme) => theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                    <CheckCircleIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.closedCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Closed Cases
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Tooltip>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
-                  <PendingIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant="h4" component="div">
-                    {stats.pendingCases}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    Pending Cases
-                  </Typography>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Tooltip title="Pending: Need assignment, waiting for action" arrow>
+            <Card
+              sx={{
+                bgcolor: 'background.paper',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  cursor: 'pointer',
+                  transform: 'scale(1.03)',
+                  boxShadow: (theme) => theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+                    <PendingIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.pendingCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Pending Cases
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Tooltip>
         </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Tooltip title="Notices: Notice 1, Notice 2, Notice 3" arrow>
+            <Card
+              sx={{
+                bgcolor: 'background.paper',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                '&:hover': {
+                  cursor: 'pointer',
+                  transform: 'scale(1.03)',
+                  boxShadow: (theme) => theme.shadows[8],
+                },
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                    <NoticeIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h4" component="div">
+                      {stats.noticeCases}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      Notices
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Tooltip>
+        </Grid>
+
       </Grid>
 
-      {/* Status Breakdown */}
+      {/* Status Breakdown - each status clickable, redirects to cases with that status filter */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12}>
           <Paper sx={{ p: 3 }}>
@@ -263,8 +478,12 @@ export default function AdminDashboard() {
               Case Status Breakdown
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=waiting_for_action"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="warning.main">
                     {stats.statusBreakdown.waiting_for_action}
                   </Typography>
@@ -273,8 +492,12 @@ export default function AdminDashboard() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=neutrals_needs_to_be_assigned"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="info.main">
                     {stats.statusBreakdown.neutrals_needs_to_be_assigned}
                   </Typography>
@@ -283,8 +506,12 @@ export default function AdminDashboard() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=consented"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="success.main">
                     {stats.statusBreakdown.consented}
                   </Typography>
@@ -293,8 +520,12 @@ export default function AdminDashboard() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=closed_no_consent"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="error.main">
                     {stats.statusBreakdown.closed_no_consent}
                   </Typography>
@@ -303,8 +534,12 @@ export default function AdminDashboard() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=settled"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="success.main">
                     {stats.statusBreakdown.settled}
                   </Typography>
@@ -313,13 +548,31 @@ export default function AdminDashboard() {
                   </Typography>
                 </Box>
               </Grid>
-              <Grid item xs={6} sm={4} md={2}>
-                <Box sx={{ textAlign: 'center' }}>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=withdrawn"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
                   <Typography variant="h5" color="default">
                     {stats.statusBreakdown.withdrawn}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Withdrawn
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={6} sm={4} md={1.7}>
+                <Box
+                  component={Link}
+                  href="/admin/cases?status=notice"
+                  sx={{ textAlign: 'center', textDecoration: 'none', color: 'secondary.main', display: 'block', cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+                >
+                  <Typography variant="h5" color="default">
+                    {stats.statusBreakdown.notice_1 + stats.statusBreakdown.notice_2 + stats.statusBreakdown.notice_3}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Notices
                   </Typography>
                 </Box>
               </Grid>

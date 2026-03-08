@@ -42,7 +42,7 @@ export const PAYMENT_CONSTANTS = {
     ONLY_USERS: 'Only users can create payment orders',
     ONLY_ADMINS: 'Only admins can manually mark payments',
     CASE_ID_REQUIRED: 'Case ID is required',
-    CASE_NOT_PENDING: 'Case is not in pending payment status',
+    CASE_NOT_PENDING: 'Payment already completed for this case.',
     MISSING_PAYMENT_DATA: 'Missing payment verification data',
     INVALID_SIGNATURE: 'Invalid payment signature',
     PAYMENT_NOT_FOUND: 'Payment record not found',

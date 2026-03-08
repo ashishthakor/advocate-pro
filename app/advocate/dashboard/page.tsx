@@ -30,6 +30,7 @@ import {
   TrendingUp as TrendingUpIcon,
   Message as MessageIcon,
   Visibility as VisibilityIcon,
+  Description as NoticeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/components/AuthProvider';
 import { apiFetch } from '@/lib/api-client';
@@ -59,6 +60,7 @@ interface DashboardStats {
   activeCases: number;
   completedCases: number;
   pendingCases: number;
+  noticeCases: number;
 }
 
 export default function AdvocateDashboardPage() {
@@ -71,6 +73,7 @@ export default function AdvocateDashboardPage() {
     activeCases: 0,
     completedCases: 0,
     pendingCases: 0,
+    noticeCases: 0,
   });
   const [recentCases, setRecentCases] = useState<Case[]>([]);
   const [selectedCase, setSelectedCase] = useState<Case | null>(null);
@@ -101,12 +104,16 @@ export default function AdvocateDashboardPage() {
         const pendingCases = cases.filter((c: any) => 
           ['hold', 'temporary_non_starter'].includes(c.status)
         ).length;
+        const noticeCases = cases.filter((c: any) => 
+          ['notice_1', 'notice_2', 'notice_3'].includes(c.status)
+        ).length;
 
         setStats({
           totalCases,
           activeCases,
           completedCases,
           pendingCases,
+          noticeCases,
         });
 
         // Get recent cases (last 5)
@@ -181,9 +188,9 @@ export default function AdvocateDashboardPage() {
         </Typography>
 
       {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
@@ -202,8 +209,8 @@ export default function AdvocateDashboardPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
@@ -222,8 +229,8 @@ export default function AdvocateDashboardPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
@@ -242,8 +249,8 @@ export default function AdvocateDashboardPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Card>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
@@ -255,6 +262,26 @@ export default function AdvocateDashboardPage() {
                   </Typography>
                   <Typography color="text.secondary">
                     Pending Cases
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={2.4}>
+          <Card sx={{ bgcolor: 'background.paper' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
+                  <NoticeIcon />
+                </Avatar>
+                <Box>
+                  <Typography variant="h4" component="div">
+                    {stats.noticeCases}
+                  </Typography>
+                  <Typography color="text.secondary">
+                    Notice
                   </Typography>
                 </Box>
               </Box>
@@ -400,27 +427,37 @@ export default function AdvocateDashboardPage() {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card>
+          <Card sx={{ bgcolor: 'background.paper' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Case Status Breakdown
               </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {Object.entries(CASE_STATUS_CONFIG).map(([status, config]) => {
-                  const count = recentCases.filter(c => c.status === status).length;
-                  return (
-                    <Box key={status} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <span>📋</span>
+                      <Typography variant="body2">Notice (Notice-1, 2, 3)</Typography>
+                    </Box>
+                    <Typography variant="body2" fontWeight="bold">
+                      {recentCases.filter(c => ['notice_1', 'notice_2', 'notice_3'].includes(c.status)).length}
+                    </Typography>
+                  </Box>
+                </Grid>
+                {Object.entries(CASE_STATUS_CONFIG).map(([status, config]) => (
+                  <Grid item xs={6} key={status}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <span>{config.icon}</span>
                         <Typography variant="body2">{config.label}</Typography>
                       </Box>
                       <Typography variant="body2" fontWeight="bold">
-                        {count}
+                        {recentCases.filter(c => c.status === status).length}
                       </Typography>
                     </Box>
-                  );
-                })}
-              </Box>
+                  </Grid>
+                ))}
+              </Grid>
             </CardContent>
           </Card>
         </Grid>
