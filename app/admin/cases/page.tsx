@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {
   Box,
   Typography,
@@ -119,6 +119,18 @@ interface PaginationInfo {
 }
 
 export default function CasesPage() {
+  return (
+    <Suspense fallback={
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 320 }}>
+        <CircularProgress />
+      </Box>
+    }>
+      <AdminCasesContent />
+    </Suspense>
+  );
+}
+
+function AdminCasesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [cases, setCases] = useState<Case[]>([]);

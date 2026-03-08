@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Skip ESLint during build to speed up; run `npm run lint` separately
+  eslint: { ignoreDuringBuilds: true },
   compiler: {
     // Remove console.logs in production
     removeConsole: process.env.NODE_ENV === 'production',
