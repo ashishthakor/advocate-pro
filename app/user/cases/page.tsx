@@ -218,7 +218,7 @@ export default function UserCasesPage() {
 
   // Handle retry payment for pending payment cases
   const handleRetryPayment = async (caseItem: Case) => {
-    if (!caseItem || caseItem.status !== 'pending_payment') return;
+    if (!caseItem || caseItem.payment_status === 'completed') return;
 
     setProcessingPayment(caseItem.id);
     setPaymentError('');
@@ -377,6 +377,7 @@ export default function UserCasesPage() {
                   onChange={(e) => handleStatusFilter(e.target.value)}
                 >
                   <MenuItem value="">All</MenuItem>
+                  <MenuItem value="notice">📋 Notice (Notice-1, 2, 3)</MenuItem>
                   {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
                     <MenuItem key={value} value={value}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -513,7 +514,7 @@ export default function UserCasesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          {c.status === 'pending_payment' && (
+                          {c.payment_status !== 'completed' && (
                             <Tooltip title="Complete Payment">
                               <IconButton 
                                 size="small" 
@@ -539,7 +540,7 @@ export default function UserCasesPage() {
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
-                          {c.status !== 'pending_payment' && (
+                          {c.payment_status === 'completed' && (
                             <Tooltip title={t('cases.chat')}>
                               <IconButton 
                                 size="small" 

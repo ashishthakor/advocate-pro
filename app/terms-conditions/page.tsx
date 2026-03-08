@@ -818,7 +818,7 @@ export default function TermsConditionsPage() {
                 {t('footer.description')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                {t('about.productOf')}
+                {t('footer.companyName')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>

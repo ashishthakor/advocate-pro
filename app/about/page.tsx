@@ -53,9 +53,9 @@ export default function AboutPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const stats = [
-    { number: '3.8+ Cr', label: t('home.stat1') },
+    { number: '5.2 Cr', label: t('home.stat1') },
     { number: '70+%', label: t('home.stat2') },
-    { number: '32+', label: t('home.stat3') },
+    { number: '64+', label: t('home.stat3') },
     { number: '30+', label: t('home.stat4') },
     { number: '8+ Years', label: t('home.stat5') }
   ];
@@ -758,7 +758,7 @@ export default function AboutPage() {
                 Empowering India's MSMEs to resolve business disputes faster, fairer, and without court hassles.
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' }, opacity: 0.8 }}>
-                A product of Gentlefolk Consulting Private Limited
+                {t('footer.companyName')}
               </Typography>
             </Grid>
             <Grid item xs={12} md={6}>

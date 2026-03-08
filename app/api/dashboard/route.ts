@@ -55,6 +55,15 @@ export async function GET(request: NextRequest) {
     const withdrawnCases = await Case.count({ 
       where: { ...whereConditions, status: 'withdrawn' } 
     });
+    const notice1Cases = await Case.count({ 
+      where: { ...whereConditions, status: 'notice_1' } 
+    });
+    const notice2Cases = await Case.count({ 
+      where: { ...whereConditions, status: 'notice_2' } 
+    });
+    const notice3Cases = await Case.count({ 
+      where: { ...whereConditions, status: 'notice_3' } 
+    });
 
     const stats = {
       total_cases: totalCases,
@@ -66,7 +75,10 @@ export async function GET(request: NextRequest) {
       temporary_non_starter_cases: temporaryNonStarterCases,
       settled_cases: settledCases,
       hold_cases: holdCases,
-      withdrawn_cases: withdrawnCases
+      withdrawn_cases: withdrawnCases,
+      notice_1_cases: notice1Cases,
+      notice_2_cases: notice2Cases,
+      notice_3_cases: notice3Cases
     };
 
     // Get recent cases with user and advocate information using Sequelize ORM
@@ -109,9 +121,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         totalCases: Number(stats.total_cases) || 0,
-        activeCases: (Number(stats.waiting_for_action_cases) || 0) + (Number(stats.neutrals_needs_to_be_assigned_cases) || 0) + (Number(stats.consented_cases) || 0),
-        closedCases: (Number(stats.closed_no_consent_cases) || 0) + (Number(stats.close_no_settlement_cases) || 0) + (Number(stats.settled_cases) || 0) + (Number(stats.withdrawn_cases) || 0),
-        pendingCases: (Number(stats.temporary_non_starter_cases) || 0) + (Number(stats.hold_cases) || 0),
+        closedCases: (Number(stats.closed_no_consent_cases) || 0) + (Number(stats.settled_cases) || 0) + (Number(stats.withdrawn_cases) || 0),
+        pendingCases: (Number(stats.waiting_for_action_cases) || 0) + (Number(stats.neutrals_needs_to_be_assigned_cases) || 0),
+        activeCases: Number(stats.consented_cases) || 0,
+        noticeCases: (Number(stats.notice_1_cases) || 0) + (Number(stats.notice_2_cases) || 0) + (Number(stats.notice_3_cases) || 0),
         recentCases: recentCases,
         recentActivities: recentActivities,
         statusBreakdown: {
@@ -124,6 +137,9 @@ export async function GET(request: NextRequest) {
           settled: Number(stats.settled_cases) || 0,
           hold: Number(stats.hold_cases) || 0,
           withdrawn: Number(stats.withdrawn_cases) || 0,
+          notice_1: Number(stats.notice_1_cases) || 0,
+          notice_2: Number(stats.notice_2_cases) || 0,
+          notice_3: Number(stats.notice_3_cases) || 0,
         }
       },
     });

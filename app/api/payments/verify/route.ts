@@ -80,8 +80,8 @@ export async function POST(request: NextRequest) {
         // Find the draft case
         updatedCase = await Case.findByPk(payment.case_id);
         
-        if (updatedCase && updatedCase.status === 'pending_payment') {
-          // Update case status to waiting_for_action and mark fees as paid
+        if (updatedCase) {
+          // Update case: mark fees as paid and set status to waiting_for_action
           updatedCase.status = 'waiting_for_action';
           updatedCase.fees_paid = payment.amount;
           await updatedCase.save();

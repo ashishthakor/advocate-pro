@@ -48,6 +48,7 @@ export default {
     // Footer
     'footer.description': 'AI-संचालित समाधानों और बहु-भाषा समर्थन के साथ उन्नत मध्यस्थता और कानूनी मामला प्रबंधन प्लेटफॉर्म।',
     'footer.quickLinks': 'त्वरित लिंक',
+    'footer.companyName': 'ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637',
     'footer.copyright': `© ${new Date().getFullYear()} ARBITALK। सभी अधिकार सुरक्षित।`,
 
     // Auth Pages
@@ -517,7 +518,7 @@ export default {
     'home.advocateFeatures5': 'बिल योग्य घंटे ट्रैक करें',
     'home.getStarted': 'शुरू करें',
     'home.statsTitle': 'भारत भर के व्यवसायों द्वारा विश्वसनीय',
-    'home.stat1': 'अनुभवी न्युट्रल',
+    'home.stat1': 'विवाद मूल्य',
     'home.stat2': 'बचाया',
     'home.stat3': 'उपयोगकर्ता',
     'home.stat4': 'औसत अनुभव',
@@ -603,10 +604,10 @@ export default {
     'fees.mediation.domestic.tier1.heading': '1. ₹2,00,000 तक के विवाद',
     'fees.mediation.domestic.tier1.admin': '₹3,000',
     'fees.mediation.domestic.tier1.success': 'सुलझी राशि का 2%',
-    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 से ऊपर ₹25,00,000 तक के विवाद',
+    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 से ऊपर ₹15,00,000 तक के विवाद',
     'fees.mediation.domestic.tier2.admin': '₹4,500',
     'fees.mediation.domestic.tier2.success': 'सुलझी राशि का 4.5%',
-    'fees.mediation.domestic.tier3.heading': '3. ₹25,00,000 से ऊपर के विवाद',
+    'fees.mediation.domestic.tier3.heading': '3. ₹15,00,000 से ऊपर के विवाद',
     'fees.mediation.domestic.tier3.admin': '₹9,500',
     'fees.mediation.domestic.tier3.success': 'सुलझी राशि का 9.5%',
     'fees.mediation.domestic.colDispute': 'विवाद की सीमा',

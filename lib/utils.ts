@@ -35,10 +35,20 @@ export function useDebounce<T>(value: T, delay: number): T {
  * Case status configuration with colors and labels
  */
 export const CASE_STATUS_CONFIG = {
-  pending_payment: {
-    label: 'Pending Payment',
-    color: 'error' as const,
-    icon: '💳'
+  notice_1: {
+    label: 'Notice-1',
+    color: 'info' as const,
+    icon: '📋'
+  },
+  notice_2: {
+    label: 'Notice-2',
+    color: 'info' as const,
+    icon: '📋'
+  },
+  notice_3: {
+    label: 'Notice-3',
+    color: 'info' as const,
+    icon: '📋'
   },
   waiting_for_action: {
     label: 'Waiting For Action',

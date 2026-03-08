@@ -30,19 +30,29 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { amount, description, case_id } = body;
 
-    // If case_id is provided, verify it exists and belongs to the user
+    // If case_id is provided, verify it exists and belongs to the user and has no completed payment
     let existingCase = null;
     if (case_id) {
-      const { Case } = require('@/models/init-models');
+      const { Case, Payment } = require('@/models/init-models');
       existingCase = await Case.findOne({
         where: {
           id: case_id,
           user_id: authResult.user.userId,
-          status: 'pending_payment'
         }
       });
 
       if (!existingCase) {
+        return NextResponse.json(
+          { success: false, message: PAYMENT_CONSTANTS.ERRORS.CASE_NOT_FOUND },
+          { status: 404 }
+        );
+      }
+
+      // Case must not already have a completed payment
+      const completedPayment = await Payment.findOne({
+        where: { case_id: existingCase.id, status: 'completed' }
+      });
+      if (completedPayment) {
         return NextResponse.json(
           { success: false, message: PAYMENT_CONSTANTS.ERRORS.CASE_NOT_FOUND },
           { status: 404 }

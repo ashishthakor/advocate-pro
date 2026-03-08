@@ -48,6 +48,7 @@ export default {
     // Footer
     'footer.description': 'Advanced arbitration and legal case management platform with AI-powered solutions and multi-language support.',
     'footer.quickLinks': 'Quick Links',
+    'footer.companyName': 'ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637',
     'footer.copyright': `© ${new Date().getFullYear()} ARBITALK. All rights reserved.`,
 
     // Auth Pages
@@ -527,7 +528,7 @@ export default {
     'home.advocateFeatures5': 'Track billable hours',
     'home.getStarted': 'Get Started',
     'home.statsTitle': 'Trusted by Businesses Across India',
-    'home.stat1': 'Dispute Under Process',
+    'home.stat1': 'Dispute Value',
     'home.stat2': 'Success Ratio',
     'home.stat3': 'Users',
     'home.stat4': 'Neutrals',
@@ -613,10 +614,10 @@ export default {
     'fees.mediation.domestic.tier1.heading': 'Disputes up to ₹2,00,000',
     'fees.mediation.domestic.tier1.admin': '₹3,000',
     'fees.mediation.domestic.tier1.success': '2% of the settled amount',
-    'fees.mediation.domestic.tier2.heading': 'Disputes above ₹2,00,000 up to ₹25,00,000',
+    'fees.mediation.domestic.tier2.heading': 'Disputes above ₹2,00,000 up to ₹15,00,000',
     'fees.mediation.domestic.tier2.admin': '₹4,500',
     'fees.mediation.domestic.tier2.success': '4.5% of the settled amount',
-    'fees.mediation.domestic.tier3.heading': 'Disputes above ₹25,00,000',
+    'fees.mediation.domestic.tier3.heading': 'Disputes above ₹15,00,000',
     'fees.mediation.domestic.tier3.admin': '₹9,500',
     'fees.mediation.domestic.tier3.success': '9.5% of the settled amount',
     'fees.mediation.domestic.colDispute': 'Dispute range',

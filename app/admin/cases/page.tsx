@@ -43,7 +43,6 @@ import {
   Assignment as AssignmentIcon,
   Schedule as ScheduleIcon,
   Message as MessageIcon,
-  Edit as EditIcon,
   AttachFile as AttachFileIcon,
   Add as AddIcon,
   CheckCircle as CheckCircleIcon,
@@ -52,9 +51,8 @@ import {
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce, CASE_STATUS_CONFIG, getStatusConfig } from '@/lib/utils';
-import StatusUpdateModal from '@/components/StatusUpdateModal';
 import CaseDetailsModal from '@/components/CaseDetailsModal';
 import DocumentsModal from '@/components/DocumentsModal';
 
@@ -122,6 +120,7 @@ interface PaginationInfo {
 
 export default function CasesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -141,11 +140,12 @@ export default function CasesPage() {
     hold: number;
     temporary_non_starter: number;
     completed: number;
+    notice?: number;
   } | null>(null);
   
-  // Filter states
+  // Filter states - initialize status from URL when coming from dashboard
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || '');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [caseTypeFilter, setCaseTypeFilter] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
@@ -153,9 +153,9 @@ export default function CasesPage() {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Status update modal state
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [selectedCase, setSelectedCase] = useState<Case | null>(null);
+  // Inline edit state for status and priority
+  const [editingCell, setEditingCell] = useState<{ caseId: number; field: 'status' | 'priority' } | null>(null);
+  const [updatingCaseId, setUpdatingCaseId] = useState<number | null>(null);
   const [caseDetailsModalOpen, setCaseDetailsModalOpen] = useState(false);
   const [selectedCaseForDetails, setSelectedCaseForDetails] = useState<Case | null>(null);
   const [documentsModalOpen, setDocumentsModalOpen] = useState(false);
@@ -247,9 +247,46 @@ export default function CasesPage() {
     }
   };
 
-  const handleStatusUpdate = (case_: Case) => {
-    setSelectedCase(case_);
-    setStatusModalOpen(true);
+  const handleInlineStatusChange = async (caseId: number, newStatus: string) => {
+    if (updatingCaseId !== null) return;
+    setUpdatingCaseId(caseId);
+    setEditingCell(null);
+    try {
+      const res = await apiFetch<{ success: boolean; message?: string }>(`/api/cases/${caseId}`, {
+        method: 'PUT',
+        json: { status: newStatus },
+      });
+      if (res && (res as { success: boolean }).success) {
+        await fetchCases(pagination.currentPage);
+      } else {
+        setError((res as { message?: string })?.message || 'Failed to update status');
+      }
+    } catch (err) {
+      setError((err as Error)?.message || 'Failed to update status');
+    } finally {
+      setUpdatingCaseId(null);
+    }
+  };
+
+  const handleInlinePriorityChange = async (caseId: number, newPriority: string) => {
+    if (updatingCaseId !== null) return;
+    setUpdatingCaseId(caseId);
+    setEditingCell(null);
+    try {
+      const res = await apiFetch<{ success: boolean; message?: string }>(`/api/cases/${caseId}`, {
+        method: 'PUT',
+        json: { priority: newPriority },
+      });
+      if (res && (res as { success: boolean }).success) {
+        await fetchCases(pagination.currentPage);
+      } else {
+        setError((res as { message?: string })?.message || 'Failed to update priority');
+      }
+    } catch (err) {
+      setError((err as Error)?.message || 'Failed to update priority');
+    } finally {
+      setUpdatingCaseId(null);
+    }
   };
 
   const handleViewCase = (case_: Case) => {
@@ -283,10 +320,6 @@ export default function CasesPage() {
     setDocumentsModalOpen(false);
     setSelectedCaseForDocuments(null);
     setCaseDocuments([]);
-  };
-
-  const handleStatusUpdated = () => {
-    fetchCases(pagination.currentPage);
   };
 
   // Handle edit fees for a case
@@ -356,7 +389,7 @@ export default function CasesPage() {
 
   // Handle open mark payment modal
   const handleOpenMarkPaymentModal = (case_: Case) => {
-    if (!case_ || case_.status !== 'pending_payment') return;
+    if (!case_ || case_.payment_status === 'completed') return;
     setSelectedCaseForPayment(case_);
     setMarkPaymentModalOpen(true);
   };
@@ -370,7 +403,7 @@ export default function CasesPage() {
 
   // Handle mark payment as paid
   const handleMarkPaymentPaid = async () => {
-    if (!selectedCaseForPayment || selectedCaseForPayment.status !== 'pending_payment') return;
+    if (!selectedCaseForPayment || selectedCaseForPayment.payment_status === 'completed') return;
 
     // Use custom fees if set, otherwise default
     const paymentAmount = selectedCaseForPayment.fees && selectedCaseForPayment.fees > 0 ? selectedCaseForPayment.fees : 3000;
@@ -491,10 +524,10 @@ export default function CasesPage() {
         </Alert>
       )}
 
-      {/* Statistics Cards - Compact Layout */}
+      {/* Statistics Cards - display only, symmetric grid (2 rows x 4) */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold">
@@ -508,8 +541,8 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="info.main">
@@ -523,8 +556,8 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="warning.main">
@@ -538,8 +571,8 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="success.main">
@@ -553,8 +586,23 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography variant="h5" component="div" fontWeight="bold" color="secondary.main">
+                  {statistics?.notice ?? cases.filter(c => ['notice_1', 'notice_2', 'notice_3'].includes(c.status)).length}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Notice
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="success.dark">
@@ -568,8 +616,8 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="warning.dark">
@@ -583,8 +631,8 @@ export default function CasesPage() {
           </Card>
         </Grid>
 
-        <Grid item xs={6} sm={3} md={1.71}>
-          <Card sx={{ height: '100%' }}>
+        <Grid item xs={6} sm={3} md={3}>
+          <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <Typography variant="h5" component="div" fontWeight="bold" color="text.secondary">
@@ -627,6 +675,10 @@ export default function CasesPage() {
                   onChange={(e) => handleStatusFilter(e.target.value)}
                 >
                   <MenuItem value="">All Status</MenuItem>
+                  <MenuItem value="closed">Closed (No Consent, Settled, Withdrawn)</MenuItem>
+                  <MenuItem value="pending">Pending (Needs Assignment, Waiting for Action)</MenuItem>
+                  <MenuItem value="active">Active (Consented)</MenuItem>
+                  <MenuItem value="notice">Notice (Notice-1, Notice-2, Notice-3)</MenuItem>
                   {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
                     <MenuItem key={value} value={value}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -791,11 +843,73 @@ export default function CasesPage() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {getStatusChip(case_.status)}
+                      <TableCell
+                        sx={{
+                          cursor: case_.payment_status === 'pending' ? 'not-allowed' : (editingCell?.caseId === case_.id && editingCell?.field === 'status' ? 'default' : 'pointer'),
+                        }}
+                        onClick={(e) => {
+                          if (editingCell?.caseId === case_.id && editingCell?.field === 'status') return;
+                          e.stopPropagation();
+                          if (case_.payment_status === 'pending') return;
+                          setEditingCell({ caseId: case_.id, field: 'status' });
+                        }}
+                        title={case_.payment_status === 'pending' ? 'Complete payment to change status' : 'Click to change status'}
+                      >
+                        {editingCell?.caseId === case_.id && editingCell?.field === 'status' ? (
+                          <FormControl size="small" fullWidth onClick={(e) => e.stopPropagation()} sx={{ minWidth: 180 }}>
+                            <Select
+                              value={case_.status}
+                              onChange={(e) => handleInlineStatusChange(case_.id, e.target.value)}
+                              onClose={() => setEditingCell(null)}
+                              autoFocus
+                              disabled={updatingCaseId === case_.id}
+                              renderValue={(v) => getStatusConfig(v).label}
+                            >
+                              {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
+                                <MenuItem key={value} value={value}>
+                                  {config.icon} {config.label}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        ) : (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {updatingCaseId === case_.id ? <CircularProgress size={18} sx={{ mr: 0.5 }} /> : null}
+                            {getStatusChip(case_.status)}
+                          </Box>
+                        )}
                       </TableCell>
-                      <TableCell>
-                        {getPriorityChip(case_.priority)}
+                      <TableCell
+                        sx={{ cursor: editingCell?.caseId === case_.id && editingCell?.field === 'priority' ? 'default' : 'pointer' }}
+                        onClick={(e) => {
+                          if (editingCell?.caseId === case_.id && editingCell?.field === 'priority') return;
+                          e.stopPropagation();
+                          setEditingCell({ caseId: case_.id, field: 'priority' });
+                        }}
+                        title="Click to change priority"
+                      >
+                        {editingCell?.caseId === case_.id && editingCell?.field === 'priority' ? (
+                          <FormControl size="small" fullWidth onClick={(e) => e.stopPropagation()} sx={{ minWidth: 120 }}>
+                            <Select
+                              value={case_.priority}
+                              onChange={(e) => handleInlinePriorityChange(case_.id, e.target.value)}
+                              onClose={() => setEditingCell(null)}
+                              autoFocus
+                              disabled={updatingCaseId === case_.id}
+                              renderValue={(v) => v.charAt(0).toUpperCase() + v.slice(1)}
+                            >
+                              <MenuItem value="low">Low</MenuItem>
+                              <MenuItem value="medium">Medium</MenuItem>
+                              <MenuItem value="high">High</MenuItem>
+                              <MenuItem value="urgent">Urgent</MenuItem>
+                            </Select>
+                          </FormControl>
+                        ) : (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            {updatingCaseId === case_.id ? <CircularProgress size={18} sx={{ mr: 0.5 }} /> : null}
+                            {getPriorityChip(case_.priority)}
+                          </Box>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">
@@ -812,7 +926,7 @@ export default function CasesPage() {
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
-                          {case_.status === 'pending_payment' && (
+                          {case_.payment_status !== 'completed' && (
                             <Tooltip title="Mark Payment as Paid">
                               <IconButton 
                                 size="small" 
@@ -854,15 +968,6 @@ export default function CasesPage() {
                               </IconButton>
                             </Tooltip>
                           )}
-                          <Tooltip title="Edit status & priority">
-                            <IconButton 
-                              size="small" 
-                              color="primary"
-                              onClick={() => handleStatusUpdate(case_)}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Tooltip>
                           <Tooltip title="Edit case details">
                             <IconButton 
                               size="small" 
@@ -872,7 +977,7 @@ export default function CasesPage() {
                               <EditNoteIcon />
                             </IconButton>
                           </Tooltip>
-                          {case_.status !== 'pending_payment' && (
+                          {case_.payment_status === 'completed' && (
                             <Tooltip title="Chat">
                               <IconButton 
                                 size="small" 
@@ -917,22 +1022,6 @@ export default function CasesPage() {
           </Box>
         </CardContent>
       </Card>
-
-      {/* Status Update Modal */}
-      {selectedCase && (
-        <StatusUpdateModal
-          open={statusModalOpen}
-          onClose={() => setStatusModalOpen(false)}
-          caseId={selectedCase.id}
-          currentStatus={selectedCase.status}
-          currentPriority={selectedCase.priority}
-          caseTitle={selectedCase.title}
-          onStatusUpdated={handleStatusUpdated}
-          paymentStatus={selectedCase.payment_status}
-          currentTrackingId={selectedCase.tracking_id}
-          allowTrackingIdEdit={true}
-        />
-      )}
 
       {/* Case Details Modal */}
       {selectedCaseForDetails && (

@@ -48,6 +48,7 @@ export default {
     // Footer
     'footer.description': 'AI-ચાલિત સોલ્યુશન્સ અને મલ્ટી-લેંગ્વેજ સપોર્ટ સાથે અદ્યતન મધ્યસ્થતા અને કાનૂની કેસ મેનેજમેન્ટ પ્લેટફોર્મ.',
     'footer.quickLinks': 'ઝડપી લિંક્સ',
+    'footer.companyName': 'ARBITALK DISPUTE RESOLUTION & LEGALTECH PRIVATE LIMITED / U69100GJ2026PTC173637',
     'footer.copyright': `© ${new Date().getFullYear()} ARBITALK. બધા અધિકારો સુરક્ષિત.`,
 
     // Auth Pages
@@ -517,7 +518,7 @@ export default {
     'home.advocateFeatures5': 'બિલ યોગ્ય કલાકો ટ્રેક કરો',
     'home.getStarted': 'શરૂ કરો',
     'home.statsTitle': 'ભારતભરના વ્યવસાયો દ્વારા વિશ્વસનીય',
-    'home.stat1': 'અનુભવી ન્યુટ્રલ્સ',
+    'home.stat1': 'વિવાદ મૂલ્ય',
     'home.stat2': 'બચાવ્યું',
     'home.stat3': 'વપરાશકર્તાઓ',
     'home.stat4': 'સરેરાશ અનુભવ',
@@ -603,10 +604,10 @@ export default {
     'fees.mediation.domestic.tier1.heading': '1. ₹2,00,000 સુધીના વિવાદો',
     'fees.mediation.domestic.tier1.admin': '₹3,000',
     'fees.mediation.domestic.tier1.success': 'અંગીકૃત રકમનો 2%',
-    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 થી વધુ અને ₹25,00,000 સુધીના વિવાદો',
+    'fees.mediation.domestic.tier2.heading': '2. ₹2,00,000 થી વધુ અને ₹15,00,000 સુધીના વિવાદો',
     'fees.mediation.domestic.tier2.admin': '₹4,500',
     'fees.mediation.domestic.tier2.success': 'અંગીકૃત રકમનો 4.5%',
-    'fees.mediation.domestic.tier3.heading': '3. ₹25,00,000 થી વધુના વિવાદો',
+    'fees.mediation.domestic.tier3.heading': '3. ₹15,00,000 થી વધુના વિવાદો',
     'fees.mediation.domestic.tier3.admin': '₹9,500',
     'fees.mediation.domestic.tier3.success': 'અંગીકૃત રકમનો 9.5%',
     'fees.mediation.domestic.colDispute': 'વિવાદની શ્રેણી',

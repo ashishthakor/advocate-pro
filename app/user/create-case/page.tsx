@@ -38,7 +38,7 @@ import { apiFetch } from '@/lib/api-client';
 import { RadioGroup, FormControlLabel, Radio, FormGroup, Checkbox, InputLabel } from '@mui/material';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useAuth } from '@/components/AuthProvider';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
+import { calculateMediationFeeWithGst } from '@/lib/fee-calculator';
 
 interface CreateCaseForm {
   // Case basic info
@@ -328,7 +328,7 @@ export default function CreateCasePage() {
         attachments_json: null, // We'll upload files after payment
       };
       
-      // Create draft case (will be in pending_payment status)
+      // Create case (status: waiting_for_action; payment tracked separately)
       const res = await apiFetch<{ success: boolean; data: any; message?: string }>(
         '/api/cases',
         { method: 'POST', json: payload }
@@ -433,11 +433,11 @@ export default function CreateCasePage() {
                 setTimeout(() => router.push(`/user/chat/${updatedCase.id}`), 600);
               } else {
                 setError('Payment successful but case update failed. Please contact support.');
-                // Case remains in pending_payment status, user can retry from cases list
+                // Case is saved; user can retry from cases list
               }
             } else {
               setError((verifyRes as any).message || 'Payment verification failed. Your case is saved and you can retry payment from your cases list.');
-              // Case remains in pending_payment status, user can retry
+              // Case is saved; user can retry from cases list
             }
           } catch (err: any) {
             setError(err?.message || 'Failed to verify payment');
@@ -771,7 +771,7 @@ export default function CreateCasePage() {
                     handleChange('dispute_amount')(e);
                     const v = parseFloat((e.target as HTMLInputElement).value);
                     if (!isNaN(v) && v > 0) {
-                      const { total } = calculateFeeWithGst(v);
+                      const { total } = calculateMediationFeeWithGst(v);
                       setForm((prev) => ({ ...prev, fees: total.toFixed(2) }));
                     }
                   }}

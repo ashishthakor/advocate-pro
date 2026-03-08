@@ -12,7 +12,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { apiFetch } from '@/lib/api-client';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
 
 interface EditCaseModalProps {
   open: boolean;

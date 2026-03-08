@@ -40,6 +40,7 @@ import {
   Visibility as VisibilityIcon,
   Add as AddIcon,
   Business as BusinessIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
@@ -82,6 +83,7 @@ export default function UsersPage() {
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -146,6 +148,13 @@ export default function UsersPage() {
 
   const handleViewUser = (user: User) => {
     setSelectedUser(user);
+    setIsEditMode(false);
+    setModalOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setIsEditMode(true);
     setModalOpen(true);
   };
 
@@ -416,6 +425,11 @@ export default function UsersPage() {
                               <VisibilityIcon />
                             </IconButton>
                           </Tooltip>
+                          <Tooltip title="Edit">
+                            <IconButton size="small" onClick={() => handleEditUser(user)}>
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -451,12 +465,15 @@ export default function UsersPage() {
         </CardContent>
       </Card>
 
-      {/* User Details Modal */}
+      {/* User Details Modal - admin can update user details */}
       {selectedUser && (
         <UserDetailsModal
           open={modalOpen}
           onClose={handleCloseModal}
           userDetails={selectedUser}
+          onUserUpdated={() => fetchUsers(pagination.currentPage)}
+          allowEdit={true}
+          startInEditMode={isEditMode}
         />
       )}
     </>

@@ -325,6 +325,7 @@ export default function AdvocateCasesPage() {
                   onChange={(e) => handleStatusFilter(e.target.value)}
                 >
                   <MenuItem value="">{t('cases.allStatuses')}</MenuItem>
+                  <MenuItem value="notice">📋 Notice (Notice-1, 2, 3)</MenuItem>
                   {Object.entries(CASE_STATUS_CONFIG).map(([value, config]) => (
                     <MenuItem key={value} value={value}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

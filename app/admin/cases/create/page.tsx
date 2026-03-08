@@ -42,7 +42,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { useLanguage } from '@/components/LanguageProvider';
-import { calculateFeeWithGst } from '@/lib/fee-calculator';
+import { calculateMediationFeeWithGst } from '@/lib/fee-calculator';
 
 const NATURE_OF_DISPUTE_OPTIONS = [
   'Commercial & Business Disputes',
@@ -492,7 +492,7 @@ export default function CreateCasePage() {
                     handleChange('dispute_amount')(e);
                     const v = parseFloat(e.target.value);
                     if (!isNaN(v) && v > 0) {
-                      const { total } = calculateFeeWithGst(v);
+                      const { total } = calculateMediationFeeWithGst(v);
                       setForm((prev) => ({ ...prev, fees: total.toFixed(2) }));
                     }
                   }}
